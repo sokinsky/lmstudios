@@ -1,0 +1,14 @@
+{
+  "name": "@lmstudios/utilities",
+  "version": "0.0.1",
+  "description": "object reflection library that is reated at runtime",
+  "private": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Steven J Okinsky",
+  "license": "WFTPL",
+  "devDependencies": {
+    "@types/node": "^10.1.0",
+    "typescript": "^3.0.1"
+  }
+}
