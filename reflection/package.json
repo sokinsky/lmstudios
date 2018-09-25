@@ -1,0 +1,13 @@
+{
+  "name": "@lmstudios/reflection",
+  "version": "0.0.1",
+  "description": "reflection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Steven J Okinsky",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^10.1.0",
+    "typescript": "^3.0.1"
+  }
+}
