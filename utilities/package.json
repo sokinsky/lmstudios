@@ -6,9 +6,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Steven J Okinsky",
-  "license": "WFTPL",
+  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^10.1.0",
     "typescript": "^3.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sokinsky/lmstudios/tree/master/utilities"
   }
 }
