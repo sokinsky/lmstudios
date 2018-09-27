@@ -1,12 +1,13 @@
-import { Type } from ".";
+import { Attribute, Type } from ".";
 
 export class PropertyInfo {
-	constructor(name: string, propertyType?: Type) {
+	constructor(name: string, type: Type) {
 		this.Name = name;
-		this.PropertyType = propertyType;
+		this.Type = type;
 	}
 	public Name: string;
-	public PropertyType?: Type;
+	public Type: Type;
+	public Attributes:Attribute[] = [];
 
 	public GetValue(item: object) {
 		return (<any>item)[this.Name];

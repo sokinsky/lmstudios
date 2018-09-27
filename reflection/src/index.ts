@@ -1,12 +1,12 @@
-import { Application } from "./Application";
 import { Assembly } from "./Assembly";
+import { Attribute } from "./Attribute";
 import { ConstructorInfo } from "./ConstructorInfo";
 import { Type } from "./Type";
 import { PropertyInfo } from "./PropertyInfo";
 
 export {
-	Application,
 	Assembly,
+	Attribute,
 	ConstructorInfo,
 	Type,
 	PropertyInfo

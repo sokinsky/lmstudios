@@ -1,12 +1,9 @@
-import { ConstructorInfo, PropertyInfo, Type } from "./";
+import { ConstructorInfo, PropertyInfo, Type, Attribute } from "./";
 
 export class Assembly {
-	constructor(name: string, root: { Path: string, Module: object }) {
-		this.Name = name;
-		this.Root = root;
-	}
-	public Name: string;
-	public Root: { Path: string, Module: object };
+	public Name: string = ""
+	public Module: object = {}
+	public References:Assembly[] = [];
 	public Types: Type[] = [];
 
 	public GetType(filter: string | (new (...args: any[]) => any) | object): Type | undefined {
@@ -23,13 +20,28 @@ export class Assembly {
 			}
 		});
 	}
-
-
 	public async Read() {
-		this.readModule(this.Root.Module, this.Name);
+		this.readModule(this.Module, this.Name);
+
+		this.Types.forEach((type:Type)=>{
+			var properties = (<any>type.Constructor.Method).__properties;
+			
+			for (var name in properties){
+				var propertyType = this.GetType(properties[name].Type)
+				if (! propertyType)
+					propertyType = new Type(properties[name].Type.name, properties[name].Type)
+				var propertyInfo = new PropertyInfo(name, type);
+				var attributes = properties[name].Attributes;
+				if (attributes){
+					attributes.forEach((attribute:Attribute)=>{
+						propertyInfo.Attributes.push(attribute);
+					});	
+				}
+				type.Properties.push(propertyInfo);
+			}
+		});
 	}
 	public async readModule(module: object, name: string) {
-		console.log(module);
 		for (var key in module) {
 			var propertyValue = (<any>module)[key];
 			var propertyName = `${name}.${key}`;
@@ -50,22 +62,14 @@ export class Assembly {
 	}
 	public async readconstructor(constructor: new (...args: any[]) => any, name:string) {
 		var type = new Type(name, constructor, this);
+
 		this.Types.push(type);
 	}
-	public static async Open(path: string, name?:string): Promise<Assembly> {		
-		if (!name) {
-			var splits = path.split('/');
-			name = splits[splits.length - 1];
-		}
-		if (!name || name.length == 0)
-			throw new Error("invalid assembly.  Please provide a name")
-		
-		var root: { Path: string, Module: object } = {
-			Path: `../../${path}`,
-			Module: await import("" + path)
-		}
-
-		let result: Assembly = new Assembly(name, root);	
+	public static async Open(name:string, modulePromise:Promise<object>): Promise<Assembly> {		
+		var module = await modulePromise;
+		let result:Assembly = new Assembly();
+		result.Name = name;
+		result.Module = module;
 		result.Read();
 		return result;
 	}
