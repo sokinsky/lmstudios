@@ -20,7 +20,7 @@ export class Assembly {
 			}
 		});
 	}
-	public async Read() {
+/* 	public async Read() {
 		this.readModule(this.Module, this.Name);
 
 		this.Types.forEach((type:Type)=>{
@@ -72,5 +72,5 @@ export class Assembly {
 		result.Module = module;
 		result.Read();
 		return result;
-	}
+	} */
 }

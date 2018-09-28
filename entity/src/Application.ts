@@ -1,45 +1,30 @@
-import { Assembly, Type } from "@lmstudios/reflection";
+import { Assembly, Type, TypeCollection } from "@lmstudios/reflection";
 import { Context } from "./";
 
 export class Application{
-    public Assemblies:Assembly[] = [];
+    constructor(){
+        (<any>window)["Application"] = this;
+    }
     public Context?:Context;
-
-
-    public GetAssembly(name:string):Assembly{
-        let result = this.Assemblies.find(x=>{
-            return x.Name == name;
-        })
-        if (!result)
-            throw new Error(`Unable to find Assembly(${name})`);
-        return result;
-    }
-    public GetType(type:object|string):Type|undefined{
-        let result:Type|undefined = undefined;
-        this.Assemblies.forEach((assembly:Assembly)=>{
-            result = assembly.GetType(type);
-            if (result)
-                return result;
-        });
-        return result;
+    public get Types():TypeCollection{
+        var result = <TypeCollection>(<any>window).Types;
+        if (! result){
+            result = new TypeCollection();
+            (<any>window).Types = result;
+        }
+        return result;           
     }
 
-    public async buildAssemblies(){
-
-    }
-    public async buildContext(){
-
-    }   
-
-    public async Start(init:(...args:any[])=>void){
-        await this.buildAssemblies();
-        await this.buildContext();
-
-        if (! (<any>window)["Application"])
-            (<any>window)["Application"] = this;
-        init();
-    } 
-    public static Retrieve():Application{
-        return (<any>window)["Application"];
+    public GetType(type:(new(...args:any[])=>any)|object|string):Type|undefined{
+        if (typeof(type) === "object")
+            return this.GetType(type.constructor);
+        switch (typeof(type)){
+            case "string":
+                var collection = <TypeCollection>(<any>window).Types;
+                return collection.Select(<string>type);
+            case "function":
+                return TypeCollection.GetType(<new(...args:any[])=>any>type);
+        }
+        return undefined;
     }
 }

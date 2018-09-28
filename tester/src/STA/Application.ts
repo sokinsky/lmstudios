@@ -1,14 +1,13 @@
-import { Assembly } from "@lmstudios/reflection";
-import { Context } from "./Data/Context";
-import * as LMS from "@lmstudios/entity";
-import { STATUS_CODES } from "http";
+import { Injectable } from "@angular/core";
+import * as Entity from "@lmstudios/entity";
+import * as Data from "./Data";
 
-export class Application extends LMS.Application {
-    public async buildAssemblies(){
-        //this.Assemblies.push(await Assembly.Open("Entity", import("@lmstudios/entity")));
-        this.Assemblies.push(await Assembly.Open("STA", import("./")));
+@Injectable()
+export class Application extends Entity.Application {
+    constructor(){
+        super();
+        this.Context = new Data.Context(this, "");
+        console.log(this);
     }
-     public async buildContext(){
-        this.Context = new Context(this, this.GetAssembly("STA"));
-    } 
+    
 }

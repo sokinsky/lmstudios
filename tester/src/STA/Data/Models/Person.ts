@@ -1,15 +1,20 @@
-import * as Entity from "@lmstudios/entity";
-import * as Base from "../Model";
+import { Model } from "../Model";
+//import { User } from "../Models";
+import { Attributes } from "@lmstudios/entity";
 
-
-export class Person extends Base.Model{
+@Attributes.Class("STA.Data.Models.Person")
+export class Person extends Model{
+    @Attributes.Property(String)
     public FirstName?:string;
+    @Attributes.Property(String)
     public LastName?:string;
+    @Attributes.Property(Date)
+    public DOB?:Date;
 
-    public static get __properties():object{
-        return {
-            FirstName:{Type:String },
-            LastName:{Type:String }
-        }            
-    }
+    @Attributes.Property(Boolean);
+    public Alive?:boolean;
+    
+
+
+
 }

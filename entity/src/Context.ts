@@ -3,7 +3,7 @@ import { API, Application, Model, Repository, Request, Response, ResponseStatusT
 import * as Bridge from "./Bridge";
 
 export class Context {
-	constructor(application:Application, assembly:string|Assembly, api:string|API) {
+	constructor(application:Application, api:string|API) {
  		var proxy: Context | undefined = new Proxy(this, {
 			get: (target, propertyName: string | number | symbol, reciever) => {
 				return Reflect.get(target, propertyName, reciever);
@@ -16,26 +16,13 @@ export class Context {
 			}
 		}); 
 		this.Application = application;
-		if (typeof(assembly) == "string"){
-			var check = this.Application.GetAssembly(assembly);
-			if (!check)
-				throw Error("");
-			this.Assembly = check
-		}
-		else{
-			this.Assembly = <Assembly>assembly;
-		}
-		this.Name = this.Assembly.Name;
  		if (typeof(api) == "string")
 			this.API = new API(this, api);
 		else
 			this.API = api;
 		return proxy;
 	}
-	public Name:string;
-	public Application: Application;
-	public Assembly:Assembly; 
-	
+	public Application:Application;
 	public API:API;
 	public ChangeTracker: ChangeTracker = new ChangeTracker(this);
 

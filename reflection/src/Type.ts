@@ -1,41 +1,42 @@
 import { Assembly, Attribute, ConstructorInfo, PropertyInfo } from "./";
 
 export class Type {
-	constructor(fullName: string, constructor: (new (...args: any[]) => any) | ConstructorInfo, assembly?: Assembly) {
-		this.FullName = fullName;
-		if (constructor instanceof ConstructorInfo)
-			this.Constructor = constructor;
-		else
-			this.Constructor = new ConstructorInfo(constructor);
-		this.Assembly = assembly;
+	constructor(constructor: (new (...args: any[]) => any), fullName?:string) {		
+		this.Constructor = new ConstructorInfo(constructor);	
+		if (!fullName)
+			fullName = constructor.name
+		this.FullName = fullName;	
 	}
 
-	public Name: string = "";
-	public Namespace: string = "";
+	public Name?: string;
+	public Namespace?: string;
 	public get FullName(): string {
-		if (this.Namespace.length > 0)
+		if (this.Namespace && this.Namespace.length > 0)
 			return `${this.Namespace}.${this.Name}`;
-		else
+		else if (this.Name)
 			return this.Name;
+		throw new Error("Invalid Type");
 	}
 	public set FullName(value: string) {
 		var splits = value.split('.');
 		for (var i = 0; i < splits.length; i++) {
 			if (i + 1 == splits.length)
 				this.Name = splits[i];
-			else
+			else{
+				if (!this.Namespace)
+					this.Namespace = "";
 				this.Namespace += `${splits[i]}.`
+			}
+				
 		}
-		this.Namespace = this.Namespace.replace(/.$/, "");
+		if (this.Namespace)
+			this.Namespace = this.Namespace.replace(/.$/, "");
 	}
 	public get BaseType(): Type | undefined {
 		var baseConstructor = Object.getPrototypeOf(this.Constructor.Method);
-		if (this.Assembly)
-			return this.Assembly.GetType(baseConstructor);
 		return undefined;
 	}
 
-	public Assembly?: Assembly;
 	public Constructor: ConstructorInfo;
 	public Properties: PropertyInfo[] = [];
 	public GetProperties(filter?:Type|(new(...args:any[])=>Attribute)):PropertyInfo[] {
@@ -74,7 +75,6 @@ export class Type {
 		//return this.Properties;
 	}
 	public GetProperty(name:string):PropertyInfo|undefined{
-		console.log(name);
 		return this.GetProperties().find(x=>{
 			return x.Name == name;
 		});
@@ -96,4 +96,57 @@ export class Type {
 	}
 
 
+}
+export class TypeCollection {
+	public __items:Type[] = [];
+	public Select(type:Type|(new(...args:any[])=>any)|object|string):Type|undefined{
+		if (typeof(type) === "object" && !(type instanceof Type))
+			return this.Select(type.constructor); 
+		var matches = this.__items.filter((item:Type)=>{
+			switch (typeof(type)){
+				case "string":
+					return (item.FullName === <string>type);
+				case "object":
+					return (item === <Type>type);
+				case "function":
+					return (item.Constructor.Method === <new(...args:any[])=>any>type);
+			}
+		});
+		switch (matches.length){
+			case 0:
+				return undefined;
+			case 1:
+				return matches[0];
+			default:
+				throw new Error("Ambiguous Type");
+		}
+	}
+	public Add(type:(new(...args:any[])=>any), fullName?:string):Type{
+		let select = this.Select(type);
+		if (! select && fullName)
+			select = this.Select(fullName);
+		if (select)
+			return select;
+		
+		var result;
+		result = new Type(type);
+		if (fullName)
+			result.FullName = fullName;
+		this.__items.push(result);
+		return result;
+	}
+
+	public static GetType(type:(new(...args:any[])=>any)):Type{
+		var types = <TypeCollection>(<any>window).Types;
+		if (! types){
+			types = new TypeCollection();
+			(<any>window).Types = types;
+		}
+
+		var result = types.Select(type);
+		if (! result){
+			result = types.Add(type)
+		}
+		return result;			
+	}
 }

@@ -7,21 +7,18 @@ import { Application } from "./STA/";
 const rootElemTagName = "app"; // Update this if you change your root component selector
 
 import Module from "./module";
+const platform = platformBrowserDynamic();
+function bootApplication() {
+	return platform.bootstrapModule(Module);
+}
 
-const application:Application = new Application();
-application.Start(()=>{
-	const platform = platformBrowserDynamic();
-	function bootApplication() {
-		return platform.bootstrapModule(Module);
+(async function () {
+	try {
+		await bootApplication();
 	}
+	catch (e) {
+		console.error(e);
+	}
+}());
 
-	(async function () {
-		try {
-			await bootApplication();
-		}
-		catch (e) {
-			console.error(e);
-		}
-	}());
-});
 

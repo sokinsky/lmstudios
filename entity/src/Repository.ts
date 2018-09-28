@@ -148,8 +148,6 @@ export class LocalRepository<TModel extends Model> {
     public Select(value: TModel | Partial<TModel> | number | string) : TModel | undefined {
 		let result:TModel|undefined;
 
-		let keyProperties:PropertyInfo[] = this.Repository.Type.GetProperties(Attributes.Key);
-		console.log(keyProperties);
 
 /* 		let keyProperty:PropertyInfo|undefined = this.Repository.Type.GetProperties().find
 

@@ -1,11 +1,7 @@
 import * as Entity from "@lmstudios/entity";
 
+@Entity.Attributes.Class("STA.Data.Model")
 export class Model extends Entity.Model {
+    @Entity.Attributes.Property(Number, {Key:true})
     public ID?:number;
-
-    public static get __properties():object{
-        return {
-            ID:{Type:Number, Attributes:[new Entity.Attributes.Key()]}
-        }            
-    }
 }

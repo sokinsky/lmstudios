@@ -5,8 +5,11 @@ import { HttpModule } from "@angular/http";
 import { RouterModule } from '@angular/router';
 
 import { HttpClientModule } from '@angular/common/http';
+import { Application } from "./STA/Application";
+import * as STA from "./STA";
 import * as Pages from './pages';
 import * as Controls from "./controls";
+
 
 @NgModule({
 	bootstrap: [Pages.Master],
@@ -24,7 +27,7 @@ import * as Controls from "./controls";
 		],
 		{ useHash: true }),
 	],
-	providers: [ ]
+	providers: [ Application ]
 })
 export default class {
 	constructor() { }

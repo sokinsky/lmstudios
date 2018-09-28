@@ -22,44 +22,24 @@ export class Model {
 			}
 		});
 
-		var application = Application.Retrieve();
+		var application = <Application>(<any>window).Application;
 		if (! application)
 			throw new Error("Unable to locate application");
-		
-		var context = application.Context;
-		if (! context)
-			throw new Error("Unable to locate context");
-		
-		var assembly = context.Assembly;
-		if (!assembly)
-			throw new Error("Unable to locate assembly");
-		
-		var type = assembly.GetType(this);
+		if (! application.Context)
+			throw new Error("Application does not have a context");
+		var type = application.GetType(this);
 		if (! type)
-			throw new Error("Unable to locate type");
+			throw new Error("Application does not have type");
 		this.__type = type;
-
-		var controllerType = assembly.GetType(`${assembly.Name}.Data.Controllers.${type.Name}`);
-		if (controllerType) {
-			var result = controllerType.Create(context, this);
-			this.__controller = <Controller<Context, Model>>result;
-		}
-		else{
-			this.__controller =  new Controller(context, this);
-		}
+	
+		this.__controller =  new Controller(application.Context, this);
 
 		return proxy;
 	}
 	public __controller: Controller<Context, Model>;
 	public __type:Type;
 	public GetType() : Type {
-		let result: Type | undefined = this.__controller.Context.Assembly.GetType(this);
 		return this.__type;
-	}
-	public static get __properties():any {
-		return {
-			ID: Number
-		};
 	}
 }
 

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import * as Entity from "@lmstudios/entity";
 import * as STA from "../STA";
+import {Application } from "../STA/Application";
 
 @Component({
 	selector: 'home',
@@ -8,19 +8,12 @@ import * as STA from "../STA";
 	styleUrls: ['./home.css']
 })
 export class Home {
-	constructor() {
+	constructor(private app:Application) {		
   	}
 	ngOnInit() {	
 	}
 
-	public get Context():STA.Data.Context{
-		let result:STA.Data.Context|undefined = <STA.Data.Context>STA.Application.Retrieve().Context;
-		return result;
-	}
-
 	public Test() {
-		console.log(this.Context.People);
-
-		var person = this.Context.People.Select(4);
+		var person = new STA.Data.Models.Person();
 	}
 }
