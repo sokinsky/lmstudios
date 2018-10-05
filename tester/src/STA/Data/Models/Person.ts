@@ -1,20 +1,15 @@
 import { Model } from "../Model";
-//import { User } from "../Models";
-import { Attributes } from "@lmstudios/entity";
+import { Meta } from "@lmstudios/entity";
+import { User } from "./User";
 
-@Attributes.Class("STA.Data.Models.Person")
 export class Person extends Model{
-    @Attributes.Property(String)
+    @Meta.Decorators.Property()
     public FirstName?:string;
-    @Attributes.Property(String)
+    @Meta.Decorators.Property()
     public LastName?:string;
-    @Attributes.Property(Date)
+    @Meta.Decorators.Property(()=>Date)
     public DOB?:Date;
-
-    @Attributes.Property(Boolean);
-    public Alive?:boolean;
-    
-
-
+    @Meta.Decorators.Property(()=>User)
+    public User?:User|Partial<User>;
 
 }

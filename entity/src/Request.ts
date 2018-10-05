@@ -13,10 +13,14 @@ export class Request{
 
     public async Post(api:API): Promise<Response>{
         this.Response = await api.Post(this);
+        
         if (! this.Response)
             throw new Error("Unable to send request");
-        else
+        else{
+            this.Response.Request = this;
             return this.Response;
+        }
+            
     }
 
 }

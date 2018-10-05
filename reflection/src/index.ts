@@ -1,12 +1,10 @@
-import { Assembly } from "./Assembly";
-import { Attribute } from "./Attribute";
+import { Attributes } from "./Attributes"
 import { ConstructorInfo } from "./ConstructorInfo";
 import { Type, TypeCollection } from "./Type";
 import { PropertyInfo } from "./PropertyInfo";
 
 export {
-	Assembly,
-	Attribute,
+	Attributes,
 	ConstructorInfo,
 	Type,
 	TypeCollection,

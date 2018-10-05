@@ -17,7 +17,11 @@
     "@angular/platform-browser-dynamic": "^6.0.2",
     "@angular/platform-server": "^6.0.2",
     "@angular/router": "^6.0.2",
+    "@lmstudios/entity": "file:D:/github/lmstudios/entity",
+    "@lmstudios/reflection": "file:D:/github/lmstudios/reflection",
+    "@lmstudios/utilities": "file:D:/github/lmstudios/utilities",
     "@types/uuid": "^3.4.3",
+    "angular4-datepicker": "^1.0.1",
     "bootstrap": "^4.1.3",
     "link": "^0.1.5",
     "material-design-icons": "^3.0.1",
@@ -25,10 +29,7 @@
     "rxjs": "^6.1.0",
     "rxjs-compat": "^6.1.0",
     "uuid": "^3.2.1",
-    "zone.js": "^0.8.26",
-    "@lmstudios/utilities": "file:D:/github/lmstudios/utilities",
-    "@lmstudios/reflection": "file:D:/github/lmstudios/reflection",
-    "@lmstudios/entity": "file:D:/github/lmstudios/entity"
+    "zone.js": "^0.8.26"
   },
   "devDependencies": {
     "@types/node": "^10.11.0",

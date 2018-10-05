@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import * as STA from "../STA";
-import {Application } from "../STA/Application";
+import { Meta } from "@lmstudios/entity";
 
 @Component({
 	selector: 'home',
@@ -8,12 +8,29 @@ import {Application } from "../STA/Application";
 	styleUrls: ['./home.css']
 })
 export class Home {
-	constructor(private app:Application) {		
+	constructor(private context:STA.Data.Context) {	
+		this.Load();
   	}
 	ngOnInit() {	
 	}
+	public Person:STA.Data.Models.Person|undefined;
+	public async Load(){
+		this.Person = await this.context.People.Select(1);
+	}
 
-	public Test() {
-		var person = new STA.Data.Models.Person();
+	public async Save(){
+		var response = await this.context.SaveChanges();
+		console.log(response);
+	}
+	public Log(item:any){
+		console.log(item);
+	}
+	public Test(item:any){
+		switch(item.GetType().Name){
+			case "User":
+				console.log(item.Controller.Values.Original);
+				console.log(item.Controller.Write());
+				break;
+		}
 	}
 }

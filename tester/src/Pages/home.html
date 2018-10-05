@@ -1,1 +1,18 @@
-<span (click)="Test()">Home</span>
+<div *ngIf="Person">
+    <h3 (click)="Log(Person)">{{Person.FirstName}}{{Person.LastName}}</h3>
+    <input type="text" placeholder="FirstName" [(ngModel)]="Person.FirstName" /><br/>
+    <input type="text" placeholder="LastName" [(ngModel)]="Person.LastName" />
+
+    <!-- <div *ngIf="Person.User">
+        <h3 (click)="Log(Person.User)">{{Person.User.Person.LastName}} <span (click)="Test(Person.User)">[test]</span></h3>
+        <input type="text" placeholder="Username" [(ngModel)]="Person.User.Username" /><br/>
+        <input type="text" placeholder="Password" [(ngModel)]="Person.User.Password" />
+    </div> -->
+</div>
+
+<div>
+    <h3 (click)="Log(context)">Context</h3>
+    <button *ngIf="context.ChangeTracker.Entries.length > 0" (click)="Save()">Save</button>{{context.ChangeTracker.Entries.length}}
+</div>
+
+

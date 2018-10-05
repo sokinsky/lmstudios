@@ -1,6 +1,2 @@
-import { Person } from "./Person";
-import { User } from "./User";
-export {
-    Person,
-    User
-}
+export { Person } from "./Person";
+export { User } from "./User";

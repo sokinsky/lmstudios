@@ -1,28 +1,22 @@
-import { Assembly, ConstructorInfo, PropertyInfo, Type } from "../../Reflection";
-import { Context, Controller, Model, Request, Response, ResponseStatus, ResponseStatusType } from "./";
-import * as Attributes from "./Attributes";
+import { Context, Controller, Model, Request, Response, ResponseStatus, ResponseStatusType, Application } from "./";
 import * as Bridge from "./Bridge";
 
-export class Repository<TModel extends Model> {
-	constructor(parent: Context | Model, type: (new (...args: any[]) => TModel)) {
-		this.Parent = {
-			Value:parent
-		}
-		var checkContext:Context|undefined;
-		if (parent instanceof Context){
-			checkContext = parent;
-		}
-		else if (parent instanceof Model){
-			this.Model = parent;
-			checkContext = this.Model.__controller.Context;
-		}
-		if (! checkContext)
-			throw new Error("Unable to continue without a context");
-		this.Context = checkContext;
+import { Meta } from "./";
 
-		var checkType:Type|undefined = this.Context.Application.GetType(type);
+export class RepositoryOwner {
+	constructor(value:Context|Model, property?:Meta.Property){
+		this.Value = value;
+		this.Property = property;
+	}
+	public Value:Context|Model;
+	public Property?:Meta.Property
+}
+export class Repository<TModel extends Model> {
+	constructor(owner: Context | Model, type: (new (...args: any[]) => TModel)) {
+		this.Owner = new RepositoryOwner(owner);
+		var checkType = Meta.Type.GetType(type);
 		if (! checkType)
-			throw new Error("Unable to continue without a type");
+			throw new Error(`Repository Type(${type.name}) does not exist`)
 		this.Type = checkType;
 
 
@@ -30,112 +24,58 @@ export class Repository<TModel extends Model> {
 		this.Server = new ServerRepository(this);
 	}
 
-	public Parent: { Value:Context|Model, Property?:PropertyInfo }
-	public Type: Type;
-
-	public Context: Context 
-	public Model: Model | undefined 
-	
-	private _items?: TModel[];
-	public get Items(): TModel[] {
-		if (!this._items)
-			this.Intialize();
-		if (!this._items)
-			this._items = [];
-		return this._items;
+	public Owner:RepositoryOwner;
+	public Type: Meta.Type;
+	public get Application():Application{
+		return <Application>(<any>window)["Application"];
 	}
+	public get Context(): Context{
+		return <Context>(<any>window)["Context"];
+	}
+
+	public Items:TModel[] = [];
 	public *[Symbol.iterator]() {
 		for (const value of this.Items) {
 			yield value;
 		}
 	}
+
+
+	public Add(newItem:TModel|Partial<TModel>):TModel{
+		var item:Model|undefined;
+		if (!(newItem instanceof Model)){
+			item = this.Local.Select(newItem);
+			if (! item){
+				item = new this.Type.Constructor();
+				if (item)
+					item.Controller.Load(newItem);
+			}
+		}
+		else{
+			item = newItem;
+		}
+		if (! item)
+			throw Error("");
+
+		if (item){
+			var existingItem = this.Items.find(x =>{
+				return x === item;
+			});
+			if (existingItem)
+				return existingItem;
+		}
+		this.Items.push(<TModel>item);
+		this.Context.ChangeTracker.Update(item);
+		return <TModel>item;
+	}
+
     public Local: LocalRepository<TModel>;
 	public Server: ServerRepository<TModel>;
 
-	public Intialize(): TModel[] {		
-		if (this._items !== undefined)
-			return this._items;
-		return [];
-		//if (this._items) {
-		//	console.warn("Repo Items have already been initialized");
-		//	return;
-		//}
-		//this._items = [];
-		//if (this.Parent instanceof Model && this.Parent.ID) {
-		//	var request = {
-		//		Type: this.Parent.GetType().Name,
-		//		Value: this.Parent.ID,
-		//		PropertyName: this.ParentPropertyName
-		//	};
-		//	var response = this.Context.API.Post("Model/Property", request).then((response) => {
-		//		if (response && response.Status.Type == ResponseStatusType.OK) {					
-		//			this.Context.Load(response);
-
-		//			var parentType: Type = (<TModel>this.Parent).GetType();
-		//			var childType: Type | undefined= this.Context.Assembly.GetType(this.Type);
-		//			if (childType) {
-		//				var childProperties = childType.GetProperties(parentType.Constructor);
-		//				for (var key in childProperties) {
-		//					var add = this.Context.GetRepository(childType.Constructor).Items.filter((item: Model) => {
-		//						console.log(item);
-		//						//var parentValue = item.__controller.ReadProperty(key);
-		//						var parentProperty = key;
-		//						//console.log(parentProperty);
-		//						var parentPropertyValue = (<any>Model)[parentProperty];
-		//						//console.log(parentPropertyValue);
-		//						//return (parentValue == this.Parent)
-		//						return true;
-		//					});
-		//					add.forEach(item => {
-		//						this.Add(<TModel>item);
-		//					})
-		//					console.log(add);
-		//				}
-		//			}
-
-		//		}
-		//	});
-		//}
-
-	}
-
-	public async Select(value: TModel | Partial<TModel> | number | string): Promise<TModel | undefined> {
+	public async Select(value: any): Promise<TModel | undefined> {
 		var result = this.Local.Select(value);
 		if (!result)
 			result = await this.Server.Select(value);
-		return result;
-	}
-
-
-
-	public Create(value?: Partial<TModel>) {
-		let result: TModel = <TModel>this.Type.Create(this.Context);
-		if (value)
-			result.__controller.Load(value);
-		return result;
-	}
-	public Add(value?: TModel | Partial<TModel>): TModel {
-		let result: TModel | undefined;
-		if (!value) {
-			result = this.Create();
-			this.Items.push(result);
-		}
-		else if (!(value instanceof Model)) {
-			result = this.Local.Select(value);
-			if (result == null) {
-				result = this.Create(value);
-				this.Items.push(result);
-			}
-		}
-		else {
-			result = this.Items.find((item: TModel) => {
-				return item === value;
-			});
-			if (!result) {
-				result = value;
-				this.Items.push(result);
-			}
-		}
 		return result;
 	}
 }
@@ -145,33 +85,55 @@ export class LocalRepository<TModel extends Model> {
     }
     public Repository: Repository<TModel>;
 
-    public Select(value: TModel | Partial<TModel> | number | string) : TModel | undefined {
-		let result:TModel|undefined;
+    public Select(value:any) : TModel | undefined {
+		var uniqueProperties:Meta.Property[] = this.Repository.Type.GetProperties({Unique:true});
+		var keyProperties:Meta.Property[] = this.Repository.Type.GetProperties({Key:true});
 
-
-/* 		let keyProperty:PropertyInfo|undefined = this.Repository.Type.GetProperties().find
-
-		let uniqueProperties:PropertyInfo[] = this.Repository.Type.GetProperties().filter((propertyInfo:PropertyInfo)=>{
-			var attribute = propertyInfo.Attributes.find(item=>{
-				return (item instanceof Attributes.Unique);
-			});
-			return (attribute !== undefined)
-		});
-		
-		let results:TModel[] = this.Repository.Items.slice();
+		var result:TModel|undefined = undefined;
 		switch (typeof(value)){
-			case "string":
-				if (uniqueProperties.length == 1)
-					result = 
+			case "object":
+				if (uniqueProperties.length > 0){
+					result = this.Repository.Items.find((item:Model) => {
+						var check = false;
+						uniqueProperties.forEach((property:Meta.Property) => {
+							check = (<any>value)[property.Name] === (<any>item)[property.Name];
+						});
+						return check;
+					});
+					if (result)
+						return result;
+				}
+				else if (keyProperties.length > 0){
+					result = this.Repository.Items.find((item:Model) => {
+						
+						var check = false;
+						keyProperties.forEach((property:Meta.Property) => {
+							check = (<any>value)[property.Name] === (<any>item)[property.Name];
+						});
+						return check;
+					})
+					if (result)
+						return result;
+				}
+				break;
+			default:
+				if (uniqueProperties.length == 1){
+					result = this.Repository.Items.find((item:Model)=>{
+						return uniqueProperties[0].GetValue(item) === value;
+					});
+					if (result)
+						return result;
+				}
+				if (keyProperties.length == 1){
+					result = this.Repository.Items.find((item:Model)=>{
+						return keyProperties[0].GetValue(item.Sync) === value;
+					})
+					if (result)
+						return result;
+				}					
+
 		}
-		if (uniqueProperties){
-			uniqueProperties.forEach((propertyInfo:PropertyInfo)=>{
-				results = results.filter((x:Model) => {
-					
-				})
-			})
-		}*/
-        return undefined; 
+		return result;
     }
 }
 export class ServerRepository<TModel extends Model> {
@@ -180,7 +142,21 @@ export class ServerRepository<TModel extends Model> {
     }
     public Repository: Repository<TModel>;
 
-	public async Select(value: TModel | Partial<TModel> | number | string): Promise<TModel | undefined> {
-        return undefined;
+	public async Select(value: any): Promise<TModel | undefined> {
+		var body = {
+			Type: this.Repository.Type.Name,
+			Value: {}
+		};
+		if (value instanceof Model)
+			body.Value = (<Model>value).Controller.Write();
+		else
+			body.Value = value;
+
+		var request:Request = new Request("Model/Select", body);
+		var response:Response = await request.Post(this.Repository.Context.API);
+		
+		if (response.Result)
+			this.Repository.Context.Load(response);
+        return this.Repository.Local.Select(value);
     }
 }

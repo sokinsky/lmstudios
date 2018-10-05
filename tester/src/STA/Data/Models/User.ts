@@ -1,16 +1,14 @@
 import { Model } from "../Model";
-//import { Person } from "../Models";
-import { Attributes } from "@lmstudios/entity";
+import { Meta } from "@lmstudios/entity";
+import { Person } from "../Models";
 
-@Attributes.Class("STA.Data.Models.User")
-export class User extends Model{
-    @Attributes.Property(String)
-    public Username?:string;
-    @Attributes.Property(String)
-    public Password?:string;
-    @Attributes.Property(String)
+export class User extends Model {
+    @Meta.Decorators.Property({Unique:true})
     public Token?:string;
-    
-    @Attributes.Property("STA.Data.Models.Person")
-    public Person?:Number;
+    @Meta.Decorators.Property({Unique:true})
+    public Username?:string;
+    @Meta.Decorators.Property()
+    public Password?:string;
+    @Meta.Decorators.Property(()=>Person)
+    public Person?:Person|Partial<Person>;
 }

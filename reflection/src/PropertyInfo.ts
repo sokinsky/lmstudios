@@ -1,4 +1,4 @@
-import { Attribute, Type } from ".";
+import { Attributes, Type } from ".";
 
 export class PropertyInfo {
 	constructor(name: string, type: Type) {
@@ -7,7 +7,7 @@ export class PropertyInfo {
 	}
 	public Name: string;
 	public Type: Type;
-	public Attributes:Attribute[] = [];
+	public Attributes:Attributes = new Attributes();
 
 	public GetValue(item: object) {
 		return (<any>item)[this.Name];
