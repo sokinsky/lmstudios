@@ -60,8 +60,7 @@ export class Repository<TModel extends Model> {
 			return items;
 		return items.filter((item:TModel)=>{
 			var result:boolean = true;
-			for (var key in filter){
-				
+			for (var key in filter){				
 				var keyValue = filter[key];
 				var itemValue = undefined;
 
