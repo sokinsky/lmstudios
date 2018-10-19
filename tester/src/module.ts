@@ -6,12 +6,14 @@ import { RouterModule } from '@angular/router';
 
 import { HttpClientModule } from '@angular/common/http';
 import * as Pages from './pages';
+import * as Controls from "./Controls";
 
 
 @NgModule({
 	bootstrap: [Pages.Master],
 	declarations: [
-		Pages.Master, Pages.Home
+		Pages.Master, Pages.Home,
+		Controls.Context, Controls.Repository, Controls.Model, Controls.Primative
 	],
     imports: [
 		BrowserModule,

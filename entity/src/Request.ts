@@ -7,6 +7,7 @@ export class Request{
     }
     public Date: Date = new Date();
     public Path:string;
+    public Url?:string;
     public Headers:{[name:string]:string} = {"Content-Type":"application/json"};
     public Body: object;
     public Response?: Response;

@@ -1,0 +1,44 @@
+div.repository{
+    border-radius:5px;
+    padding:5px;
+    margin:4px;
+}
+div.repository:hover{
+    background-color:#ddd;
+    box-shadow: 1px 1px #aaa;
+    background-image: linear-gradient(#ddd, #fff);
+}
+div.repository.selected{
+    background-color:#ddd;
+    box-shadow: 2px 2px #aaa;
+    background-image: linear-gradient(#ddd, #fff);
+}
+
+div.header{
+    cursor: pointer;
+}
+div.body{
+    padding:5px;
+    background-color:#fff;
+    box-shadow: -1px -1px #aaa;
+}
+div.body.selected{
+    background-image: linear-gradient(#fff, #888);
+}
+span.title:hover {
+    font-weight:bold;
+}
+span.toolbar {
+    float:right;
+    text-align:center;
+    margin: 0px 10px;
+}
+div.items {
+    margin: 0 0 0 10px;
+}
+
+div.footer{
+    border-radius: 5px;
+    cursor: pointer;
+    background-image: linear-gradient(#fff, #888);
+}

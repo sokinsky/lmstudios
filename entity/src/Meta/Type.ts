@@ -1,9 +1,11 @@
 import { Attributes, Property, Properties } from "./";
+import { Utilities } from "..";
 
 export class Type {
     constructor(init:(()=>new(...args:any[])=>any)){
         this.__init=init;
     }
+    public id:Utilities.Guid = Utilities.Guid.Create();
     private __init:(()=>new(...args:any[])=>any);
     public get Name():string{
         return this.Constructor.name;

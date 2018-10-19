@@ -10,17 +10,18 @@ export class API {
 	public Requests:Request[] = [];
 
 	public async Post(request:Request): Promise<Response|undefined> {
-		let url: string = `${this.Url}/${request.Path}`;
+		request.Url = `${this.Url}/${request.Path}`;
 		let input = {
 			method: "POST",
 			headers: request.Headers,
 			body: JSON.stringify(request.Body)
 		}
 
-		let fetchResult = await fetch(url, input);
+		let fetchResult = await fetch(request.Url, input);
 		let fetchResponse = await fetchResult.json();
 		let response: Response = new Response(fetchResponse);
 		request.Response = response;
+		this.Requests.push(request);
 		return response;
 	}
 	

@@ -8,4 +8,6 @@ export class Attributes {
     }
     public Key:boolean = false;
     public Unique:boolean = false;    
+    public Required:boolean = false;
+    public Index?:{Name:string,Order:number,Unique:boolean};
 }

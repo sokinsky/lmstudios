@@ -1,0 +1,43 @@
+<div class="lmspanel">
+    <div class="header">
+        <div class="titlebar">
+            <a class="nodebutton" (click)="this.toggle.click()">
+                <i class="glyphicon" [ngClass]="{'glyphicon-minus-sign':this.toggle.value, 'glyphicon-plus-sign':!this.toggle.value}"></i>
+            </a>
+            <span class="title">{{this.label}}</span>
+            <div class="toolbar">
+                <a class="toggleButton" title="Add" *ngIf="this.options.add.available()" (click)="this.options.add.toggle.click()">
+                    <i class="glyphicon glyphicon-plus"></i>
+                </a>
+            </div>
+        </div>
+        <!-- add-->
+        <div class="lmsOption" *ngIf="this.options.add.toggle.value">
+            <div class="header">
+                <div class="titlebar">
+                    <span class="title">
+                        <i class="glyphicon glyphicon-plus"></i> Add
+                    </span>
+                    <div class="toolbar">
+                        <a class="iconbutton" title="Add">
+                            <i class="glyphicon glyphicon-ok" (click)="this.options.add.actions.add()"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="body">
+                <textarea style="width:100%" [(ngModel)]="this.options.add.value"></textarea>
+            </div>          
+        </div>
+    </div>
+    <div class="body" *ngIf="this.toggleValue">
+        <div *ngFor="let property of properties">
+            <ctlPrimative *ngIf="isPrimative(property)" [parent]=this [parentProperty]=property></ctlPrimative>
+            <ctlModel *ngIf="isModel(property)" [parent]=this [parentProperty]=property [value]=property.GetValue(this.value.Controller.Model)></ctlModel>
+            <ctlRepository *ngIf="isRepository(property)" (select)="select($event)" [parent]=this [parentProperty]=property [value]=property.GetValue(this.value)></ctlRepository>
+        </div>
+    </div>    
+</div>
+<ng-content></ng-content>
+
+        

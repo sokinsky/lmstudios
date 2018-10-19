@@ -1,0 +1,23 @@
+div.model{
+    border-radius:5px;
+    padding:5px;
+    margin:4px;
+}
+div.model:hover{
+    background-color:#ddd;
+    box-shadow: 1px 1px #aaa;
+    background-image: linear-gradient(#ddd, #fff);
+}
+div.model.selected{
+    background-color:#ddd;
+    box-shadow: 2px 2px #aaa;
+    background-image: linear-gradient(#ddd, #fff);
+}
+div.header{
+    cursor: pointer;
+}
+div.body{
+    padding:5px;
+    background-color:#fff;
+    box-shadow: -1px -1px #aaa;
+}

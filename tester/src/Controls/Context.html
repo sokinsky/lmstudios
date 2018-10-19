@@ -1,0 +1,46 @@
+<div class="lmspanel">
+    <div class="header">
+        <div class="titlebar">
+            <a class="nodebutton" (click)="this.toggle.click()">
+                <i class="glyphicon" [ngClass]="{'glyphicon-minus-sign':this.toggle.value, 'glyphicon-plus-sign':!this.toggle.value}"></i>
+            </a>
+            <span class="title">Title</span>
+            <div class="toolbar">
+                <a class="toggleButton" [ngClass]="{'selected':this.options.save.toggle.value, 'disabled':this.options.save.disabled()}" (click)="this.options.save.toggle.click()">
+                    <i class="glyphicon glyphicon-floppy-disk" title="Add"></i>
+                </a>
+            </div>
+        </div>
+        <div class="lmsOption" *ngIf="this.options.save.toggle.value">
+            <div class="header">
+                <div class="titlebar">
+                    <span class="title">
+                        <i class="glyphicon glyphicon-floppy-disk"></i> Save
+                    </span>
+                    <div class="toolbar">
+                        <a class="iconbutton" title="Cancel" (click)="this.options.save.actions.cancel()">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                        <a class="iconbutton" title="Search" (click)="this.options.save.actions.save()">
+                            <i class="glyphicon glyphicon-ok"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="body">
+                <div *ngFor="let entry of this.value.ChangeTracker.Changes">
+                    {{entry.Model.toString()}}:{{entry.Status}}
+                </div>
+            </div>          
+        </div>
+    </div>
+    <div class="body" *ngIf="this.toggle.value">
+        <div *ngFor="let property of properties">
+            <ctlPrimative *ngIf="isPrimative(property)" [parent]=this [parentProperty]=property></ctlPrimative>
+            <ctlModel *ngIf="isModel(property)" [parent]=this [parentProperty]=property [value]=property.GetValue(this.value.Controller.Model)></ctlModel>
+            <ctlRepository *ngIf="isRepository(property)" (select)="select($event)" [parent]=this [parentProperty]=property [value]=property.GetValue(this.value)></ctlRepository>
+        </div>
+    </div>
+
+</div>
+

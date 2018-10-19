@@ -28,12 +28,25 @@ export function Property(arg1?:(()=>new(...args:any[])=>any)|Meta.Attributes|Par
         });
         if (! classType){
             classType = new Meta.Type(() => target.constructor);
-            types.push(classType);
+              types.push(classType);
+        }
+        let propertyType:Meta.Type|undefined = undefined;
+        if (type){
+            if (type()){
+                propertyType = types.find(x =>{
+                    return x.Constructor === type()
+                });
+            }
+            if (propertyType === undefined){
+                propertyType = new Meta.Type(type);
+                types.push(propertyType);
+            }
+
         }    
         
         let property:Meta.Property = new Meta.Property(propertyName);
-        if (type)
-            property.Type = new Meta.Type(type);       
+        if (propertyType)
+            property.Type = propertyType;       
         if (attributes)
             property.Attributes = attributes;
         classType.Properties.push(property);

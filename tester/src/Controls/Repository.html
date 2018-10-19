@@ -1,0 +1,86 @@
+<div class="lmspanel">
+    <div class="header">
+        <div class="titlebar">
+            <a class="nodebutton" [ngClass]="{'disabled':this.toggle.disabled()}" (click)="this.toggle.click()">
+                <i class="glyphicon" [ngClass]="{'glyphicon-minus-sign':this.toggle.value, 'glyphicon-plus-sign':!this.toggle.value}"></i>
+            </a>
+            <span class="title">{{this.label}}</span>
+            <div class="toolbar">
+                <a class="toggleButton" [ngClass]="{'selected':this.options.add.toggle.value}" (click)="this.options.add.toggle.click()">
+                    <i class="glyphicon glyphicon-plus" title="Add"></i>
+                </a>
+                <a class="toggleButton" [ngClass]="{'selected':this.options.search.toggle.value}" (click)="this.options.search.toggle.click()">
+                    <i class="glyphicon glyphicon-search" title="Search"></i>
+                </a>
+            </div>
+        </div>
+        <!-- add-->
+        <div class="lmsOption" *ngIf="this.options.add.toggle.value">
+            <div class="header">
+                <div class="titlebar">
+                    <span class="title">
+                        <i class="glyphicon glyphicon-plus"></i> Add
+                    </span>
+                    <div class="toolbar">
+                        <a class="iconbutton" title="Cancel" (click)="this.options.add.actions.cancel()">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                        <a class="iconbutton" title="Add">
+                            <i class="glyphicon glyphicon-ok" (click)="this.options.add.actions.add()"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="body">
+                <textarea style="width:100%" [(ngModel)]="this.options.add.value"></textarea>
+            </div>  
+            <div class="footer">
+                <div class="toolbar">
+                    <a class="iconbutton" title="Cancel" (click)="this.options.add.actions.cancel()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </a>
+                    <a class="iconbutton" title="Add">
+                        <i class="glyphicon glyphicon-ok" (click)="this.options.add.actions.add()"></i>
+                    </a>
+                </div>
+            </div>        
+        </div>
+        <!-- search -->
+        <div class="lmsOption" *ngIf="this.options.search.toggle.value">
+            <div class="header">
+                <div class="titlebar">
+                    <span class="title">
+                        <i class="glyphicon glyphicon-search"></i> Search
+                    </span>
+                    <div class="toolbar">
+                        <a class="iconbutton" title="Cancel">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                        <a class="iconbutton" title="Search" (click)="this.options.search.actions.search()">
+                            <i class="glyphicon glyphicon-ok"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="body">
+                <textarea style="width:100%" [(ngModel)]="this.options.search.value"></textarea>
+            </div>     
+            <div class="footer">
+                <div class="toolbar">
+                    <a class="iconbutton" title="Cancel">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </a>
+                    <a class="iconbutton" title="Search" (click)="this.options.search.actions.search()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                    </a>
+                </div>
+            </div>     
+        </div>
+    </div>
+    <div class="body" *ngIf="this.toggle.value" #items>
+        <ctlModel *ngFor="let model of this.value" [toggleValue]="this.selectedModel === model" [parent]="this" [value]="model"></ctlModel>
+    </div>    
+</div>
+  
+
+
