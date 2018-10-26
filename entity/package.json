@@ -13,10 +13,6 @@
     "type": "git",
     "url": "https://github.com/sokinsky/lmstudios/tree/master/utilities"
   },
-  "dependencies": {
-    "@lmstudios/utilities": "file:D:/github/lmstudios/utilities",
-    "@lmstudios/reflection": "file:D:/github/lmstudios/reflection"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }

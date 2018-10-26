@@ -1,0 +1,23 @@
+{
+  "name": "@lmstudios/datatester",
+  "version": "0.0.1",
+  "description": "object reflection library that is reated at runtime",
+  "private": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Steven J Okinsky",
+  "license": "MIT",
+  "dependencies": {
+    
+  },
+  "devDependencies": {
+    "angular2-template-loader": "^0.6.2",
+    "awesome-typescript-loader": "^5.2.1",
+    "css-loader": "^1.0.0",
+    "html-loader": "^0.5.5",
+    "raw-loader": "^0.5.1",
+    "typescript": "^3.0.3",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.1"
+  }
+}

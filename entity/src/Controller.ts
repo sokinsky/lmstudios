@@ -15,8 +15,8 @@ export class Controller<TModel extends Model> {
 	}
 	public Guid:Guid = Guid.Create();
 	public Model: TModel;
-	public Sync:SyncController<TModel> = new SyncController(this);
-	public Async:AsyncController<TModel> = new AsyncController(this);
+	public Local:LocalController<TModel> = new LocalController(this);
+	public Server:ServerController<TModel> = new ServerController(this);
 	
 	public get Context(): Context {
 		return this.Model.Context;
@@ -118,10 +118,10 @@ export class Controller<TModel extends Model> {
 				if (!(result instanceof Model)){
 					var repository = this.Context.GetRepository(property.Type.Name);
 					if (repository){
-						var localValue = repository.Sync.Select(result);
+						var localValue = repository.Local.Select(result);
 						if (localValue === undefined){
 							property.SetValue(this.Model, null);
-							repository.Async.Select(result).then(serverValue=>{
+							repository.Server.Select(result).then(serverValue=>{
 								if (serverValue !== undefined && property !== undefined)
 									property.SetValue(this.Model, serverValue);
 							})
@@ -170,7 +170,7 @@ export class Controller<TModel extends Model> {
 	}
 }
 
-export class SyncController<TModel extends Model>{
+export class LocalController<TModel extends Model>{
 	constructor(parent:Controller<TModel>){
 		this.Parent = parent;
 	}
@@ -199,10 +199,10 @@ export class SyncController<TModel extends Model>{
 						throw new Error("");
 
 					console.log(property);
-					var localValue = repository.Sync.Select(result);
+					var localValue = repository.Local.Select(result);
 					if (localValue === undefined){
 						result = null;
-						repository.Async.Select(result).then(serverValue=>{
+						repository.Server.Select(result).then(serverValue=>{
 							result = serverValue;
 						})
 					}
@@ -213,7 +213,7 @@ export class SyncController<TModel extends Model>{
 	}
 
 }
-export class AsyncController<TModel extends Model>{
+export class ServerController<TModel extends Model>{
 	constructor(parent:Controller<TModel>){
 		this.Parent = parent;
 	}
@@ -239,12 +239,12 @@ export class AsyncController<TModel extends Model>{
 					property.SetValue(this.Parent.Model, null);
 					var repository = this.Parent.Context.GetRepository(property.Type.Name);
 					if (repository){
-						var localValue = repository.Sync.Select(result);
+						var localValue = repository.Local.Select(result);
 						if (localValue !== undefined){
 							result = localValue;
 						}
 						else {							
-							var serverValue = await repository.Async.Select(result);
+							var serverValue = await repository.Server.Select(result);
 							if (serverValue === undefined)
 								result = null;
 							else 

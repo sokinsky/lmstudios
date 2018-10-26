@@ -1,0 +1,14 @@
+{
+  "name": "@lmstudios/data",
+  "version": "0.0.2",
+  "description": "utilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Steven J Okinsky",
+  "license": "MIT",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sokinsky/lmstudios/tree/master/data"
+  }
+}

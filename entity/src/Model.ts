@@ -26,7 +26,7 @@ export class Model {
 				let property:Meta.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (! property)
 					return Reflect.get(target, propertyName, reciever);					
-				return await this.Controller.Async.GetValue(property);
+				return await this.Controller.Server.GetValue(property);
 			}
 		});
 		this.Controller = new Controller(this);

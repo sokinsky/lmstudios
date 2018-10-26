@@ -28,10 +28,10 @@ export class ChangeTracker {
     }
 	public Add(model: Model) {
         var entry = this.Entries.find(x => {
-            return x.Model === model.Proxy;
+            return x.Model === model.Local;
         });
         if (entry === undefined){
-            entry = new ChangeEntry(model.Proxy);
+            entry = new ChangeEntry(model.Local);
             this.Entries.push(entry);
         }
         entry.Status = model.Controller.GetStatus();

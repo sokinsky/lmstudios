@@ -3,6 +3,7 @@ export { ChangeEntry, ChangeStatus } from "./ChangeEntry";
 export { ChangeTracker } from "./ChangeTracker";
 export { Context } from "./Context";
 export { Controller } from "./Controller";
+export { List } from "./List";
 export { Message } from "./Message";
 export { Model } from "./Model";
 export { Repository } from "./Repository";

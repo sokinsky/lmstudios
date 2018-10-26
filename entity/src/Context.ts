@@ -39,33 +39,37 @@ export class Context {
 		});
 		types.forEach((type:Meta.Type)=>{
 			type.Properties.forEach((property:Meta.Property)=>{
-				if (property.Type)
-					property.Type = Meta.Type.GetType(property.Type.Constructor);
+				var propertyType = Meta.Type.GetType(property.Type.Constructor);
+				if (propertyType !== undefined)
+					property.Type = propertyType;
 			})
 		});
 		this.Initialize();
-
-
-		// console.log(types);
-		// removeTypes.forEach(x =>{
-		// 	var index = types.indexOf(x);
-		// 	types.splice(index, 1);
-		// })
-		// console.log(types);
 	}
 	public Status:ContextStatus = ContextStatus.Ready;
 	public API:API;
 	public ChangeTracker: ChangeTracker = new ChangeTracker(this);
 
-	public Select(type:Meta.Type|string, value:any):Model|undefined{
-		var repository = this.GetRepository(type);
-		if (repository === undefined)
-			throw new Error(`Not Repositorty with Type(${type}) was found`);
-		return repository.Sync.Select(value);
+	public GetTypes():Meta.Type[]{
+		return Meta.Type.Types;
+	}
+	public GetType(type?:(new (...args: any[]) => any)):Meta.Type{
+		if (type === undefined){
+			var result = Meta.Type.GetType(this);
+			if (result === undefined)
+				throw new Error(`could not find repository of type(${type})`);
+			return result;
+		}
+		else{
+			var result =  Meta.Type.GetType(type);
+			if (result === undefined)
+				throw new Error(`could not find repository of type(${type})`);
+			return result;
+		}
 	}
 
-	public get Repositories():Array<Repository<Model>>{
-		var result:Array<Repository<Model>> = [];
+	public GetRepositories():Repository<Model>[]{
+		var result:Repository<Model>[] = [];
 		for (var key in this){
 			if ((<any>this)[key] instanceof Repository){
 				result.push((<any>this)[key]);
@@ -73,17 +77,24 @@ export class Context {
 		}
 		return result;
 	}
- 	public GetRepository(type:Meta.Type|string): Repository<Model>|undefined{
-		 var typeName:string|undefined;
-		 if (type instanceof Meta.Type)
-			typeName = type.Name;
-		else
-			typeName = type;
-
-		return this.Repositories.find(x => {
-			return x.Type.Name === typeName;
-		})
+ 	public GetRepository(type:(new (...args: any[]) => Model)|Meta.Type|string): Repository<Model>{
+		 var result:Repository<Model>|undefined;
+		 switch (typeof(type)){
+			 case "function":
+				 result = this.GetRepositories().find((x:Repository<Model>) => { return x.Type.Name === (<new (...args: any[]) => Model>type).name });
+				 break;
+			 case "object":
+			 	result = this.GetRepositories().find((x:Repository<Model>) => { return x.Type === (<Meta.Type>type)});
+				 break;
+			 case "string":
+				 result = this.GetRepositories().find((x:Repository<Model>) => { return x.Type.Name === <string>type});
+				 break;
+		 }
+		 if (result === undefined)
+		 	throw new Error(`could not find repository of type(${type})`);
+		 return result;
 	} 
+	
 	public async Initialize() {
 		if (this.Status === ContextStatus.Initializing)
 			return;
@@ -100,7 +111,7 @@ export class Context {
 		bridgeModels.forEach((bridgeModel: Bridge.Model) => {	
 			var repository = this.GetRepository(bridgeModel.Type);
 			if (repository !== undefined){
-				var dataModel: Model | undefined = repository.Sync.Select(bridgeModel);
+				var dataModel: Model | undefined = repository.Local.Select(bridgeModel);
 				if (!dataModel)
 					dataModel = repository.Add(bridgeModel.Value);
 				else
@@ -118,11 +129,5 @@ export class Context {
 		}			
 		return response;
 	}	
-	public GetType():Meta.Type{
-		var result = Meta.Type.GetType(this);
-		if (result)
-			return result;
-		throw new Error("");
-	}
 }
 
