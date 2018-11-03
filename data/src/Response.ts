@@ -1,17 +1,19 @@
-import { Message, Request, ResponseStatus, ResponseStatusType } from ".";
+import { Message, Request, ResponseStatus } from ".";
 
 
 export class Response {
     constructor(init?: any) {
+		this.Status = ResponseStatus.OK;
 		if (init) {
-			this.Status = new ResponseStatus(init.Status);
+			this.Status = init.Status
+			this.Message = init.Message;
+			this.Description = init.Description;
 			this.Result = init.Result;
-		}
-		else {
-			this.Status = new ResponseStatus({ Type: "OK" });
 		}
 	}
 	public Request?:Request;
 	public Status: ResponseStatus;
+	public Message: string = "";
+	public Description: string = "";
     public Result: any;
 }

@@ -22,13 +22,17 @@ export class SubRepository<TModel extends Model> {
         }
     }
     public get ParentFilter():any{
-        var parentProperty:Meta.Property = this.ParentProperty; 
-        var parentValue:any = this.Parent.Key.Value;
-        if (parentValue === undefined)
-            parentValue = this.Parent.Key.Guid.Value;
-        
-        var result:any = {}
-        result[parentProperty.Name] = parentValue;
+        var property = this.ParentProperty; 
+        var keyProperty = this.Parent.GetType().Attributes.PrimaryKey;
+        if (keyProperty === undefined)
+            throw new Error(``);
+
+        var value = keyProperty.GetValue(this.Parent);
+        if (value === undefined)
+            return undefined;
+
+        var result:any = {};
+        result[keyProperty.Name] = value;
         return result;       
     }
     public Repository:Repository<TModel>;
@@ -37,19 +41,21 @@ export class SubRepository<TModel extends Model> {
 
 	public get Items():TModel[]{
         this.Initialize();
-        return [];
+          return this.Repository.Local.Search(this.ParentFilter);
 	}
 	public *[Symbol.iterator]() {
 		for (const value of this.Items) {
 			yield value;
 		}
     } 
+    public get length(){
+        return this.Items.length;
+    }
 
     public async Initialize(){
         if (this.Initializing === undefined){
             this.Initializing = new Date();
-            console.log(this.ParentFilter);
-            this.Repository.Search(this.ParentFilter);
+            await this.Repository.Search(this.ParentFilter);
             this.Initialized = new Date();
         }
     }
@@ -62,6 +68,5 @@ export class SubRepository<TModel extends Model> {
         var parentProperty:Meta.Property = this.ParentProperty; 
         parentProperty.SetValue(model, this.Parent);
         return this.Repository.Add(model);
-	}
-
+    }
 }

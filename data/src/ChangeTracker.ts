@@ -13,11 +13,12 @@ export class ChangeTracker {
         })
     }
     public GetBridgeChanges():Bridge.Model[]{
-        var result:Bridge.Model[] = [];
+        var results:Bridge.Model[] = [];
 		this.Changes.forEach((entry: ChangeEntry) => {	
-            result.push(entry.Model.Controller.Bridge())	
+            var result = Bridge.Model.Create(entry.Model);
+            results.push(result);	
         });
-        return result;
+        return results;
     } 
 
     public Contains(model:Model):boolean{
@@ -27,7 +28,6 @@ export class ChangeTracker {
         return (exists !== undefined);
     }
 	public Add(model: Model) {
-        //console.log(model);
         var entry = this.Entries.find(x => {
             return x.Model === model;
         });

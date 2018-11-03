@@ -1,16 +1,23 @@
-import * as STA from "./STA";
-import * as LMSData from "@lmstudios/data";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "reflect-metadata";
+import "zone.js";
+import { enableProdMode } from "@angular/core";
+import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
+const rootElemTagName = "app"; // Update this if you change your root component selector
 
-(async function(){
-    var context = new STA.Data.Context();
-    var person = await context.People.Select(1);
-    console.log(person);
-    // if (person !== undefined){
-    //     console.log(person);
-    // }
-    //var person = context.People.Add({});
-    if (person !== undefined){ 
-         console.log(await person.Server.PeopleEmails);
-    }
+import Module from "./module";
+const platform = platformBrowserDynamic();
+function bootApplication() {
+	return platform.bootstrapModule(Module);
+}
 
-}())
+(async function () {
+	try {
+		await bootApplication();
+	}
+	catch (e) {
+		console.error(e);
+	}
+}());
+
+

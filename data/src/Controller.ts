@@ -1,6 +1,6 @@
 import { Guid } from "./Utilities";
 import { Meta } from "./";
-import { ChangeStatus, Context, Model, Repository, Response, ResponseStatus, ResponseStatusType, SubRepository } from "./";
+import { ChangeStatus, Context, Model, Repository, Response, ResponseStatus, Request, SubRepository } from "./";
 import * as Bridge from "./Bridge";
 
 export enum ControllerStatus {
@@ -25,17 +25,67 @@ export class Controller<TModel extends Model> {
 		Original:Partial<TModel>,
 		Current:Partial<TModel>,
         Pending:Partial<TModel>
-    };	
+	};	
+	public ID:string = Guid.Create().toString();
 	public get Context(): Context {
 		return this.Values.Proxied.Context;
-	}	  
+	}
+	public get Type():Meta.Type{
+		return this.Values.Proxied.GetType();
+	}
+	public get Repository():Repository<TModel>{
+		return <Repository<TModel>>this.Context.GetRepository(this.Type.Name);
+	}
+	public get KeyProperty():Meta.Property{
+		var result = this.Type.Attributes.PrimaryKey;
+		if (result === undefined)
+			throw new Error(`Model(${this.Type}) does not have a primary key`);
+		return result;
+	}
+	public get KeyValue():number|string{
+		return this.KeyProperty.GetValue(this.Values.Proxied);
+	}
+	
+	
 
 	public Load(values: Partial<TModel>) {
+		if (values instanceof Model)
+			throw new Error(`Invalid Loading Value`);
+
 		for (var propertyName in values){
-			var property = this.Values.Unproxied.GetType().GetProperty(propertyName)
+			var property = this.Type.GetProperty(propertyName)
 			if (property !== undefined){
-				if (! property.Type.IsSubTypeOf(SubRepository)){
-					console.log(property);
+				var loadValue = property.GetValue(values);		
+				if (property.Type.IsSubTypeOf(Model)){
+					var childRepository = this.Context.GetRepository(property.Type.Name);					
+					var localValue = childRepository.Local.Select(loadValue);
+					if (localValue === undefined){
+						switch (typeof(loadValue)){
+							case "object":
+								localValue = childRepository.Add(loadValue);
+								property.SetValue(this.Values.Unproxied, localValue);
+								var keyProperty = property.Type.Attributes.PrimaryKey;
+								if (keyProperty !== undefined){
+									var keyValue = keyProperty.GetValue(localValue);
+									if (keyValue === undefined)
+										keyValue = localValue.Controller.ID;
+									// console.log(keyValue);
+									property.SetValue(this.Values.Current, keyValue);
+									property.SetValue(this.Values.Original, keyValue);
+								}
+								break;
+							default:
+								property.SetValue(this.Values.Unproxied, loadValue);
+								property.SetValue(this.Values.Current, loadValue);
+								property.SetValue(this.Values.Original, loadValue);
+								break;
+						}
+					}					
+				}
+				else if (property.Type.IsSubTypeOf(SubRepository)){
+
+				}
+				else {
 					var value = property.GetValue(values);
 					property.SetValue(this.Values.Unproxied, value);
 					property.SetValue(this.Values.Original, value);
@@ -57,15 +107,6 @@ export class Controller<TModel extends Model> {
 		}
 		this.Context.ChangeTracker.Add(this.Values.Proxied);
 	}
-
-	public Bridge():Bridge.Model{
-		var result = new Bridge.Model({
-			ID:this.Values.Proxied.Key.Guid.Value,
-			Type:this.Values.Proxied.GetType().Name,
-			Value:this.Values.Current
-		});
-		return result;
-	}
 	public GetStatus():ChangeStatus{
 		var repository = this.Context.GetRepository(this.Values.Proxied.GetType())
 		var attached = repository.Items.find(x =>{
@@ -74,10 +115,8 @@ export class Controller<TModel extends Model> {
 		if (! attached)
 			return ChangeStatus.Detached;
 
-		if (this.Values.Proxied.Key.Value === undefined)
+		if (this.KeyValue === undefined)
 			return ChangeStatus.Added;
-		if (this.Values.Proxied.Key.Value === null)
-			return ChangeStatus.Deleted;
 		
 		var modified = false;
 		this.Values.Proxied.GetType().GetProperties().forEach(property=>{

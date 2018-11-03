@@ -1,5 +1,5 @@
 ﻿import { Meta, Utilities } from "./";
-import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatusType} from './'
+import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatus} from './'
 import * as Bridge from "./Bridge";
 
 export enum ContextStatus { Ready, Initializing, Saving }
@@ -12,7 +12,7 @@ export class Context {
 			this.API = api;
 
 		var removeTypes:any[] = [];
-		var types = Meta.Type.Types;
+		var types = Meta.Type.GetTypes();
 		types.forEach((type:Meta.Type)=>{
 			var duplicates:Meta.Type[] = types.filter(x => {
 				return type.Constructor === x.Constructor
@@ -63,7 +63,8 @@ export class Context {
 		if (typeof(guid) === "string")
 			return this.Select(new Utilities.Guid(guid));
 		var selectedEntry = this.ChangeTracker.Entries.find(entry => {
-			return String(entry.Model.Key.Guid.Value) === String(guid.Value);
+			var key = entry.Model.Controller.ID;
+			return String(key) === String(guid.Value);
 		});
 		if (selectedEntry !== undefined)
 			return selectedEntry.Model;
@@ -72,7 +73,7 @@ export class Context {
 
 
 	public GetTypes():Meta.Type[]{
-		return Meta.Type.Types;
+		return Meta.Type.GetTypes();
 	}
 	public GetType(type?:(new (...args: any[]) => any)):Meta.Type{
 		if (type === undefined){
@@ -127,11 +128,17 @@ export class Context {
 	}
 	public async Load(response: Response) {	
 		let bridgeModels: Array<Bridge.Model> = [];
-		if (Array.isArray(response.Result))
-			bridgeModels = response.Result.map(x => new Bridge.Model(x));
+		if (Array.isArray(response.Result)){
+			response.Result.forEach(item =>{
+				console.log(item);
+				bridgeModels.push(Bridge.Model.Create(item));
+			})
+		}
+		console.log(bridgeModels);
 		bridgeModels.forEach((bridgeModel: Bridge.Model) => {	
-			var dataModel:Model|undefined = this.Select(bridgeModel.ID);
+			var dataModel = this.Select(bridgeModel.ID);
 			if (dataModel === undefined){
+				console.log(bridgeModel.Type);
 				var repository = this.GetRepository(bridgeModel.Type);
 				dataModel = repository.Add(bridgeModel.Value);
 			}
@@ -142,7 +149,7 @@ export class Context {
 		let bridgeModels: Bridge.Model[] = this.ChangeTracker.GetBridgeChanges();
 		let request = new Request("Context/SaveChanges", bridgeModels);
 		let response = await request.Post(this.API);
-		if (response.Status.Type == ResponseStatusType.OK) {
+		if (response.Status == ResponseStatus.OK) {
 			this.ChangeTracker.Clear();
 			this.Load(response);
 		}			

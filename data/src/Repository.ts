@@ -1,8 +1,9 @@
-import { Context, Controller, Model, Request, Response, ResponseStatus, ResponseStatusType, Utilities } from "./";
+import { Context, Controller, Model, Request, Response, ResponseStatus, SubRepository, Utilities } from "./";
 import * as Bridge from "./Bridge";
 
 import { Meta } from "./";
 import { Guid } from "./Utilities";
+import { Property } from "./Meta";
 
 export class Repository<TModel extends Model> {
 	constructor(context: Context, type: (new (...args: any[]) => TModel)) {
@@ -20,60 +21,105 @@ export class Repository<TModel extends Model> {
 	}
 	public Context:Context;
 	public Type: Meta.Type;
-	public get KeyProperty():Meta.Property{
-		var properties = this.Type.GetProperties({Key:true});
-		switch (properties.length){
-			case 1:
-				return properties[0];
-			case 0:
-				throw  new Error(`Type(${this.Type.Name}) contains no key properties`);
-			default:
-				throw new Error(`Type(${this.Type.Name}) contains multiple key properties`);
-		}
-	}
-	public get UniqueProperties():Meta.Property[]{
-		return this.Type.GetProperties({Unique:true});
-	}
-	public get UniqueProperty():Meta.Property|undefined{
-		var uniqueProperties = this.UniqueProperties;
-		if (uniqueProperties.length === 1)
-			return uniqueProperties[0];
-		return undefined;
-	}
     public Local: LocalRepository<TModel> = new LocalRepository(this);
 	public Server: ServerRepository<TModel> = new ServerRepository(this);
 
-	public Create(item:Partial<TModel>):TModel{
-		var result = new this.Type.Constructor();
-		(<TModel>result).Controller.Load(item);
+	public BuildPartial(value:string|number):Partial<TModel>{
+		var keyProperty:Property|undefined = this.Type.Attributes.PrimaryKey;
+		if (keyProperty === undefined)
+			throw new Error(`Type(${this.Type.Name}) does not have a Primary Key`);
+		
+		var result:Partial<TModel> = {};
+		switch (keyProperty.Name){
+			case "String":
+				switch (typeof(value)){
+					case "string":
+						keyProperty.SetValue(result, value);						
+						break;
+					case "number":
+						keyProperty.SetValue(result, value.toString());
+						break;
+				}
+				break;
+			case "Number":
+				var intParsed = parseInt(value.toString());
+				if (! isNaN(intParsed))
+					keyProperty.SetValue(result, intParsed);
+				break;
+		}
 		return result;
 	}
-	public Add(item:TModel|Partial<TModel>):TModel{
-		var model:TModel;
-		if (item instanceof Model)
-			model = item;
-		else
-			model = this.Create(item);	
-		if (model.Controller.Values.Unproxied === model)
-			throw new Error(`Repository only excepts the proxied models`);
-		var exists = this.Items.find(x => {
-			return x === model;
-		});
-		if (! exists){
-			this.__items.push(model);
-		}	
-		return model;		
+	public Create(value:Partial<TModel>|number|string):TModel{
+		switch (typeof(value)){
+			case "string":
+				return this.Create(this.BuildPartial(<string>value));
+			case "number":
+				return this.Create(this.BuildPartial(<number>value));
+			case "object":
+				var result:TModel = new this.Type.Constructor();
+				result.Controller.Load(value);
+
+				
+				var principalProperty = this.Type.GetProperties().find(x => {return x.Attributes.Principal});
+				if (principalProperty !== undefined){
+					if (principalProperty.GetValue(result) === undefined){
+						var principalRepository = this.Context.GetRepository(principalProperty.Type.Name);
+						var principalValue = principalRepository.Add({});
+						principalProperty.SetValue(result, principalValue);
+					}
+
+						
+				}
+				
+
+
+				return result;			
+		}
+		throw new Error(``);
+	}
+	public Add(value:TModel|Partial<TModel>|number|string):TModel{		
+		switch (typeof(value)){
+			case "string":
+				return this.Add(this.BuildPartial(<string>value));
+			case "number": 
+				return this.Add(this.BuildPartial(<number>value));
+			case "object":
+				var check;
+				if (value instanceof Model){
+					if (value.GetType() !== this.Type)
+						throw new Error(``);
+					else{
+						check = this.__items.find(x => x === value);
+						if (check === undefined){
+							this.__items.push(value);
+							this.Context.ChangeTracker.Add(value);
+							return value;
+						}
+						return check;
+					}
+				}
+				else{
+					check = this.Local.Select(value);
+					if (check === undefined){
+						check = this.Create(value);
+						return this.Add(check);
+					}
+					return check;
+				}
+			default:
+				throw new Error(``);
+		}		
 	}
 
-	public async Select(value: any):Promise<TModel|undefined> {
+	public async Select(value:Partial<TModel>|number|string):Promise<TModel|undefined> {
 		var result:TModel|undefined = this.Local.Select(value);
 		if (!result)
 			result = await this.Server.Select(value);
 		return result;
 	}
-	public async Search(...values:any[]):Promise<TModel[]>{
-		await this.Server.Search(...values);
-		return this.Local.Search(...values);
+	public async Search(value:Partial<TModel>|number|string):Promise<TModel[]>{
+		await this.Server.Search(value);
+		return this.Local.Search(value);
 	}
 }
 export class LocalRepository<TModel extends Model> {
@@ -85,50 +131,67 @@ export class LocalRepository<TModel extends Model> {
     public Select(value:Partial<TModel>|number|string) : TModel|undefined {
 		if (value === undefined)
 			return undefined;
-		var keyProperty = this.Parent.KeyProperty;
-		var uniqueProperties = this.Parent.UniqueProperties;
-		
-		var result:TModel|undefined = undefined;
+		var result:TModel|undefined;
 		switch (typeof(value)){
+			case "string":
+				return this.Select(this.Parent.BuildPartial(<string>value));
+			case "number": 
+				return this.Select(this.Parent.BuildPartial(<number>value));
 			case "object":
-				var uniqueProperties = this.Parent.UniqueProperties;
-				if (uniqueProperties.length > 0){
-					result = this.Parent.Items.find(item => {
-						var match:boolean = true;
-						uniqueProperties.forEach(uniqueProperty=>{
-							var itemValue = uniqueProperty.GetValue(item.Controller.Values.Unproxied);							
-							var selectValue = uniqueProperty.GetValue(value);
-							if (match === true)
-								match = itemValue === selectValue;							
-						})
-						return match;
-					})
+				if (value instanceof Model)
+					return this.Select(<any>value.Controller.Values.Current);
+
+				var filters:any[] = [];
+				var typeIndexes = this.Parent.Type.Attributes.Indexes;
+				for (var typeIndexName in typeIndexes){
+					var filter:any = {};
+					typeIndexes[typeIndexName].forEach(typeIndex =>{						
+						var index = typeIndex.Index;
+						var property = typeIndex.Property;
+						if (index.IsUnique)
+							filter[property.Name] = property.GetValue(value);
+					});
+					filters.push(filter);
 				}
-				if (result === undefined){
-					result = this.Parent.Items.find(item =>{
-						var itemValue = this.Parent.KeyProperty.GetValue(item.Controller.Values.Unproxied);
-						var selectValue = this.Parent.KeyProperty.GetValue(value);
-						return itemValue === selectValue;
-					})
+				var keyProperty = this.Parent.Type.Attributes.PrimaryKey;
+				if (keyProperty !== undefined){
+					var filter:any = {};
+					filter[keyProperty.Name] = keyProperty.GetValue(value);
+					filters.push(filter)
 				}
-				break;
-			default:				
-				result = this.Parent.Items.find(x => {
-					var keyValue = String(keyProperty.GetValue(x.Controller.Values.Unproxied));
-					return keyValue === String(value);
-				})
-				if (result === undefined && uniqueProperties.length == 1){
-					result = this.Parent.Items.find(x => {
-						var uniqueValue = String(uniqueProperties[0].GetValue(x.Controller.Values.Unproxied));
-						return uniqueValue === String(value);
-					})
-				}
+
+				filters.forEach(filter =>{
+					var searchResults = this.Search(filter);
+					if (searchResults.length == 1)
+						return searchResults[0];
+				});
 				break;
 		}
-		return result;
+		return undefined;
 	}
-	public Search(...values:any[]):TModel[]{
-		return [];
+	public Search(value:Partial<TModel>|number|string):TModel[]{
+		var result:TModel[] = [];
+		switch (typeof(value)){
+			case "string":
+				return this.Search(this.Parent.BuildPartial(<string>value));
+			case "number": 
+				return this.Search(this.Parent.BuildPartial(<number>value));
+			case "object":
+				if (value instanceof Model)
+					return this.Search(<any>value.Controller.Values.Current);
+				
+				var filter:any = value;
+				result = this.Parent.Items.filter(item => {
+					for(var key in filter){
+						if (filter[key] === (<any>item.Controller.Values.Current)[key])
+							return false;			
+					}
+					return true;
+				});
+				return result;
+			default:
+				return [];
+		}
 	}
 }
 export class ServerRepository<TModel extends Model> {
@@ -147,19 +210,15 @@ export class ServerRepository<TModel extends Model> {
 			this.Parent.Context.Load(response);
 		return this.Parent.Local.Select(value);
 	}
-	public async Search(...values:any[]):Promise<TModel[]>{
-		for (var i=0; i<values.length; i++){
-			var body = {
-				Type: this.Parent.Type.Name,
-				Value: values[i]
-			}
-			console.log(JSON.stringify(body));
-			var request:Request = new Request("Model/Search", body);
-			var response = await request.Post(this.Parent.Context.API);
-			console.log(response);
-			if (response !== undefined)
-				this.Parent.Context.Load(response);
+	public async Search(value:Partial<TModel>|number|string):Promise<TModel[]>{
+		var body = {
+			Type: this.Parent.Type.Name,
+			Value: value
 		}
-		return this.Parent.Local.Search(...values);
+		var request:Request = new Request("Model/Search", body);
+		var response = await request.Post(this.Parent.Context.API);
+		if (response !== undefined)
+			this.Parent.Context.Load(response);
+		return this.Parent.Local.Search(value);
 	}
 }

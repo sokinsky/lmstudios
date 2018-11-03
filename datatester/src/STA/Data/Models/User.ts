@@ -1,14 +1,18 @@
+import { Decorators, SubRepository } from "@lmstudios/data";
 import { Model } from "../Model";
-import * as LMSData from "@lmstudios/data";
 import { Person } from "../Models";
 
 export class User extends Model {
-    @LMSData.Meta.Decorators.Property(()=>String, {Unique:true})
+    @Decorators.Index("IX_Token")
+    @Decorators.Map(()=>String)
     public Token?:string;
-    @LMSData.Meta.Decorators.Property(()=>String, {Unique:true})
+    @Decorators.Index("IX_Username")
+    @Decorators.Map(()=>String)
     public Username?:string;
-    @LMSData.Meta.Decorators.Property(()=>String)
+    @Decorators.Map(()=>String)
     public Password?:string;
-    @LMSData.Meta.Decorators.Property(()=>Person)
+    
+    @Decorators.Principal
+    @Decorators.Map(()=>Person)
     public Person?:Person|Partial<Person>;
 }

@@ -6,36 +6,32 @@ import { SubRepository } from "./SubRepository";
 
 export class Model {
 	constructor()	{
-		var  keyProperties:Meta.Property[] = this.GetType().GetProperties({Key:true});
-		switch (keyProperties.length){
-			case 0:	throw new Error("");
-			default: throw new Error("");
-			case 1:
-				this.__key = { Property: keyProperties[0], Value:undefined, Guid:Utilities.Guid.Create() };
-				break;
-		}
 		var proxy:Model|undefined = new Proxy(this, {
 			get: (target, propertyName: string | number | symbol, reciever) => {					
 				let property:Meta.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
 
+				
 				var value = property.GetValue(this);
-				//console.log(`getProxy(${<string>propertyName})`);
+				if (value === undefined)
+					return undefined;
 
 				
 				if (property.Type.IsSubTypeOf(Model)){
-					if (! (value instanceof Model)){
-						var repository = this.Context.GetRepository(property.Type);
+					var repository = this.Context.GetRepository(property.Type);
+					if (value instanceof Model){
+						return value;
+					}
+					else{
 						var localValue = repository.Local.Select(value);
 						if (localValue === undefined){
-							repository.Server.Select(value).then(serverValue=>{
+							value = repository.Add(value);
+							property.SetValue(this, value);
+							repository.Server.Select(value.Controller.Values.Current).then(serverValue=>{
 								if (property !== undefined)
 									property.SetValue(this, serverValue);
-							})
-						}
-						else{
-							value = localValue;
+							});
 						}
 					}
 				}
@@ -45,14 +41,29 @@ export class Model {
 				let property:Meta.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined || property.Type.IsSubTypeOf(SubRepository))
 					return Reflect.set(target, propertyName, propertyValue, reciever);
-
-				//console.log(`get(proxy)=>${<string>propertyName}:${propertyValue}`);
+				
+				if (property.Type.IsSubTypeOf(Model)){
+					var repository = this.Context.GetRepository(property.Type.Name);
+					if (typeof(propertyValue) === "object"){
+						if (propertyValue instanceof Model){
+							repository.Add(propertyValue);
+						}
+						else {					
+							propertyValue = repository.Add(propertyValue);
+							property.SetValue(this, propertyValue);
+							propertyValue.Refresh();
+						}
+					}
+				}
 				property.SetValue(this, propertyValue);
 				if (propertyValue instanceof Model){
-					if (propertyValue.Key.Value !== undefined)
-						propertyValue = propertyValue.Key.Value;
-					else
-						propertyValue = propertyValue.Key.Guid;						
+					var keyProperty = this.GetType().Attributes.PrimaryKey;
+					if (keyProperty !== undefined){
+						var keyValue = keyProperty.GetValue(propertyValue);
+						if (keyValue === undefined)
+							keyValue = propertyValue.Controller.ID;
+						propertyValue = keyValue;	
+					}		
 				}
 				property.SetValue(this.Controller.Values.Current, propertyValue);
 				this.Context.ChangeTracker.Add(this.Controller.Values.Proxied);
@@ -74,8 +85,10 @@ export class Model {
 				else if (property.Type.IsSubTypeOf(SubRepository) || property.Type.Constructor === SubRepository){
 					var subRepository = property.GetValue(this);
 					if (subRepository instanceof SubRepository){
-						if (subRepository.Initialized === undefined)
+						if (subRepository.Initialized === undefined){
 							await subRepository.Initialize();
+						}
+							
 						return subRepository;
 					}
 				}	
@@ -87,15 +100,9 @@ export class Model {
 	}
 	public Server:{[p in keyof this]:Promise<this[p]>};
 	public Controller: Controller<Model>;
-	private __key:{Property:Meta.Property,Value:string|number|undefined,Guid:Guid};
-	public get Key():{Property:Meta.Property,Value:string|number|undefined,Guid:Guid}{
-		this.__key.Value = this.__key.Property.GetValue(this.Controller.Values.Unproxied);
-		return this.__key;
-	}
 	public get Context(): Context{
 		return <Context>(<any>window)["Context"];
 	}
-	
 	
 	public GetType() : Meta.Type {
 		var result = Meta.Type.GetType(this);		
@@ -105,10 +112,13 @@ export class Model {
 	}
 
 	public toString():string{
-		if (this.Key.Value !== undefined)
-			return `${this.GetType().Name}(${this.Key.Value})`;
-		else 
-			return `${this.GetType().Name}(${this.Key.Guid.Value})`
+		var keyProperty = this.GetType().Attributes.PrimaryKey;
+		if (keyProperty !== undefined){
+			var keyValue = keyProperty.GetValue(this);
+			if (keyValue === undefined)
+				keyValue = this.Controller.ID;
+		}
+		return `${this.GetType().Name}(${keyValue})`;
 	}
 }
 

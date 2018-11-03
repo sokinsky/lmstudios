@@ -1,12 +1,12 @@
-import * as LMSData from "@lmstudios/data";
+import { Decorators, SubRepository } from "@lmstudios/data";
 import { Model } from "../Model";
 import { Person, Email } from "./";
 
 export class PersonEmail extends Model{
-    @LMSData.Meta.Decorators.Property(()=>String)
+    @Decorators.Map(()=>String)
     public Name?:string;
-    @LMSData.Meta.Decorators.Property(()=>Person)
+    @Decorators.Map(()=>Person)
     public Person?:Person|Partial<Person>;
-    @LMSData.Meta.Decorators.Property(()=>Email)
+    @Decorators.Map(()=>Email)
     public Email?:Email|Partial<Email>;
 }

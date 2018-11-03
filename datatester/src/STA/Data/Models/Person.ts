@@ -1,19 +1,18 @@
-import * as LMSData from "@lmstudios/data";
+import { Decorators, SubRepository } from "@lmstudios/data";
 import { Model } from "../Model";
-import { User } from "./User";
-import { PersonEmail } from "./PersonEmail";
+import { User, PersonEmail } from "./";
 
 export class Person extends Model{
-    @LMSData.Meta.Decorators.Property(()=>String)
+    @Decorators.Map(()=>String)
     public FirstName?:string;
-    @LMSData.Meta.Decorators.Property(()=>String)
+    @Decorators.Map(()=>String)
     public LastName?:string;
-    @LMSData.Meta.Decorators.Property(()=>Date)
+    @Decorators.Map(()=>Date)
     public DOB?:Date;
-    @LMSData.Meta.Decorators.Property(()=>User)
+    @Decorators.Map(()=>User)
     public User?:User|Partial<User>;
 
-    @LMSData.Meta.Decorators.Property(()=>LMSData.SubRepository)
-    public PeopleEmails:LMSData.SubRepository<PersonEmail> = new LMSData.SubRepository(this, PersonEmail);
+    @Decorators.Map(()=>SubRepository)
+    public PeopleEmails:SubRepository<PersonEmail> = new SubRepository(this, PersonEmail);
 
 }

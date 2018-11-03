@@ -1,16 +1,19 @@
-import * as LMSData from "@lmstudios/data";
+import { Injectable } from "@angular/core";
+import { Context as Base } from "@lmstudios/data";
+import { Decorators, Repository } from "@lmstudios/data";
 import * as STA from "../";
 
-export class Context extends LMSData.Context{
+@Injectable({providedIn:"root"})
+export class Context extends Base {
     constructor(){
         super("http://localhost:53701/api");
     }
-    @LMSData.Meta.Decorators.Property(()=>LMSData.Repository)
-    public Emails = new LMSData.Repository(this, STA.Data.Models.Email);
-    @LMSData.Meta.Decorators.Property(()=>LMSData.Repository)
-    public People = new LMSData.Repository(this, STA.Data.Models.Person);
-    @LMSData.Meta.Decorators.Property(()=>LMSData.Repository)
-    public Users = new LMSData.Repository(this, STA.Data.Models.User);
-    @LMSData.Meta.Decorators.Property(()=>LMSData.Repository)
-    public PeopleEmails = new LMSData.Repository(this, STA.Data.Models.PersonEmail);
+    @Decorators.Map(()=>Repository)
+    public Emails = new Repository(this, STA.Data.Models.Email);
+    @Decorators.Map(()=>Repository)
+    public People = new Repository(this, STA.Data.Models.Person);
+    @Decorators.Map(()=>Repository)
+    public Users = new Repository(this, STA.Data.Models.User);
+    @Decorators.Map(()=>Repository)
+    public PeopleEmails = new Repository(this, STA.Data.Models.PersonEmail);
 }
