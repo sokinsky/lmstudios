@@ -2,8 +2,6 @@ import { Decorators, SubRepository } from "@lmstudios/data";
 import { Model } from "../Model";
 
 export class Phone extends Model{
-    @Decorators.Match("^\d{10}$")
-    @Decorators.Index("IX_Number")
-    @Decorators.Map(()=>String)
+    @Decorators.Map(()=>String, {Indexes:["Number"], Match:"^\d{10}$"})
     public Number?:string;
 }

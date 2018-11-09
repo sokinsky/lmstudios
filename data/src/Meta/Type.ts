@@ -40,6 +40,32 @@ export class Type {
             return x.Name === name;
         })
     }
+    public get Key():Property|undefined{
+        var results = this.GetProperties().filter(x => {
+            return x.Attributes.Key;
+        })
+        switch (results.length){
+            case 0:
+                return undefined;
+            case 1:
+                return results[0];
+            default:
+                throw new Error(``);
+        }
+    }
+    public get Indexes():{[name:string]:Property[]}{
+        var results:{[name:string]:Property[]} = {};
+        this.GetProperties().forEach(property=>{
+            property.Attributes.Indexes.forEach(index=>{
+                if (results[index] === undefined)
+                    results[index] = [];
+                if (results[index].find(p => { return p.Name === property.Name}) === undefined)
+                    results[index].push(property);
+            })
+        })
+        return results;
+    }
+
     public get SuperType():Type|undefined{
         var types = Type.GetTypes();
         var constructor = Object.getPrototypeOf(this.Constructor);
@@ -47,7 +73,7 @@ export class Type {
             return (x.Constructor === constructor);
         });
     }
-    public IsSubTypeOf(type:new (...args:any[])=>any){
+    public IsSubTypeOf(type:new (...args:any[])=>any):boolean{
         var check:any = this.Constructor;
         while (check){
             if (check === type)
@@ -56,6 +82,8 @@ export class Type {
         }
         return false;
     }
+
+    
 
     public static GetType(type:(new (...args:any[])=>any)|object):Type {       
         if (typeof(type)==="object")
@@ -86,20 +114,5 @@ export class TypeAttributes {
         this.Type = type;
     }
     public Type:Type;
-    public get Indexes():{[name:string]:{Index:Attributes.Index,Property:Property}[]} {  
-        var result:{[name:string]:{Index:Attributes.Index,Property:Property}[]} = {};
-        this.Type.GetProperties().forEach(property=>{
-            property.Attributes.Indexes.forEach(index=>{
-                if (result[index.Name] === undefined)
-                    result[index.Name] = [];
-                var check = result[index.Name].find(x => { return x.Index === index; });
-                if (check === undefined)
-                    result[index.Name].push({Index:index, Property:property});                
-            });
-        })      
-        return result;
-    }
-    public get PrimaryKey():Property|undefined {
-        return this.Type.GetProperties().find(x => { return x.Attributes.Key; });
-    }
+    public Controller?:Attributes.Controller;
 }

@@ -1,22 +1,15 @@
 import { Meta } from "../";
 
-export class Index{
-    constructor(name:string, options?:{Order?:number,IsUnique?:boolean}){
-        this.Name = name;
-        if (options !== undefined){
-            if (options.Order !== undefined)
-                this.Order = options.Order;
-            if (options.IsUnique !== undefined)
-                this.IsUnique = options.IsUnique;
-        }
+export class Controller{
+    constructor(type:Meta.Type){
+        this.Type = type;
     }
-    public Name:string;
-    public Order:number = 0;
-    public IsUnique:boolean = true; 
+    public Type:Meta.Type;
 }
-export class Match {
-    constructor(pattern:string){
-        this.Patten = pattern;
+export class Reference{
+    constructor(required?:boolean){
+        if (required !== undefined)
+            this.Required = required;
     }
-    public Patten:string;
+    public Required:boolean = true;
 }

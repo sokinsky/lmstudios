@@ -13,37 +13,6 @@ export class Context {
 
 		var removeTypes:any[] = [];
 		var types = Meta.Type.GetTypes();
-		types.forEach((type:Meta.Type)=>{
-			var duplicates:Meta.Type[] = types.filter(x => {
-				return type.Constructor === x.Constructor
-			});
-			let keep:Meta.Type|undefined = duplicates.find(x => {
-				return x.Properties.length > 0
-			});
-			let replace:Meta.Type[] = duplicates.filter(x =>{
-				return x.Properties.length <= 0;
-			})
-			if (keep !== undefined && replace.length > 0){
-				var check = removeTypes.find(x =>{
-					return x.keep === keep;
-				})
-				if (check === undefined)
-					removeTypes.push({keep:keep, replace:replace});
-			}
-		});
-		removeTypes.forEach(x =>{
-			x.replace.forEach((y:any) => {
-				var index = types.indexOf(y);
-				types.splice(index, 1);
-			});
-		});
-		types.forEach((type:Meta.Type)=>{
-			type.Properties.forEach((property:Meta.Property)=>{
-				var propertyType = Meta.Type.GetType(property.Type.Constructor);
-				if (propertyType !== undefined)
-					property.Type = propertyType;
-			})
-		});
 		this.Initialize();
 	}
 	public Status:ContextStatus = ContextStatus.Ready;
@@ -130,19 +99,21 @@ export class Context {
 		let bridgeModels: Array<Bridge.Model> = [];
 		if (Array.isArray(response.Result)){
 			response.Result.forEach(item =>{
-				console.log(item);
 				bridgeModels.push(Bridge.Model.Create(item));
 			})
 		}
 		console.log(bridgeModels);
+
 		bridgeModels.forEach((bridgeModel: Bridge.Model) => {	
 			var dataModel = this.Select(bridgeModel.ID);
 			if (dataModel === undefined){
-				console.log(bridgeModel.Type);
 				var repository = this.GetRepository(bridgeModel.Type);
-				dataModel = repository.Add(bridgeModel.Value);
+				dataModel = repository.Add(bridgeModel.Value, true);
 			}
-			dataModel.Controller.Load(bridgeModel.Value);
+			else{
+				dataModel.Controller.Load(bridgeModel.Value, true);
+			}			
+			
 		});
 	}
 	public async SaveChanges(): Promise<Response | undefined> {

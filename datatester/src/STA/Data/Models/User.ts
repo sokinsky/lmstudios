@@ -3,16 +3,15 @@ import { Model } from "../Model";
 import { Person } from "../Models";
 
 export class User extends Model {
-    @Decorators.Index("IX_Token")
-    @Decorators.Map(()=>String)
+    @Decorators.Map(()=>String, {Indexes:["Token"]})
     public Token?:string;
-    @Decorators.Index("IX_Username")
-    @Decorators.Map(()=>String)
+
+    @Decorators.Map(()=>String, {Indexes:["Username"]})
     public Username?:string;
+
     @Decorators.Map(()=>String)
     public Password?:string;
-    
-    @Decorators.Principal
-    @Decorators.Map(()=>Person)
+
+    @Decorators.Map(()=>Person, { Required:true })
     public Person?:Person|Partial<Person>;
 }

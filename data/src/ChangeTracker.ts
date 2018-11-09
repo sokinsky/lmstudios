@@ -35,7 +35,7 @@ export class ChangeTracker {
             entry = new ChangeEntry(model);
             this.Entries.push(entry);
         }
-        entry.Status = model.Controller.GetStatus();
+        entry.Status = model.Controller.GetChangeStatus();
 	}
 	public Clear() {
 		this.Entries = [];

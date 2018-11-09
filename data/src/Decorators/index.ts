@@ -1,39 +1,42 @@
 import { Meta, Attributes } from "../";
 import { Model } from "../";
+import { PropertyAttributes } from "../Meta/Property";
 
-export function Map(typeConstructor:(()=>new(...args:any[])=>any)) {
+export function Controller(type:(()=>new(...args:any[])=>any)){
+    return function(target:any){
+        let classType = Meta.Type.GetType(target);
+        let controllerType = Meta.Type.GetType(type);
+     }    
+}
+export function Map(typeConstructor:(()=>new(...args:any[])=>any), attributes?:Partial<PropertyAttributes>) {
     let type:(()=>new(...args:any[])=>any) = typeConstructor;
     return function(target:any, propertyName:string){
-        let classType = Meta.Type.GetType(target);
-        let propertyType = Meta.Type.GetType(type());
+        let classType = Meta.Type.GetType(target); 
+        //let propertyType = Meta.Type.GetType(type());
         let property = classType.GetProperty(propertyName);
         if (property === undefined){
-            classType.Properties.push(new Meta.Property(propertyName, propertyType));
-        }
+            property = new Meta.Property(propertyName, type);
+            classType.Properties.push(property);
+        }            
+        if (attributes !== undefined)
+            property.Attributes = new PropertyAttributes(attributes);
      }      
 }
 export function Key(target:any, propertyName:string){
     var type = Meta.Type.GetType(target);
     var property = type.GetProperty(propertyName);
     if (property === undefined)
-        throw new Error(`Property(${propertyName}) has not been mapped to Type(${type.Name}).  Please add the @Map() decorator to ${type.Name} prior to the @Key decorator`);        
-    property.Attributes.Key = true;  
+        throw new Error(`${propertyName}.${type.Name} has not been mapped(@Map)`);        
+        property.Attributes.Key = true; 
 }
-export function Index(name:string, value?:{Order?:number, IsUnique:boolean}) {   
+export function Index(name:string){
     return function(target:any, propertyName:string){
         var type = Meta.Type.GetType(target);
         var property = type.GetProperty(propertyName);
         if (property === undefined)
-            throw new Error(`Property(${propertyName}) has not been mapped to Type(${type.Name}).  Please add the @Map() decorator to ${type.Name} prior to the @Index decorator`);        
-
-        var index = new Attributes.Index(name);
-        if (value !== undefined){
-            if (value.IsUnique !== undefined)
-                index.IsUnique = value.IsUnique;
-            if (value.Order !== undefined)
-                index.Order = value.Order;
-        }
-        property.Attributes.Indexes.push(index);      
+            throw new Error(`${propertyName}.${type.Name} has not been mapped(@Map)`);        
+        if (property.Attributes.Indexes.find(x => {return x === name}) === undefined)
+            property.Attributes.Indexes.push(name);
     }
 }
 export function Required(target:any, propertyName:string){
@@ -42,6 +45,13 @@ export function Required(target:any, propertyName:string){
     if (property === undefined)
         throw new Error(`Property(${propertyName}) has not been mapped to Type(${type.Name}).  Please add the @Map() decorator to ${type.Name} prior to the @Required decorator`); 
     property.Attributes.Required = true;    
+}
+export function Optional(target:any, propertyName:string){
+    var type = Meta.Type.GetType(target);
+    var property = type.GetProperty(propertyName);
+    if (property === undefined)
+        throw new Error(``)
+    property.Attributes.Optional = true;
 }
 export function Match(pattern:string){
     return function(target:any, propertyName:string){
@@ -52,15 +62,6 @@ export function Match(pattern:string){
 
         if (property.Type.Name !== "String")
             throw new Error(`Property(${property.Name}) an not have @Match applied because it is not mapped(@Map) to a String`);
-        property.Attributes.Match = new Attributes.Match(pattern);
+        property.Attributes.Match = pattern;
     }
-}
-export function Principal(target:any, propertyName:string){
-    var type = Meta.Type.GetType(target);
-    var property = type.GetProperty(propertyName);
-    if (property === undefined)
-        throw new Error(`Property(${propertyName}) has not been mapped to Type(${type.Name}).  Please add the @Map() decorator to ${type.Name} prior to the @Principal decorator`); 
-    if (! type.IsSubTypeOf(Model))
-        throw new Error(`Property(${propertyName}) cannot add the @Principal decorator to a non Model type`);
-    property.Attributes.Principal = true;
 }

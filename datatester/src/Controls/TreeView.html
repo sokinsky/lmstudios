@@ -1,0 +1,58 @@
+<fieldset *ngIf="this.selectedItemType == 'Model'">
+    <legend (click)="Log(selectedItem)">{{this.selectedItem}}</legend>
+    <div *ngFor="let property of this.Properties">
+        <div *ngIf="propertyType(property) == 'Model'">
+            <div *ngIf="property.GetValue(this.selectedItem)">
+                <span (click)="selectItem(property.GetValue(this.selectedItem))">{{property.Name}}</span><br>
+            </div>
+            <div *ngIf="!property.GetValue(this.selectedItem)">
+                <span>{{property.Name}} </span>
+                <div style="float:right;">
+                    <a (click)="selectModel(property);" style="display:inline-block;margin-right:auto;">(select)</a>&nbsp;|
+                    <a (click)="createModel(property);" style="display:inline-block;margin-right:auto;">(new)</a>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="propertyType(property) == 'any'">  
+            <span>{{property.Name}} </span>            
+            <textarea [(ngModel)]="this.selectedItem[property.Name]" placeholder={{property.Name}}></textarea>
+        </div>
+    </div>
+</fieldset>
+<fieldset *ngIf="this.selectedItemType == 'Repository'" class="repository">
+    <legend (click)="Log(selectedNode)">Repository({{this.selectedItem.Type.Name}})</legend>
+    <input [(ngModel)]="tbxSearch" placeholder="Search"><a (click)="search(tbxSearch);">(search)</a>
+    <table style="width:100%;">
+        <thead>
+            <tr>
+                <td *ngFor="let property of Properties">{{property.Name}}</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of this.Items" (click)="selectItem(item)">
+                <td *ngFor="let property of Properties">{{property.GetValue(item)}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <div>
+        <div style="float:right;">
+            <a (click)="createModel();" style="display:inline-block;margin-right:auto;">(new)</a>
+        </div>
+    </div>
+</fieldset>
+<fieldset *ngIf="this.selectedItemType == 'SubRepository'">
+    <legend (click)="Log(selectedNode)">SubRepository</legend>
+    <table style="width:100%;">
+        <thead>
+            <tr>
+                <td *ngFor="let property of Properties">{{property.Name}}</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of this.Items" (click)="Log(item)">
+                <td *ngFor="let property of Properties">{{property.GetValue(item)}}</td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
+

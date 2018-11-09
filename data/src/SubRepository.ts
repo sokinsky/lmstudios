@@ -23,16 +23,12 @@ export class SubRepository<TModel extends Model> {
     }
     public get ParentFilter():any{
         var property = this.ParentProperty; 
-        var keyProperty = this.Parent.GetType().Attributes.PrimaryKey;
-        if (keyProperty === undefined)
-            throw new Error(``);
-
-        var value = keyProperty.GetValue(this.Parent);
+        var value = this.Parent.Key.Value;
         if (value === undefined)
             return undefined;
 
         var result:any = {};
-        result[keyProperty.Name] = value;
+        result[this.Parent.Key.Property.Name] = value;
         return result;       
     }
     public Repository:Repository<TModel>;
@@ -59,12 +55,8 @@ export class SubRepository<TModel extends Model> {
             this.Initialized = new Date();
         }
     }
-	public Add(item:TModel|Partial<TModel>):TModel {
-        var model:TModel;
-        if (item instanceof Model)
-            model = item;
-        else
-            model = this.Repository.Create(item);        
+	public Add(item:TModel|Partial<TModel>|string|number):TModel {
+        var model = this.Repository.Add(item);        
         var parentProperty:Meta.Property = this.ParentProperty; 
         parentProperty.SetValue(model, this.Parent);
         return this.Repository.Add(model);

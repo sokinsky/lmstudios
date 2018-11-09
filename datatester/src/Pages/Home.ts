@@ -27,8 +27,15 @@ export class Home implements OnInit {
     public async SaveChanges(){
         console.log(this.context.ChangeTracker.Changes);
         console.log(this.context.ChangeTracker.GetBridgeChanges());
+        console.log(await this.context.SaveChanges());
+    }
+	public async NewPerson() {
+		console.log(this.context.People.Local.Search({ ID: 1 }));
+		console.log(this.context.People.Local.Select({ ID: 1 }));
+		//var result = this.context.PeopleEmails.Add({ ID: 1, Person: 1, Email: 1 })
+		//console.log(result);
     }
     public async NewUser(){
-        this.User = this.context.Users.Add({});
+        this.User = this.context.Users.Add();
     }
 }

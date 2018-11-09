@@ -1,14 +1,30 @@
-<div *ngIf="User">
-    <span (click)="Log(User)">{{User.Username}}:{{User.Password}}</span><br/>
+<explorer [context]=context></explorer>
+
+<fieldset *ngIf="User">
+    <legend (click)="Log(User)">User({{User.Token}})</legend>
     <input [(ngModel)]="User.Username" placeholder="Username" />:<input [(ngModel)]="User.Password" placeholder="Password"/>
     <div *ngIf="User.Person">
         <span (click)="Log(User.Person)">{{User.Person.FirstName}} {{User.Person.LastName}}</span><br>
         <input [(ngModel)]="User.Person.FirstName" placeholder="FirstName" /> <input [(ngModel)]="User.Person.LastName" placeholder="LastName" />
     </div>
-</div>  
-<div *ngIf="!User">
-    <a (click)="NewUser()">New User</a>
-</div>  
+    <div style="text-align:right;">
+        <a (click)="this.User = undefined">Done</a>
+    </div>
+</fieldset>  
+<fieldset *ngIf="!User" (click)="NewUser()">
+    <legend>User</legend>
+    New User
+</fieldset>  
+
+<fieldset *ngIf="Person">
+    <legend (click)="Log(Person)">{{Person.FirstName}} {{Person.LastName}}</legend>
+    <input [(ngModel)]="Person.FirstName" placeholder="FirstName" />
+    <input [(ngModel)]="Person.LastName" placeholder="LastName" />
+</fieldset>
+<fieldset *ngIf="!Person" (click)="NewPerson()">
+    <legend>Person</legend>
+    New Person
+</fieldset>
 
 <div style="margin: 25px 0 0 0;">
     <span (click)="Log(context)">Context (</span>

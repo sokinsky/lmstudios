@@ -12,7 +12,7 @@ export class Model {
 		if (dataModel instanceof Data.Model){
 			result.ID = dataModel.Controller.ID;
 			result.Type = dataModel.GetType().Name;
-			result.Value = dataModel.Controller.Values.Current;			
+			result.Value = dataModel.Controller.Values.Actual.Data;			
 		}
 		else{
 			if (dataModel.ID !== undefined)

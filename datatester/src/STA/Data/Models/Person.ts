@@ -9,7 +9,7 @@ export class Person extends Model{
     public LastName?:string;
     @Decorators.Map(()=>Date)
     public DOB?:Date;
-    @Decorators.Map(()=>User)
+    @Decorators.Map(()=>User, { Optional:false })
     public User?:User|Partial<User>;
 
     @Decorators.Map(()=>SubRepository)

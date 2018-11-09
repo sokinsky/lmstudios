@@ -1,0 +1,11 @@
+textarea { width:100%; }
+
+a { cursor: pointer; }
+a:hover { text-decoration: underline}
+
+fieldset.repository table { width:100% }
+fieldset.repository table thead td { background-color:#ccc; }
+
+fieldset.repository table tbody tr { cursor: pointer; }
+fieldset.repository table tbody tr:hover { background-color:#dedede; }
+

@@ -11,62 +11,13 @@ export class Model {
 				let property:Meta.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
-
-				
-				var value = property.GetValue(this);
-				if (value === undefined)
-					return undefined;
-
-				
-				if (property.Type.IsSubTypeOf(Model)){
-					var repository = this.Context.GetRepository(property.Type);
-					if (value instanceof Model){
-						return value;
-					}
-					else{
-						var localValue = repository.Local.Select(value);
-						if (localValue === undefined){
-							value = repository.Add(value);
-							property.SetValue(this, value);
-							repository.Server.Select(value.Controller.Values.Current).then(serverValue=>{
-								if (property !== undefined)
-									property.SetValue(this, serverValue);
-							});
-						}
-					}
-				}
-				return value;
+				return this.Controller.GetValue(property);
 			},
 			set: (target, propertyName, propertyValue, reciever) => {		
 				let property:Meta.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined || property.Type.IsSubTypeOf(SubRepository))
 					return Reflect.set(target, propertyName, propertyValue, reciever);
-				
-				if (property.Type.IsSubTypeOf(Model)){
-					var repository = this.Context.GetRepository(property.Type.Name);
-					if (typeof(propertyValue) === "object"){
-						if (propertyValue instanceof Model){
-							repository.Add(propertyValue);
-						}
-						else {					
-							propertyValue = repository.Add(propertyValue);
-							property.SetValue(this, propertyValue);
-							propertyValue.Refresh();
-						}
-					}
-				}
-				property.SetValue(this, propertyValue);
-				if (propertyValue instanceof Model){
-					var keyProperty = this.GetType().Attributes.PrimaryKey;
-					if (keyProperty !== undefined){
-						var keyValue = keyProperty.GetValue(propertyValue);
-						if (keyValue === undefined)
-							keyValue = propertyValue.Controller.ID;
-						propertyValue = keyValue;	
-					}		
-				}
-				property.SetValue(this.Controller.Values.Current, propertyValue);
-				this.Context.ChangeTracker.Add(this.Controller.Values.Proxied);
+				this.Controller.SetValue(property, propertyValue);
 				return true;
 			}
 		});
@@ -100,10 +51,10 @@ export class Model {
 	}
 	public Server:{[p in keyof this]:Promise<this[p]>};
 	public Controller: Controller<Model>;
+
 	public get Context(): Context{
 		return <Context>(<any>window)["Context"];
-	}
-	
+	}	
 	public GetType() : Meta.Type {
 		var result = Meta.Type.GetType(this);		
 		if (result)
@@ -111,14 +62,25 @@ export class Model {
 		throw new Error("");
 	}
 
+	public get Key():{Property:Meta.Property, Value:any}{
+		return this.Controller.Key;
+	}
+
+	public Load(value:any, server?:boolean){
+		this.Controller.Load(value, server);
+	}
+	public Refresh(){
+		this.Controller.Refresh();
+	}
+	public GetValue(property:Meta.Property|string){
+		return this.Controller.GetValue(property);
+	}
+	public SetValue(property:Meta.Property|string, value:any){
+		this.Controller.SetValue(property, value);
+	}
+
 	public toString():string{
-		var keyProperty = this.GetType().Attributes.PrimaryKey;
-		if (keyProperty !== undefined){
-			var keyValue = keyProperty.GetValue(this);
-			if (keyValue === undefined)
-				keyValue = this.Controller.ID;
-		}
-		return `${this.GetType().Name}(${keyValue})`;
+		return this.Controller.toString();
 	}
 }
 

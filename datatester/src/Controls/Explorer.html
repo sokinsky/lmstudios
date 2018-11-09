@@ -1,0 +1,13 @@
+<div class="explorer">
+    <table style="width:100%;">
+        <tr>
+            <td style="width:25%; vertical-align: top;">
+                <tree #tree [context]="this.context" (select)="selectNode($event)"></tree>
+            </td>
+            <td style="vertical-align: top;">
+                <treeview #view (itemSelected)="selectItem($event)"></treeview>
+            </td>
+        </tr>
+    </table>
+    
+</div>
