@@ -4,16 +4,23 @@ import * as Bridge from "./Bridge";
 
 export enum ContextStatus { Ready, Initializing, Saving }
 export class Context {
-	constructor(api:string|API) {
-		(<any>window).Context = this;
+	constructor(api:string|API) {		
  		if (typeof(api) == "string")
 			this.API = new API(this, api);
 		else
 			this.API = api;
 
-		var removeTypes:any[] = [];
-		var types = Meta.Type.GetTypes();
+		var proxy:Context = new Proxy(this, {
+			set:(target, propertyName, propertyValue, reciever) =>{
+				if (propertyValue instanceof Repository)
+					propertyValue.Name = <string>propertyName;
+				return Reflect.set(target, propertyName, propertyValue, reciever);
+			}
+		})	
+
 		this.Initialize();
+		(<any>window).Context = proxy;
+		return proxy;
 	}
 	public Status:ContextStatus = ContextStatus.Ready;
 	public API:API;
@@ -102,8 +109,6 @@ export class Context {
 				bridgeModels.push(Bridge.Model.Create(item));
 			})
 		}
-		console.log(bridgeModels);
-
 		bridgeModels.forEach((bridgeModel: Bridge.Model) => {	
 			var dataModel = this.Select(bridgeModel.ID);
 			if (dataModel === undefined){

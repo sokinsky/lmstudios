@@ -2,12 +2,49 @@
     <table style="width:100%;">
         <tr>
             <td style="width:25%; vertical-align: top;">
-                <tree #tree [context]="this.context" (select)="selectNode($event)"></tree>
+                <fieldset>
+                    <legend>Repositories</legend>
+                    <div class="repository" *ngFor="let repository of this.repositories" (click)="this.selectRepository(repository)">{{repository}}</div>
+                </fieldset>
             </td>
             <td style="vertical-align: top;">
                 <treeview #view (itemSelected)="selectItem($event)"></treeview>
             </td>
         </tr>
     </table>
-    
+    <table style="width:100%">
+        <tr>
+            <td style="width:25%; vertical-align: top;">
+                <fieldset>
+                    <legend>Requests</legend>
+                    <div class="request" *ngFor="let request of this.context.API.Requests" (click)="this.selectedRequest = request;">
+                        {{request.Path}}
+                    </div>
+                </fieldset>
+            </td>
+            <td style="vertical-align:top;">
+                <fieldset *ngIf="this.selectedRequest">
+                    <legend>{{this.selectedRequest.Path}}</legend>
+                    <span (click)="Log(this.selectedRequest)">Request:</span>
+                    <pre>{{this.toJson(this.selectedRequest.Body)}}</pre>
+                    <span (click)="Log(this.selectedRequest.Response);">Response:</span>
+                    <pre>{{this.toJson(this.selectedRequest.Response.Result)}}</pre>
+                </fieldset>                
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%">
+        <tr>
+            <td style="width:25%; vertical-align: top;">
+                <fieldset>
+                    <legend (click)="Log(this.context.ChangeTracker);">Changes</legend>
+                    <div class="request" *ngFor="let change of this.context.ChangeTracker.Changes" >
+                        <span (click)="Log(change)">{{change.Model}}</span>
+                    </div>
+                    <div class="save" (click)="SaveChanges()" *ngIf="this.context.ChangeTracker.Changes.length > 0">SaveChanges</div>
+                </fieldset>
+            </td>
+            <td style="vertical-align:top;"></td>
+        </tr>
+    </table>
 </div>

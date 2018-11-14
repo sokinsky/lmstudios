@@ -16,9 +16,12 @@ export class Repository<TModel extends Model> {
 	}
 	public *[Symbol.iterator]() {
 		for (const value of this.Items) {
+			if (value.Controller.Values.Server.Data === undefined)
+				value.Refresh();
 			yield value;
 		}
 	}
+	public Name:string = "";
 	public Context:Context;
 	public Type: Meta.Type;
 	public get Key():Meta.Property{
@@ -84,6 +87,7 @@ export class Repository<TModel extends Model> {
 	public Add(value?:TModel|Partial<TModel>|number|string, server?:boolean):TModel{	
 		if (value === undefined)
 			value = {};	
+
 		switch (typeof(value)){
 			case "string":
 				return this.Add(this.BuildPartial(<string>value));
@@ -102,7 +106,6 @@ export class Repository<TModel extends Model> {
 				}
 				else {
 					var select = this.Local.Select(value);
-					//console.log(select);
 					if (select === undefined){
 						select = new this.Type.Constructor();
 						if (select !== undefined){
@@ -110,7 +113,11 @@ export class Repository<TModel extends Model> {
 							return this.Add(select, server);
 						}
 					}
-					
+					else{
+						console.log(select);
+						console.log(value);
+						select.Load(value, server);
+					}					
 					if (select !== undefined)
 						return select;
 				}
@@ -137,6 +144,9 @@ export class Repository<TModel extends Model> {
 			default:
 				return this.Search(this.BuildPartial(value));
 		}
+	}
+	public toString():string{
+		return this.Name;
 	}
 }
 export class LocalRepository<TModel extends Model> {

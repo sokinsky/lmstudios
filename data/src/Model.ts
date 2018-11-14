@@ -15,7 +15,7 @@ export class Model {
 			},
 			set: (target, propertyName, propertyValue, reciever) => {		
 				let property:Meta.Property|undefined = this.GetType().GetProperty(propertyName);
-				if (property === undefined || property.Type.IsSubTypeOf(SubRepository))
+				if (property === undefined)
 					return Reflect.set(target, propertyName, propertyValue, reciever);
 				this.Controller.SetValue(property, propertyValue);
 				return true;
@@ -69,8 +69,8 @@ export class Model {
 	public Load(value:any, server?:boolean){
 		this.Controller.Load(value, server);
 	}
-	public Refresh(){
-		this.Controller.Refresh();
+	public Refresh(values?:Partial<Model>){
+		this.Controller.Refresh(values);
 	}
 	public GetValue(property:Meta.Property|string){
 		return this.Controller.GetValue(property);

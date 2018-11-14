@@ -16,9 +16,13 @@ export class Property {
     public Attributes:PropertyAttributes = new PropertyAttributes();
 
     public GetValue(item:any):any{
+        if (item === undefined)
+            return undefined;
         return item[this.Name];
     }
     public SetValue(item:any, value:any){
+        if (item === undefined)
+            return;
         item[this.Name] = value;
     }
 }

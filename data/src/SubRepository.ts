@@ -21,6 +21,7 @@ export class SubRepository<TModel extends Model> {
                 return parentProperties[0];
         }
     }
+    public Name:string = "";
     public get ParentFilter():any{
         var property = this.ParentProperty; 
         var value = this.Parent.Key.Value;
@@ -60,5 +61,9 @@ export class SubRepository<TModel extends Model> {
         var parentProperty:Meta.Property = this.ParentProperty; 
         parentProperty.SetValue(model, this.Parent);
         return this.Repository.Add(model);
+    }
+
+    public toString():string{
+        return this.Name;
     }
 }

@@ -13,7 +13,7 @@ import * as Controls from "./controls";
 	bootstrap: [Pages.Master],
 	declarations: [
 		Pages.Master, Pages.Home,
-		Controls.Explorer, Controls.Tree, Controls.TreeNode, Controls.TreeView
+		Controls.Explorer, Controls.TreeView
 	],
     imports: [
 		BrowserModule,

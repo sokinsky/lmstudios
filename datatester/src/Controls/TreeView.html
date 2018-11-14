@@ -1,20 +1,26 @@
 <fieldset *ngIf="this.selectedItemType == 'Model'">
     <legend (click)="Log(selectedItem)">{{this.selectedItem}}</legend>
+
     <div *ngFor="let property of this.Properties">
         <div *ngIf="propertyType(property) == 'Model'">
             <div *ngIf="property.GetValue(this.selectedItem)">
                 <span (click)="selectItem(property.GetValue(this.selectedItem))">{{property.Name}}</span><br>
+                <div style="float:right;">
+                    <a (click)="removeModel(property);" style="display:inline-block;margin-right:auto;">(remove)</a>
+                </div>
+                <pre (click)="selectedItem = property.GetValue(this.selectedItem)">{{this.toJson(property)}}</pre>
             </div>
             <div *ngIf="!property.GetValue(this.selectedItem)">
                 <span>{{property.Name}} </span>
-                <div style="float:right;">
-                    <a (click)="selectModel(property);" style="display:inline-block;margin-right:auto;">(select)</a>&nbsp;|
-                    <a (click)="createModel(property);" style="display:inline-block;margin-right:auto;">(new)</a>
-                </div>
+                <pre (click)="addModel(property)">undefined (click to add)</pre>
             </div>
         </div>
-        <div *ngIf="propertyType(property) == 'any'">  
-            <span>{{property.Name}} </span>            
+        <div *ngIf="propertyType(property) == 'SubRepository'">
+            <span>{{property.Name}} </span>
+            <pre (click)="selectItem(property.GetValue(this.selectedItem))">{{this.toJson(property)}}</pre>
+        </div>
+        <div *ngIf="propertyType(property) == 'any'">
+            <span>{{property.Name}} </span>
             <textarea [(ngModel)]="this.selectedItem[property.Name]" placeholder={{property.Name}}></textarea>
         </div>
     </div>
@@ -29,14 +35,14 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let item of this.Items" (click)="selectItem(item)">
+            <tr *ngFor="let item of this.Items" (click)="selectedItem = item">
                 <td *ngFor="let property of Properties">{{property.GetValue(item)}}</td>
             </tr>
         </tbody>
     </table>
     <div>
         <div style="float:right;">
-            <a (click)="createModel();" style="display:inline-block;margin-right:auto;">(new)</a>
+            <a (click)="addModel();" style="display:inline-block;margin-right:auto;">(new)</a>
         </div>
     </div>
 </fieldset>

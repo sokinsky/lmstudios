@@ -9,3 +9,14 @@ fieldset.repository table thead td { background-color:#ccc; }
 fieldset.repository table tbody tr { cursor: pointer; }
 fieldset.repository table tbody tr:hover { background-color:#dedede; }
 
+pre {
+    border-radius:5px;
+    border:1px solid #ccc;
+    padding:5px 5px;
+    cursor:pointer;
+}
+pre:hover {
+    border: 1px solid #000;
+    background-color:#eee;
+}
+

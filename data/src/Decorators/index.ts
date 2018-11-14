@@ -1,5 +1,5 @@
 import { Meta, Attributes } from "../";
-import { Model } from "../";
+import { Model, Context, Repository } from "../";
 import { PropertyAttributes } from "../Meta/Property";
 
 export function Controller(type:(()=>new(...args:any[])=>any)){
@@ -12,7 +12,6 @@ export function Map(typeConstructor:(()=>new(...args:any[])=>any), attributes?:P
     let type:(()=>new(...args:any[])=>any) = typeConstructor;
     return function(target:any, propertyName:string){
         let classType = Meta.Type.GetType(target); 
-        //let propertyType = Meta.Type.GetType(type());
         let property = classType.GetProperty(propertyName);
         if (property === undefined){
             property = new Meta.Property(propertyName, type);
