@@ -87,6 +87,7 @@ export class Repository<TModel extends Model> {
 	public Add(value?:TModel|Partial<TModel>|number|string, server?:boolean):TModel{	
 		if (value === undefined)
 			value = {};	
+		console.log(value);
 
 		switch (typeof(value)){
 			case "string":
@@ -114,8 +115,6 @@ export class Repository<TModel extends Model> {
 						}
 					}
 					else{
-						console.log(select);
-						console.log(value);
 						select.Load(value, server);
 					}					
 					if (select !== undefined)
@@ -228,7 +227,7 @@ export class ServerRepository<TModel extends Model> {
 		var request:Request = new Request("Model/Select", body);
 		var response:Response = await request.Post(this.Parent.Context.API);
 		if (response.Result)
-			this.Parent.Context.Load(response);
+			this.Parent.Context.Load(response.Result);
 		return this.Parent.Local.Select(value);
 	}
 	public async Search(value:Partial<TModel>|number|string):Promise<TModel[]>{
@@ -239,7 +238,7 @@ export class ServerRepository<TModel extends Model> {
 		var request:Request = new Request("Model/Search", body);
 		var response = await request.Post(this.Parent.Context.API);
 		if (response !== undefined)
-			this.Parent.Context.Load(response);
+			this.Parent.Context.Load(response.Result);
 		return this.Parent.Local.Search(value);
 	}
 }

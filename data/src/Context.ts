@@ -1,4 +1,5 @@
-﻿import { Meta, Utilities } from "./";
+﻿import * as Schema from "./Schema";
+import { Meta, Utilities } from "./";
 import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatus} from './'
 import * as Bridge from "./Bridge";
 
@@ -22,6 +23,7 @@ export class Context {
 		(<any>window).Context = proxy;
 		return proxy;
 	}
+	public Schema:Schema.Context = new Schema.Context();
 	public Status:ContextStatus = ContextStatus.Ready;
 	public API:API;
 	public ChangeTracker: ChangeTracker = new ChangeTracker(this);
@@ -99,13 +101,20 @@ export class Context {
 
 		let request = new Request("Context/Initialize", {});
 		let response = await request.Post(this.API);
-		this.Load(response);
+		this.Schema = new Schema.Context(response.Result.Schema);
+		this.Schema.Models.forEach(model =>{
+			
+		})
+
+
+		this.Load(response.Result.Models);
 		this.Status = ContextStatus.Ready;
 	}
-	public async Load(response: Response) {	
+	public async Load(models: any[]) {	
+		console.log(models);
 		let bridgeModels: Array<Bridge.Model> = [];
-		if (Array.isArray(response.Result)){
-			response.Result.forEach(item =>{
+		if (Array.isArray(models)){
+			models.forEach(item =>{
 				bridgeModels.push(Bridge.Model.Create(item));
 			})
 		}
@@ -127,7 +136,7 @@ export class Context {
 		let response = await request.Post(this.API);
 		if (response.Status == ResponseStatus.OK) {
 			this.ChangeTracker.Clear();
-			this.Load(response);
+			this.Load(response.Result);
 		}			
 		return response;
 	}	
