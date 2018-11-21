@@ -9,8 +9,8 @@ import { Meta } from "@lmstudios/data";
     styleUrls: ['./Home.css'],
 })
 export class Home implements OnInit {
-    constructor(private context:Context) {
-
+	constructor(private context: Context) {
+		console.log(Meta.Type.GetTypes());
     }
     public async ngOnInit(){
         //this.User = this.context.Users.Add({Username:"sokinsky", Password:"musk4rat"});

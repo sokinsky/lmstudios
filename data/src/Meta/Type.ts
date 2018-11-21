@@ -1,13 +1,13 @@
 import { Property } from "./";
-import { Attributes, Utilities } from "..";
+import { Attributes, Utilities, Schema } from "..";
 
 export class Type {
     constructor(init:(()=>new(...args:any[])=>any)){
         this.__init=init;
     }
-    public id:Utilities.Guid = Utilities.Guid.Create();
+    private __id:Utilities.Guid = Utilities.Guid.Create();
     private __init:(()=>new(...args:any[])=>any);
-    public Attributes:TypeAttributes = new TypeAttributes(this);
+    public Schema?:Schema.Type;
 
     public get Name():string{
         return this.Constructor.name;
@@ -15,6 +15,7 @@ export class Type {
     public get Constructor():(new(...args:any[])=>any){
         return this.__init();
     }
+    public Controller?:Type;
     public Properties:Property[] = [];
     public GetProperties():Property[] {        
         var result:Property[] = [];

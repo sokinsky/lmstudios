@@ -1,16 +1,14 @@
-import { Model } from "./Model";
+import { Type } from "./Type";
 
 export class Context {
     constructor(init?:Partial<Context>){
         if (init !== undefined){
-            console.log(init);
-            if (init.Models !== undefined){
-                init.Models.forEach(model=>{
-                    this.Models.push(new Model(this, model));
+            if (init.Types !== undefined){
+                init.Types.forEach(type=>{
+                    this.Types.push(new Type(this, type));
                 });           
             }
         }
-
     }
-    public Models:Model[] = [];
+    public Types:Type[] = [];
 }

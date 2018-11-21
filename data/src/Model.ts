@@ -51,10 +51,10 @@ export class Model {
 	}
 	public Server:{[p in keyof this]:Promise<this[p]>};
 	public Controller: Controller<Model>;
-
 	public get Context(): Context{
 		return <Context>(<any>window)["Context"];
 	}	
+
 	public GetType() : Meta.Type {
 		var result = Meta.Type.GetType(this);		
 		if (result)

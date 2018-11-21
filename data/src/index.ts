@@ -15,11 +15,13 @@ import * as Attributes from "./Attributes";
 import * as Bridge from "./Bridge";
 import * as Decorators from "./Decorators";
 import * as Meta from "./Meta";
+import * as Schema from "./Schema";
 import * as Utilities from "./Utilities";
 export {
 	Attributes,
 	Bridge,
 	Decorators,
 	Meta,
+	Schema,
 	Utilities
 }

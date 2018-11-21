@@ -1,20 +1,23 @@
-import { Model } from "./";
+import { Model, Key } from "./";
 
-export enum PropertyType { 
-    Column = "Column", Reference = "Reference" 
-}
 export class Property {
     constructor(model:Model, init:Partial<Property>){
-        if (init.Name === undefined || init.Type === undefined)
-            throw new Error(``);
         this.Model = model;
-        this.Name = init.Name;
-        this.Type = init.Type;
+        if (init.Name !== undefined)
+            this.Name = init.Name;
+        if (init.Type != undefined)
+            this.Type = init.Type;
+        if (init.Required !== undefined)
+            this.Required = init.Required;
+        if (init.Key != undefined)
+            this.Key = new Key(init.Key);
     }
 
     public Model:Model;
-    public Name:string;
-    public Type:PropertyType;
+    public Name:string = "";
+    public Type:string = "";
+    public Required:boolean = false;
+    public Key?:Key;
 }
 export class ColumnProperty extends Property {
     constructor(model:Model, init:Partial<ColumnProperty>){

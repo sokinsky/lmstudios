@@ -13,8 +13,7 @@ export class Context {
 
 		var proxy:Context = new Proxy(this, {
 			set:(target, propertyName, propertyValue, reciever) =>{
-				if (propertyValue instanceof Repository)
-					propertyValue.Name = <string>propertyName;
+				console.log(propertyName);
 				return Reflect.set(target, propertyName, propertyValue, reciever);
 			}
 		})	
@@ -102,9 +101,10 @@ export class Context {
 		let request = new Request("Context/Initialize", {});
 		let response = await request.Post(this.API);
 		this.Schema = new Schema.Context(response.Result.Schema);
-		this.Schema.Models.forEach(model =>{
-			
-		})
+		
+		this.Schema.Models.forEach(model => {
+			 
+		});
 
 
 		this.Load(response.Result.Models);

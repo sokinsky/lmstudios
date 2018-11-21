@@ -15,18 +15,27 @@ export class Controller<TModel extends Model> {
 				Data:undefined
 			},
 			Proxy:proxy, 
-
 			Pending:{} 
 		}
 	}
 	public ID:string = Guid.Create().toString();
-	public Locked:boolean = false;
-	public Values:{	Actual: {Model:TModel, Data:Partial<TModel> }, Server: { Time?:Date, Data?:Partial<TModel> }, Proxy: TModel, Pending:Partial<TModel> };
+	public Values:{	
+		Actual: {
+			Model:TModel, 
+			Data:Partial<TModel> 
+		}, 
+		Server: { 
+			Time?:Date, 
+			Data?:Partial<TModel> 
+		}, 
+		Proxy: TModel, 
+		Pending:Partial<TModel> 
+	};
 
 	
-	public get Context(): Context {
-		return this.Values.Actual.Model.Context;
-	}
+	public get Context(): Context{
+		return <Context>(<any>window)["Context"];
+	}	
 	public get Type():Meta.Type{
 		return this.Values.Actual.Model.GetType();
 	}
@@ -135,11 +144,6 @@ export class Controller<TModel extends Model> {
 							this.Values.Server.Data = {};
 						property.SetValue(this.Values.Server.Data, keyValue);						
 					}
-					if (this.Locked){
-						if (this.Values.Pending === undefined)
-							this.Values.Pending = {};
-						property.SetValue(this.Values.Pending, keyValue);						
-					}
 					var referenceProperties = value.Controller.GetReferences(this.Type)
 					if (referenceProperties.length == 1){
 						referenceProperties[0].SetValue(value, this.Values.Proxy)
@@ -166,8 +170,6 @@ export class Controller<TModel extends Model> {
 			property.SetValue(this.Values.Actual.Data, value);
 			if (server)
 				property.SetValue(this.Values.Server.Data, value);
-			if (this.Locked)
-				property.SetValue(this.Values.Pending, value);
 			this.Context.ChangeTracker.Add(this.Values.Proxy);
 		}
 	}
@@ -206,10 +208,6 @@ export class Controller<TModel extends Model> {
 		this.Context.ChangeTracker.Add(this.Values.Proxy);
 	}
 	public Refresh(values?:Partial<TModel>){
-		if (this.Locked === true)
-			return;
-
-		this.Locked = true;
 		if (values !== undefined)
 			this.Load(values);
 		var body = {
@@ -219,7 +217,7 @@ export class Controller<TModel extends Model> {
 		}
 		var request:Request = new Request("Model/Refresh", body);
 		var response = request.Post(this.Context.API).then(response=>{
-			this.Context.Load(response);
+			this.Context.Load(response.Result);
 		})
 	}
 
