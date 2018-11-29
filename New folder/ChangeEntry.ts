@@ -1,4 +1,4 @@
-import { Model } from "./";
+import { Model, Bridge } from "./";
 
 export enum ChangeStatus {
     Detached = "Detached",

@@ -8,10 +8,7 @@
     "strict": true,
     "watch":true,
     "inlineSourceMap": true,
-    "inlineSources": true
-  },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+    "inlineSources": true,
+    "forceConsistentCasingInFileNames": true
+  }
 }

@@ -1,4 +1,4 @@
-import { Context, Request, Response } from ".";
+import { Context, Request, Response, ResponseStatus } from ".";
 
 export class API {
 	constructor(context: Context, url: string) {

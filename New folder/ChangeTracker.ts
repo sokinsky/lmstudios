@@ -1,3 +1,4 @@
+import * as Bridge from "./Bridge";
 import { Context, ChangeEntry, ChangeStatus, Model } from "./";
 
 export class ChangeTracker {

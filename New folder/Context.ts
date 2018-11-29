@@ -1,5 +1,6 @@
 ﻿import * as Schema from "./Schema";
 import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatus} from './'
+import * as Bridge from "./Bridge";
 
 export enum ContextStatus { None="None", Ready="Ready", Saving="Saving" }
 export class Context {
