@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, InjectionToken } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, ControlContainer } from '@angular/forms';
 import { BrowserModule } from "@angular/platform-browser";
 import { HttpModule } from "@angular/http";
@@ -6,14 +6,18 @@ import { RouterModule } from '@angular/router';
 
 import { HttpClientModule } from '@angular/common/http';
 import * as Pages from './pages';
-import * as Controls from "./controls";
+import { getSchema } from "@lmstudios/data"
 
+export let schema;
+export const schemaToken = new InjectionToken("");
+export const schemaPromise = getSchema("").then(response=>{
+	schema = response.Result.Schema;
+});
 
 @NgModule({
 	bootstrap: [Pages.Master],
 	declarations: [
 		Pages.Master, Pages.Home,
-		Controls.Explorer, Controls.TreeView
 	],
     imports: [
 		BrowserModule,
@@ -26,7 +30,7 @@ import * as Controls from "./controls";
 		],
 		{ useHash: true }),
 	],
-	providers: [ ]
+	providers: [ {provide:schemaToken, useFactory:()=>schema} ]
 })
 export default class {
 	constructor() { }

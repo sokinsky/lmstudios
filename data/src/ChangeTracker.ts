@@ -11,10 +11,14 @@ export class ChangeTracker {
             return (x.Status !== ChangeStatus.Unchanged && x.Status !== ChangeStatus.Detached);
         })
     }
-    public GetBridgeChanges():Bridge.Model[]{
-        var results:Bridge.Model[] = [];
+    public GetBridgeChanges():any[]{
+        var results:any[] = [];
 		this.Changes.forEach((entry: ChangeEntry) => {	
-            var result = Bridge.Model.Create(entry.Model);
+            var result = {
+                ID:entry.Model.__internal.controller.__internal.id,
+                Type:entry.Model.GetType().Name,
+                Value:entry.Model.__internal.controller.__internal.values.actual.data
+            }
             results.push(result);	
         });
         return results;

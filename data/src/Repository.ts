@@ -1,14 +1,14 @@
 import { Context, Model, Request, Response, Schema } from "./";
 
 export class Repository<TModel extends Model> {
-	private __internal:{
+	public __internal:{
 		context:Context,
 		type:{
 			constructor:(new (...args: any[]) => TModel),
 			schema?:Schema.Type
 		}
 	}
-	constructor(context:Context, type: (new (...args: any[]) => TModel)) {		
+	constructor(context:Context, type: (new (...args: any[]) => TModel)) {
 		this.__internal = {
 			context:context,
 			type:{
@@ -39,27 +39,32 @@ export class Repository<TModel extends Model> {
 	public Server: ServerRepository<TModel> = new ServerRepository(this);
 
 	public Create():TModel{
-		var result = new this.Type.Constructor();
-		return result;
+		if (this.Type !== undefined){
+			if (this.Type.Constructor !== undefined){
+				var result = new this.Type.Constructor(this.__internal.context);
+				return result;
+			}
+		}
+		throw new Error(`Repository.Create was unable to create Model`);
 	}
 	public Add(value?:TModel|Partial<TModel>, server?:boolean):TModel{	
 		if (value === undefined)
 			value = this.Add({});	
 
 		if (value instanceof Model) {
+			if (value.GetType() !== this.Type)
+				throw new Error(`Repository.Add():Unable to add value`);
 			var existing = this.Items.find(x => { return x === value});
-			if (existing == null){
+			if (existing === undefined)
 				this.Items.push(value);
-				this.Context.ChangeTracker.Add(value);
-			}
 			return value;
 		}
 		else {
 			var result = this.Local.Select(value);
 			if (result === undefined){
-				var newModel = new this.Type.Constructor();
-				newModel.Load(value, server);
-				result = this.Add(newModel, server);
+				result = this.Create();
+				result.Load(value, server);
+				result = this.Add(result, server);
 			}				
 			return result;
 		}
@@ -90,21 +95,7 @@ export class LocalRepository<TModel extends Model> {
 	public Search(...values:Partial<TModel>[]):TModel[]{
 		if (values.length == 0)
 			return [];
-
-		var result:TModel[] = [];
-		values.forEach(value=>{
-			this.Repository.Items.filter(item =>{
-				for (var propertyName in value){
-					var actual:any = item.Controller.Values.Actual.Data;
-					if (actual[propertyName] !== value[propertyName])
-						return false;
-				}
-				return true;
-			}).forEach(item =>{
-				result.push(item);
-			})
-		});
-		return result;
+		return [];
 	}
 }
 export class ServerRepository<TModel extends Model> {
@@ -113,25 +104,30 @@ export class ServerRepository<TModel extends Model> {
     }
 	public Repository: Repository<TModel>;
 	public async Select(value: Partial<TModel>) : Promise<TModel|undefined> {
+		if (this.Repository.Type === undefined)
+			return undefined;
 		var body = {
 			Type: this.Repository.Type.Name,
 			Value: value
 		};
 		var request:Request = new Request("Model/Select", body);
-		var response:Response = await request.Post(this.Repository.Context.API);
+		var response:Response = await request.Post(this.Repository.__internal.context.API);
 		if (response.Result)
-			this.Repository.Context.Load(response.Result);
+			this.Repository.__internal.context.Load(response.Result);
 		return this.Repository.Local.Select(value);
 	}
 	public async Search(...values:Partial<TModel>[]):Promise<TModel[]>{
+		if (this.Repository.Type === undefined)
+			return [];
+
 		var body = {
 			Type:this.Repository.Type.Name,
 			Values:values
 		}
 		var request:Request = new Request("Model/Search", body);
-		var response = await request.Post(this.Repository.Context.API);
+		var response = await request.Post(this.Repository.__internal.context.API);
 		if (response !== undefined)
-			this.Repository.Context.Load(response.Result);
+			this.Repository.__internal.context.Load(response.Result);
 		return this.Repository.Local.Search(...values);
 	}
 }

@@ -13,7 +13,6 @@ export class Request{
     public Response?: Response;
 
     public async Post(api:API): Promise<Response>{
-        console.log(this);
         this.Response = await api.Post(this);
         
         if (! this.Response)

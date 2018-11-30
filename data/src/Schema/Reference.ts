@@ -1,23 +1,19 @@
 import { Type, Property, Constraint } from "./";
 export class Reference {
-    constructor(constraint:Constraint, init:any){
-        this.__init = init;
+    constructor(constraint:Constraint, type:string, properties:string[]){
         this.Constraint = constraint;
-    }
-    private __init:any;
-    public Constraint:Constraint;
-
-
-    public get Type():Type{
-        return this.Constraint.Property.Type.Context.GetType(this.__init.Type);
-    }
-    public Properties():Property[] {
-        var results:Property[] = [];
-        this.__init.Properties.forEach((propertyName:any) => {
-            var result = this.Type.GetProperty(propertyName);
-            if (result !== undefined)
-                results.push(result);
+        var referenceType = this.Constraint.Property.Type.Context.GetType(type);
+        if (referenceType === undefined)
+            throw new Error(`Reference.constructor():Type(${type}) does not exist in the context`);
+        this.Type = referenceType;
+        properties.forEach(propertyName=>{
+            var property = this.Type.GetProperty(propertyName);
+            if (property === undefined)
+                throw new Error(`Reference.constructor():Type(${type}) does not contains a property(${propertyName})`)
+            this.Properties.push(property);
         });
-        return results;
-    };
+    }
+    public Constraint:Constraint;
+    public Type:Type;
+    public Properties:Property[] = [];
 }

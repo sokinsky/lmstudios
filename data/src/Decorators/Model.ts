@@ -2,14 +2,14 @@ import { Controller } from "../";
 
 export function Model(name:string, controllerType?:(()=>new(...args:any[])=>any)){
     var controllerType:(()=>new(...args:any[])=>any)|undefined = controllerType;     
-    return function(target:any){
-        target.prototype.type = {
-            name:name
-        };
+    return function(target:any){        
+        target.prototype.decoration = {
+            type: {
+                name:name,
+                controller:(()=>Controller)
+            }
+        }
         if (controllerType !== undefined)
-            target.prototype.controller = controllerType;
-        else
-            target.prototype.controller = (()=>Controller)
-        var type = Meta.Type.GetType(target);
+            target.prototype.decoration.type.controller = controllerType;
      }    
 }

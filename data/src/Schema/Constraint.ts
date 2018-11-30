@@ -1,15 +1,19 @@
 import { Property, Type, Reference,  } from './';
 export class Constraint{
-    constructor(property:Property, init:any){
-        this.Property = property;       
-        this.__init = init;
+    constructor(property:Property, to:{Type:string, Properties:string[]}, from:{Type:string, Properties:string[]}){
+        this.Property = property;
+        this.To = new Reference(this, to.Type, to.Properties);
+        this.From = new Reference(this, from.Type, from.Properties);
     }
-    private __init:any;
     public Property:Property;
-    public get From():Reference{
-        return new Reference(this, this.__init.From);
+    public To:Reference;
+    public From:Reference;
+
+    public static Create(property:Property, constraintData:{To:{Type:string, Properties:string[]},From:{Type:string, Properties:string[]}}[]):Constraint[]{
+        var results:Constraint[] = [];
+        constraintData.forEach(data=>{
+            results.push(new Constraint(property, data.To, data.From));
+        });
+        return results;
     }
-    public get To():Reference{
-        return new Reference(this, this.__init.To);
-    };
 }

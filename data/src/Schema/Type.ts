@@ -1,30 +1,18 @@
 import { Context, Property, Key } from "./";
 
 export class Type {
-    constructor(context:Context, init:any){
-        this.__init = init;
-        this.FullName = init.Name;
+    constructor(context:Context, typeData:string|{Name:string, Properties:{Name:string, PropertyType:string}[]}){
         this.Context = context;
+        if (typeof(typeData) === "string")
+            this.Name = typeData;
+        else
+            this.Name = typeData.Name;
     }
-    private __init:any;
     public Context:Context;
-    public FullName:string;
-    public Constructor?:(new (...args: any[]) => any)
-
-    public get Name():string{
-        var split = this.FullName.split('.');
-        return split[split.length-1];
-    };
-    public get Namespace():string{
-        var split = this.FullName.split('.');
-        split = split.splice(split.length-1);
-        var result = "";
-        split.forEach(part =>{
-            result += `${part}.`
-        });
-        return result.replace(/\.$/, "");
-    }; 
+    public Name:string = "";
     public Properties:Property[] = [];
+    public Keys:Key[] = [];
+    public Constructor?:(new (...args: any[]) => any)
 
     public GetProperty(name:string):Property|undefined{
         return this.Properties.find(x => {

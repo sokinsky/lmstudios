@@ -1,9 +1,8 @@
 ﻿export { API } from "./API";
 export { ChangeEntry, ChangeStatus } from "./ChangeEntry";
 export { ChangeTracker } from "./ChangeTracker";
-export { Context } from "./Context";
+export { Context, ContextStatus } from "./Context";
 export { Controller } from "./Controller";
-export { SubRepository } from "./SubRepository";
 export { Message } from "./Message";
 export { Model } from "./Model";
 export { Repository } from "./Repository";
@@ -19,3 +18,4 @@ export {
 	Schema,
 	Utilities
 }
+

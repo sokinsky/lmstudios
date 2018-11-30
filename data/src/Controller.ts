@@ -1,43 +1,46 @@
 import { Guid } from "./Utilities";
-import { Schema } from "./";
+import { Schema, Utilities } from "./";
 import { ChangeStatus, Context, Model, Request } from "./";
+import { Repository } from "./Repository";
+
+const internal=Symbol();
 
 export class Controller<TModel extends Model> {
-	public __internal:{
-		id:string,
-		context:Context,
-		values:{
-			actual:{
-				model:TModel,
-				data:Partial<TModel>
-			},
-			server:{
-				data:Partial<TModel>
-			},
-			proxy:TModel,
-			pending:Partial<TModel>
-		}
+	[internal]:{
+		context:Context
 	};
 	constructor(context:Context, actual: TModel, proxy:TModel) {
-		this.__internal = {
-			id:Guid.Create().toString(),
-			context:context,
-			values:{
-				actual:{
-					model:actual,
-					data:{}
-				},
-				server:{
-					data:{}
-				},
-				proxy:proxy,
-				pending:{}
-			}
+		this[internal] = {
+			context:context
+		}
+		this.Values = {
+			Actual:{
+				Model:actual,
+				Data:{}
+			},
+			Server:{
+				Data:{}
+			},
+			Proxy:proxy,
+			Pending:{}
 		}
 	}
 
+	public ID:string = Utilities.Guid.Create.toString();
+	public Values:{	Actual:{ Model:TModel, Data:Partial<TModel>	}, Server:{	Data:Partial<TModel> },	Proxy:TModel, Pending:Partial<TModel> };
+	
+	private __repository?:Repository<TModel>;
+	public get Repository():Repository<TModel>{
+		if (this.__repository === undefined){
+			this.__repository = <Repository<TModel>>this[internal].context.GetRepository(this.Model);
+			if (this.__repository === undefined)
+				throw new Error(``);
+		}
+		return this.__repository;
+	}
+
 	public get Model():TModel{
-		return this.__internal.values.actual.model;
+		return this.Values.Actual.Model;
 	}
 	public GetValue(property:Schema.Property|string):any{			
 		if (typeof(property) === "string"){
@@ -56,65 +59,50 @@ export class Controller<TModel extends Model> {
 		}
 	}
 	public GetChangeStatus(property?:Schema.Property|string):ChangeStatus{
-		var dataModel:TModel|undefined = undefined;
-		var dataRepository = this.__internal.context.GetRepository(this.Model.GetType());
-		if (dataRepository !== undefined){
-			dataModel = dataRepository.Items.find(model =>{
-				return model
-			})
+		if (property!== undefined){
+			if (typeof(property) === "string"){
+				property = this.Model.GetType().GetProperty(property);
+				if (property !== undefined)
+					return this.GetChangeStatus(property);
+				else
+					return ChangeStatus.Detached;
+			}				
 		}
-		var check = this.Repository.Items.find(x => {
-			return x === this.Values.Proxy;
-		});
-		if (! check) {			
-			if (this.Key.Value === undefined)
-				return ChangeStatus.Added;
-			else
+		if (property !== undefined){
+			if (property.Type !== this.Model.GetType())
 				return ChangeStatus.Detached;
+			else {
+				var actualValue = property.GetValue(this.Values.Actual.Data)
+				var serverValue = property.GetValue(this.Values.Server.Data);
+				if (serverValue === actualValue)
+					return ChangeStatus.Unchanged;
+				else{
+					if (serverValue === undefined)
+						return ChangeStatus.Added;
+					else if (actualValue === undefined)
+						return ChangeStatus.Deleted;
+					else
+						return ChangeStatus.Modified;
+				}				
+			}			
 		}
-		
-		var modified = false;
-		this.Type.GetProperties().forEach(property=>{
-			var currentValue = property.GetValue(this.Values.Server.Data);
-			var originalValue = property.GetValue(this.Values.Actual.Data);
-			if (currentValue !== originalValue)
-				modified = true;
-		});
-		if (modified) return ChangeStatus.Modified;
-		else return ChangeStatus.Unchanged;
+		else{
+			var check = this.Repository.Items.find(model =>  { return this.Model === model; } );
+			if (check === undefined)
+				return ChangeStatus.Detached;				
+		}
+		return ChangeStatus.Unchanged;
 	}
 	
 	
 
 	public Load(values: Partial<TModel>, server?:boolean) {
 		for (var propertyName in values){
-			var property:Schema.Property = this.Model.GetType().GetProperty(propertyName);
-			if (property !== undefined)
-			var value = property.GetValue(values);
-			this.SetValue(property, value, server);				
+			var property:Schema.Property|undefined = this.Model.GetType().GetProperty(propertyName);
+			if (property !== undefined){
+				var value = property.GetValue(values);
+				this.SetValue(property, value, server);	
+			}			
 		}
-		this.Context.ChangeTracker.Add(this.Values.Proxy);
-	}
-	public Refresh(values?:Partial<TModel>){
-		// if (values !== undefined)
-		// 	this.Load(values);
-		// var body = {
-		// 	ID: this.ID,
-		// 	Type: this.Type.Name,
-		// 	Value: this.Values.Actual.Data
-		// }
-		// var request:Request = new Request("Model/Refresh", body);
-		// var response = request.Post(this.Context.API).then(response=>{
-		// 	this.Context.Load(response.Result);
-		// })
-	}
-
-	public toString():string{
-		var keyValue:string = this.ID;
-		if (this.Key.Value !== undefined)
-			 keyValue = this.Key.Value.toString();
-		if (keyValue.length > 8)
-			keyValue = `${keyValue.substring(0, 8)}...`
-		return `${this.Type.Name}(${keyValue})`;
 	}
 }
