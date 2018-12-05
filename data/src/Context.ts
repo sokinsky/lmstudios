@@ -1,76 +1,50 @@
 ﻿import * as Schema from "./Schema";
 import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatus} from './'
 
-
-export enum ContextStatus { None="None", Ready="Ready", Saving="Saving" }
 export class Context {
-	constructor(schema:Schema.Context) {	
-		var decoration:{name:string, url:string} = ((<any>this).__proto__).context;
-		if (decoration === undefined)
-			throw new Error(`Please add @lmstudios.Decororators.Context to the context class`);
-		if (decoration.url === undefined)
-			throw new Error(`'url' was not added to the decorator`);
-		this.API = new API(this, decoration.url);
-		this.Schema = schema;
-
-		let request = new Request("Context/Initialize", {});
-		request.Post(this.API).then(response => {
-			if (response !== undefined){
-				if (response.Request !== undefined){
-					if (response.Result.Schema !== undefined){
-						this.Schema = new Schema.Context(response.Result.Schema);
-						this.Initialized = true;					
-						for (const repository of this.Repositories){
-							console.log(repository.__internal.type.constructor.prototype);
-						}
-						this.Status = ContextStatus.Ready;
-						if (response.Result.Models !== undefined){
-							this.Load(response.Result.Models);
-						}
-					}
-				}
-			}
-		});
+	constructor(apiUrl:string, schemaData:any) {	
+		this.API = new API(this, apiUrl);
+		this.Schema = new Schema.Context(schemaData);
+		//this.Load(modelData);
+		this.Initialize();
 	}
-	public Initialized:boolean = false;
 	public API:API;
 	public Changes:ChangeTracker = new ChangeTracker(this);
-	public Status:ContextStatus = ContextStatus.None;
-	public Schema:Schema.Context|undefined;
+	public Schema:Schema.Context;
 
+	private __repositories?:Repository<Model>[];
 	public get Repositories(){
-		return this.getRepositories();
-	}
-	public * getRepositories(){
-		for (var key in this){
-			if ((<any>this)[key] instanceof Repository){
-				yield (<any>this)[key];
+		if (this.__repositories === undefined){
+			this.__repositories = [];
+			for (var key in this){
+				if ((<any>this)[key] instanceof Repository){
+					this.__repositories.push((<any>this)[key]);
+				}
 			}
 		}
+		return this.__repositories;
 	}
-
-	public GetRepository(type:string|Schema.Type|(new (...args: any[]) => Model)|Model):Repository<Model>|undefined {
-		if (this.Status === undefined)
-			return undefined;
+	public async Initialize(){
+		var request = new Request("Context/Initialize", {});
+		var response = await this.API.Post(request);
+		if (response !== undefined)
+			this.Load(response.Result);
+	}
+	public GetRepository(type:string|Schema.Type|(new (...args: any[]) => Model)|Model):Repository<Model> {
 		switch (typeof(type)){
 			case "string":
-				if (this.Schema !== undefined){
-					var schemaType = this.Schema.Types.find(x => x.Name === type);
-					if (schemaType !== undefined)
-						return this.GetRepository(schemaType);					
-				}
-				return undefined;
+				return this.GetRepository(this.GetType(<string>type));					
 			case "object":
 				if (type instanceof Model)
 					return this.GetRepository(type.GetType());
-				else if (type instanceof Schema.Type && type.Constructor !== undefined)
-					return this.Repositories.find(repositorty => { return repositorty.__internal.type.schema === type});
-				return undefined;
-			default:
-				return this.Repositories.find(repositorty => { return repositorty.__internal.type.constructor === type});
-				
+				else if (type instanceof Schema.Type ){
+					var result = this.Repositories.find((repository:Repository<Model>) => { return type === repository.Type });
+					if (result !== undefined)
+						return result;
+				}
+				break;
 		}
-		return undefined;
+		throw new Error(``);
 	}
 	public async Load(models: {ID:string,Type:string,Value:any}[]) {	
 		models.forEach((bridgeModel: any) => {
@@ -80,17 +54,15 @@ export class Context {
 				dataModel = dataEntry.Model;
 			if (dataModel === undefined){
 				var dataRepository = this.GetRepository(bridgeModel.Type);
-				if (dataRepository !== undefined){
-					dataModel = dataRepository.Local.Select(bridgeModel.Value);
-					if (dataModel === undefined)
-						dataModel = dataRepository.Add(bridgeModel.Value, true);
-				}
-				else{
-					throw new Error(`Repository(${bridgeModel.Type}) is currently unavailable`);
-				}				
+				dataModel = dataRepository.Local.Select(bridgeModel.Value);
+				if (dataModel === undefined)
+					dataModel = dataRepository.Add(bridgeModel.Value, true);	
+				else
+					dataModel.Load(bridgeModel.Value, true);	
 			}
-			dataModel.Load(bridgeModel.Value, true);					
-			
+			else{
+				dataModel.Load(bridgeModel.Value, true);
+			}							
 		});
 	}
 	public async SaveChanges(): Promise<Response | undefined> {
@@ -104,10 +76,11 @@ export class Context {
 		return response;
 	}
 
-	public GetType(name:string|(new (...args: any[]) => any)):Schema.Type|undefined{
-		if (this.Schema !== undefined)
-			return this.Schema.GetType(name);
-		return undefined;
+	public GetType(name:string|(new (...args: any[]) => any)):Schema.Type{
+		var result = this.Schema.GetType(name);
+		if (result === undefined)
+			throw new Error(``);
+		return result;
 	}
 }
 

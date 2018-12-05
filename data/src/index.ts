@@ -1,7 +1,7 @@
 ﻿export { API } from "./API";
 export { ChangeEntry, ChangeStatus } from "./ChangeEntry";
 export { ChangeTracker } from "./ChangeTracker";
-export { Context, ContextStatus } from "./Context";
+export { Context } from "./Context";
 export { Controller } from "./Controller";
 export { Message } from "./Message";
 export { Model } from "./Model";

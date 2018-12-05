@@ -1,20 +1,12 @@
 import { Context, Model, Request, Response, Schema } from "./";
 
 export class Repository<TModel extends Model> {
-	public __internal:{
-		context:Context,
-		type:{
-			constructor:(new (...args: any[]) => TModel),
-			schema?:Schema.Type
-		}
-	}
 	constructor(context:Context, type: (new (...args: any[]) => TModel)) {
-		this.__internal = {
-			context:context,
-			type:{
-				constructor:type
-			}
-		}
+		this.Context = context;
+		if (type.prototype.decoration === undefined)
+			throw new Error(`'${type.prototype.constructor.name}' was not decorated`);	
+		this.Type = this.Context.GetType(type.prototype.decoration.type.name);
+		this.Type.Constructor = type;
 	}
 	private __items:TModel[] = [];
 	public get Items():TModel[]{
@@ -25,25 +17,16 @@ export class Repository<TModel extends Model> {
 			yield value;
 		}
 	}
-	public get Type(): Schema.Type|undefined{
-		if (this.__internal.type.schema === undefined){
-			if (this.__internal.context.Schema !== undefined){
-				this.__internal.type.schema = this.__internal.context.Schema.GetType(this.__internal.type.constructor);
-			}
-		}
-		return this.__internal.type.schema;
-		
-	}
+	public Context:Context;
+	public Type:Schema.Type;
 
     public Local: LocalRepository<TModel> = new LocalRepository(this);
 	public Server: ServerRepository<TModel> = new ServerRepository(this);
 
 	public Create():TModel{
-		if (this.Type !== undefined){
-			if (this.Type.Constructor !== undefined){
-				var result = new this.Type.Constructor(this.__internal.context);
-				return result;
-			}
+		if (this.Type.Constructor !== undefined){
+			var result = new this.Type.Constructor(this.Context);
+			return result;
 		}
 		throw new Error(`Repository.Create was unable to create Model`);
 	}
@@ -73,8 +56,8 @@ export class Repository<TModel extends Model> {
 	public async Select(value:Partial<TModel>):Promise<TModel|undefined> {
 		var result = this.Local.Select(value);
 		if (!result)
-			await this.Server.Select(value);
-		return this.Local.Select(value);
+			return this.Server.Select(value);
+		return undefined;
 	}
 	public async Search(value:Partial<TModel>):Promise<TModel[]>{
 		if (value === undefined)
@@ -87,15 +70,54 @@ export class LocalRepository<TModel extends Model> {
     constructor(repository: Repository<TModel>) {
         this.Repository = repository;
     }
-    public Repository: Repository<TModel>;
+	public Repository: Repository<TModel>;
+	public get Items():TModel[]{
+		return this.Repository.Items;
+	}
+	public get Type():Schema.Type{
+		return this.Repository.Type;
+	}
 
     public Select(value:Partial<TModel>) : TModel|undefined {
+		var filter:Partial<TModel> = {};
+		this.Repository.Type.PrimaryKey.Properties.forEach(property =>{
+			property.SetValue(filter, property.GetValue(value));
+		})
+		var results = this.Search(filter);
+		if (results.length === 1)
+			return results[0];
+		
+		this.Repository.Type.AdditionalKeys.forEach(key =>{
+			filter = {};
+			key.Properties.forEach(property=>{
+				property.SetValue(filter, property.GetValue(value));
+			})
+			results = this.Search(filter);
+			if (results.length === 1)
+				return results[0];
+		})
 		return undefined;
 	}
 	public Search(...values:Partial<TModel>[]):TModel[]{
-		if (values.length == 0)
-			return [];
-		return [];
+		var results:TModel[] = [];
+		for (let value of values){
+			for (let item of this.Repository.Items){
+				var include = true;
+				for (var propertyName in value){
+					var property = this.Type.GetProperty(propertyName);
+					if (property !== undefined){
+						if (property.GetValue(item) !== property.GetValue(value))
+							include = false;
+					}	
+				}
+				if (include){
+					var included = results.find(x => { return (x === item); });
+					if (!included)
+						results.push(item);
+				}	
+			}
+		}
+		return results;
 	}
 }
 export class ServerRepository<TModel extends Model> {
@@ -111,9 +133,9 @@ export class ServerRepository<TModel extends Model> {
 			Value: value
 		};
 		var request:Request = new Request("Model/Select", body);
-		var response:Response = await request.Post(this.Repository.__internal.context.API);
-		if (response.Result)
-			this.Repository.__internal.context.Load(response.Result);
+		var response:Response = await request.Post(this.Repository.Context.API);
+		if (response.Result)			
+			this.Repository.Context.Load(response.Result);		
 		return this.Repository.Local.Select(value);
 	}
 	public async Search(...values:Partial<TModel>[]):Promise<TModel[]>{
@@ -125,9 +147,9 @@ export class ServerRepository<TModel extends Model> {
 			Values:values
 		}
 		var request:Request = new Request("Model/Search", body);
-		var response = await request.Post(this.Repository.__internal.context.API);
+		var response = await request.Post(this.Repository.Context.API);
 		if (response !== undefined)
-			this.Repository.__internal.context.Load(response.Result);
+			this.Repository.Context.Load(response.Result);
 		return this.Repository.Local.Search(...values);
 	}
 }

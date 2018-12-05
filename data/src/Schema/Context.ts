@@ -1,4 +1,4 @@
-import { Type, Key, Property } from "./";
+import { Type, Key, Property, Constraint } from "./";
 
 export class Context {
     constructor(contextData?:any){
@@ -15,24 +15,31 @@ export class Context {
                     this.Types.push(type);
                 });       
             }
-            this.Types.forEach(type => {               
+            this.Types.forEach(type => {           
+                console.log(type);   
                 var typeData = contextData.Types.find((tdata:any)=>{ return(tdata.Name === type.Name); });
+                console.log(typeData);
                 if (typeData !== undefined){
                     type.Properties.forEach(property =>{
-                        var propertyData = typeData.Properties.find((propertyData:any)=>{ propertyData.Name === property.Name });
+                        console.log(property);
+                        var propertyData = typeData.Properties.find((propertyData:any)=>{ return (propertyData.Name === property.Name) });
+                        console.log(propertyData);
                         if (propertyData !== undefined){
                             property.PropertyType = this.GetType(propertyData.PropertyType);
+                            if (propertyData.Constraints !== undefined)
+                                property.Constraints = Constraint.Create(property, propertyData.Constraints);
+                            //if (propertyData.References !== undefined)
+                                // property.References = Reference.Create(property, propertyData.References);
                         }
-                    });
-                    
+                    });                    
                     type.Keys = Key.Create(type, typeData.Keys);
                 }
             })
-            console.log(this);
         }
     }
 
     public Name:string = "";
+    public APIUrl:string = "";
     public Types:Type[] = [];
 
     public GetType(name:string|(new (...args: any[]) => any)):Type|undefined {
@@ -48,14 +55,4 @@ export class Context {
         }
         return undefined;
     }
-}
-export async function getSchema(url:string){    
-    let input = {
-        method: "POST",
-        body: "{}"
-    }
-    let fetchResult = await fetch(url, input);
-    let fetchResponse = await fetchResult.json();
-    let result = new Context(fetchResponse.Result.Schema);
-    return result;
 }

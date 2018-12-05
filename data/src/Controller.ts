@@ -3,17 +3,12 @@ import { Schema, Utilities } from "./";
 import { ChangeStatus, Context, Model, Request } from "./";
 import { Repository } from "./Repository";
 
-const internal=Symbol();
-
 export class Controller<TModel extends Model> {
-	[internal]:{
-		context:Context
-	};
 	constructor(context:Context, actual: TModel, proxy:TModel) {
-		this[internal] = {
-			context:context
-		}
-		this.Values = {
+		this.__context = context;
+		this.__schema = actual.GetType();
+		this.__repository = <Repository<TModel>>this.__context.GetRepository(actual);
+		this.__values = {
 			Actual:{
 				Model:actual,
 				Data:{}
@@ -23,45 +18,55 @@ export class Controller<TModel extends Model> {
 			},
 			Proxy:proxy,
 			Pending:{}
-		}
+		}		
 	}
-
-	public ID:string = Utilities.Guid.Create.toString();
-	public Values:{	Actual:{ Model:TModel, Data:Partial<TModel>	}, Server:{	Data:Partial<TModel> },	Proxy:TModel, Pending:Partial<TModel> };
+	public __id:string = Utilities.Guid.Create().toString();
+	public __context:Context;
+	public __schema:Schema.Type;
+	public __repository:Repository<TModel>;
+	public __values:{ Actual:{ Model:TModel, Data:Partial<TModel>	}, Server:{	Data:Partial<TModel> },	Proxy:TModel, Pending:Partial<TModel> };
 	
-	private __repository?:Repository<TModel>;
-	public get Repository():Repository<TModel>{
-		if (this.__repository === undefined){
-			this.__repository = <Repository<TModel>>this[internal].context.GetRepository(this.Model);
-			if (this.__repository === undefined)
-				throw new Error(``);
-		}
-		return this.__repository;
-	}
 
-	public get Model():TModel{
-		return this.Values.Actual.Model;
-	}
 	public GetValue(property:Schema.Property|string):any{			
 		if (typeof(property) === "string"){
-			var actualProperty:Schema.Property|undefined = this.Model.GetType().GetProperty(<string>property);
-			if (actualProperty !== undefined)
+			var actualProperty:Schema.Property|undefined = this.__values.Actual.Model.GetType().GetProperty(<string>property);
+			if (actualProperty === undefined){
+				console.warn(`Property(${property}) could not be found in Type(${this.__schema.Name})`);
+				return undefined;
+			}				
+			else{
 				return this.GetValue(actualProperty);
-			return undefined;
+			}	
 		}
-		return property.GetValue(this.Model);
+		else if (property instanceof Schema.Property){
+			return property.GetValue(this.__values.Actual.Model);
+		}
+		throw new Error(`Controller.GetValue():Invalid parameter`);
 	}
 	public SetValue(property:Schema.Property|string, value:any, server?:boolean):any{
 		if (typeof(property) === "string"){
-			var actualProperty:Schema.Property|undefined = this.Model.GetType().GetProperty(property);
-			if (actualProperty !== undefined)
+			var actualProperty:Schema.Property|undefined = this.__values.Actual.Model.GetType().GetProperty(<string>property);
+			if (actualProperty === undefined){
+				console.warn(`Property(${property}) could not be found in Type(${this.__schema.Name})`);
+				return undefined;
+			}				
+			else{
 				return this.SetValue(actualProperty, value, server);
+			}	
 		}
+		else if (property instanceof Schema.Property){
+			property.SetValue(this.__values.Actual.Data, value);
+			property.SetValue(this.__values.Actual.Model, value);
+			if (server)
+				property.SetValue(this.__values.Server.Data, value);
+			return true;
+		}
+		throw new Error(`Controller.SetValue():Invalid parameter`);
 	}
 	public GetChangeStatus(property?:Schema.Property|string):ChangeStatus{
 		if (property!== undefined){
 			if (typeof(property) === "string"){
-				property = this.Model.GetType().GetProperty(property);
+				property = this.__schema.GetProperty(property);
 				if (property !== undefined)
 					return this.GetChangeStatus(property);
 				else
@@ -69,11 +74,11 @@ export class Controller<TModel extends Model> {
 			}				
 		}
 		if (property !== undefined){
-			if (property.Type !== this.Model.GetType())
+			if (property.Type !== this.__schema)
 				return ChangeStatus.Detached;
 			else {
-				var actualValue = property.GetValue(this.Values.Actual.Data)
-				var serverValue = property.GetValue(this.Values.Server.Data);
+				var actualValue = property.GetValue(this.__values.Actual.Data)
+				var serverValue = property.GetValue(this.__values.Server.Data);
 				if (serverValue === actualValue)
 					return ChangeStatus.Unchanged;
 				else{
@@ -87,7 +92,7 @@ export class Controller<TModel extends Model> {
 			}			
 		}
 		else{
-			var check = this.Repository.Items.find(model =>  { return this.Model === model; } );
+			var check = this.__repository.Items.find(model =>  { return this.__values.Actual.Model === model; } );
 			if (check === undefined)
 				return ChangeStatus.Detached;				
 		}
@@ -98,11 +103,12 @@ export class Controller<TModel extends Model> {
 
 	public Load(values: Partial<TModel>, server?:boolean) {
 		for (var propertyName in values){
-			var property:Schema.Property|undefined = this.Model.GetType().GetProperty(propertyName);
+			var property:Schema.Property|undefined = this.__schema.GetProperty(propertyName);
 			if (property !== undefined){
-				var value = property.GetValue(values);
+				var value = property.GetValue(values);				
 				this.SetValue(property, value, server);	
 			}			
 		}
+		console.log(this.__values);
 	}
 }

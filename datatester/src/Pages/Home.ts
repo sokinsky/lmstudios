@@ -11,6 +11,10 @@ export class Home implements OnInit {
 	constructor(private context: Context) {
     }
     public async ngOnInit(){
+        this.Person = await this.context.People.Select({ID:2});
+        console.log(this.Person);
+        if (this.Person !== undefined)
+            console.log(this.Person.User);
     }
 
     public User?:Models.User;

@@ -1,0 +1,1 @@
+export { appSettings } from "./appSettings";

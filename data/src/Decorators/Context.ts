@@ -1,4 +1,4 @@
-export function Context(name:string, url:string){  
+export function Context(name:string, url?:string){  
     return function(target:any){
         target.prototype.context = {
             name:name,

@@ -1,0 +1,7 @@
+<div *ngIf="Person">
+    {{Person.FirstName}} {{Person.LastName}}
+    <div *ngIf="User">
+        <input [(ngModel)]="User.Username" placeholder="Username" /><br />
+        <input [(ngModel)]="User.Password" placeholder="Password" /><br />
+    </div>
+</div>

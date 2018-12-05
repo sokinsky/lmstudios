@@ -1,7 +1,8 @@
-import { Decorators, SubRepository } from "@lmstudios/data";
+import { Decorators } from "@lmstudios/data";
 import { Model } from "../Model";
 import { Person } from "../Models";
 
+@Decorators.Model("STA.Data.Models.User")
 export class User extends Model {
     public Token?:string;
     public Username?:string;

@@ -14,6 +14,8 @@ export class Property {
     public Type:Type;
     public Name:string;
     public PropertyType?:Type;
+    public Constraints?:Constraint[];
+    public References?:any[];
     
     // public get PropertyType():Type{
     //     if (this.__init.PropertyType === undefined)

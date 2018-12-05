@@ -14,12 +14,7 @@ export class ChangeTracker {
     public GetBridgeChanges():any[]{
         var results:any[] = [];
 		this.Changes.forEach((entry: ChangeEntry) => {	
-            var result = {
-                ID:entry.Model.__internal.controller.__internal.id,
-                Type:entry.Model.GetType().Name,
-                Value:entry.Model.__internal.controller.__internal.values.actual.data
-            }
-            results.push(result);	
+            results.push(entry.Model.ToBridge());	
         });
         return results;
     } 
