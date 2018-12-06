@@ -1,4 +1,4 @@
-import { Type, Constraint } from "./";
+import { Type, Collection, Model } from "./";
 
 export class Property {
     constructor(type:Type, propertyData:string|{Name:string, PropertyType:string}){
@@ -14,28 +14,9 @@ export class Property {
     public Type:Type;
     public Name:string;
     public PropertyType?:Type;
-    public Constraints?:Constraint[];
-    public References?:any[];
+    public Collection?:Collection;
+    public Model?:Model;
     
-    // public get PropertyType():Type{
-    //     if (this.__init.PropertyType === undefined)
-    //         throw new Error(`Property(${this.Name}) is missing PropertyType`);
-    //     var result = this.Type.Context.GetType(this.__init.PropertyType);
-    //     if (result === undefined)
-    //         result = new Type(this.Type.Context,  this.__init.Property);
-    //     return result;
-    // }
-    // public get Constraints():Constraint[]|undefined {
-    //     if (this.__init.Constraints === undefined)
-    //         return undefined;
-    //     var results:Constraint[] = [];
-    //     this.__init.Constraints.forEach((constraintData:any) => {
-    //         results.push(new Constraint(this, constraintData))
-
-    //     });
-    //     return results;
-    // }
-
     public GetValue(item:any):any{
         if (item === undefined)
             return undefined;

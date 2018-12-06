@@ -13,14 +13,6 @@ export class Model {
 				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
-				console.log(property);
-				if (property.Constraints !== undefined){
-					console.log(property.Name);
-					console.log(property.Constraints);
-				}
-					
-				
-				
 				return this.__controller.GetValue(property);
 			},
 			set: (target, propertyName:string, propertyValue, reciever) => {

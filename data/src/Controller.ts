@@ -39,7 +39,42 @@ export class Controller<TModel extends Model> {
 			}	
 		}
 		else if (property instanceof Schema.Property){
-			return property.GetValue(this.__values.Actual.Model);
+			if (property.Model !== undefined){			
+				var referenceProperties:Schema.Property[] = [];
+				var localProperties:Schema.Property[] = [];
+				var referenceType:Schema.Type = property.Model.ModelType;
+				for (var propertyName in property.Model.Properties){
+					var checkProperty = property.Type.GetProperty(propertyName);
+					if (checkProperty !== undefined)
+						localProperties.push(checkProperty);
+						checkProperty = referenceType.GetProperty(property.Model.Properties[propertyName]);
+					if (checkProperty !== undefined)
+						referenceProperties.push(checkProperty);
+				}
+				if (referenceProperties.length === localProperties.length){
+					var filter:any = {};
+					for (var i=0; i<referenceProperties.length; i++){
+						var referenceProperty = referenceProperties[i];
+						var localProperty = localProperties[i];
+						referenceProperty.SetValue(filter, localProperty.GetValue(this.__values.Actual.Model))
+					}
+				}
+				var modelResult = property.GetValue(this.__values.Actual.Model);
+				var modelSelect = (modelResult === undefined);
+				if (modelSelect){
+					var repositorty = this.__context.GetRepository(referenceType);
+					repositorty.Select(filter).then(selected=>{
+						property.SetValue(this.__values.Actual.Model, selected)
+					})
+				}
+				return modelResult;
+			}
+			else if (property.Collection !== undefined){
+
+			}
+			else{
+				return property.GetValue(this.__values.Actual.Model);
+			}
 		}
 		throw new Error(`Controller.GetValue():Invalid parameter`);
 	}
@@ -109,6 +144,5 @@ export class Controller<TModel extends Model> {
 				this.SetValue(property, value, server);	
 			}			
 		}
-		console.log(this.__values);
 	}
 }

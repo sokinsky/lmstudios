@@ -1,4 +1,4 @@
-import { Type, Key, Property, Constraint } from "./";
+import { Type, Key, Property, Collection, Model } from "./";
 
 export class Context {
     constructor(contextData?:any){
@@ -16,20 +16,16 @@ export class Context {
                 });       
             }
             this.Types.forEach(type => {           
-                console.log(type);   
                 var typeData = contextData.Types.find((tdata:any)=>{ return(tdata.Name === type.Name); });
-                console.log(typeData);
                 if (typeData !== undefined){
                     type.Properties.forEach(property =>{
-                        console.log(property);
                         var propertyData = typeData.Properties.find((propertyData:any)=>{ return (propertyData.Name === property.Name) });
-                        console.log(propertyData);
                         if (propertyData !== undefined){
                             property.PropertyType = this.GetType(propertyData.PropertyType);
-                            if (propertyData.Constraints !== undefined)
-                                property.Constraints = Constraint.Create(property, propertyData.Constraints);
-                            //if (propertyData.References !== undefined)
-                                // property.References = Reference.Create(property, propertyData.References);
+                            if (propertyData.Collection !== undefined)
+                                property.Collection = new Collection(property, propertyData.Collection);
+                            if (propertyData.Model !== undefined)
+                                property.Model = new Model(property, propertyData.Model);
                         }
                     });                    
                     type.Keys = Key.Create(type, typeData.Keys);
