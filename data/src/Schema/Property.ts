@@ -1,21 +1,18 @@
-import { Type, Collection, Model } from "./";
+import { Type, Reference } from "./";
 
 export class Property {
-    constructor(type:Type, propertyData:string|{Name:string, PropertyType:string}){
-        this.Type = type;  
-        if (typeof(propertyData) == "string"){
-            this.Name = propertyData;
-        }   
-        else{
-            this.Name = propertyData.Name;
-        }
+    constructor(parent:Type, data:{Name:string, Type:string, References:any[]}){
+        this.Parent = parent;  
+        this.Name = data.Name;
+        this.Type = this.Parent.Context.GetType(data.Type);
+        this.References = [];
+
 
     }
-    public Type:Type;
+    public Parent:Type;
     public Name:string;
-    public PropertyType?:Type;
-    public Collection?:Collection;
-    public Model?:Model;
+    public Type?:Type;
+    public References:Reference[];
     
     public GetValue(item:any):any{
         if (item === undefined)

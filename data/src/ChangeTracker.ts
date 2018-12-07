@@ -25,6 +25,23 @@ export class ChangeTracker {
         });
         return (exists !== undefined);
     }
+
+    public Update(model?:Model){
+        if (model === undefined){
+            for (var entry of this.Entries){
+                this.Update(entry.Model);
+            }
+            return;
+        }
+        var existingEntry  = this.Entries.find(entry => {
+            return entry.Model === model;
+        });
+        if (existingEntry === undefined){
+            existingEntry = new ChangeEntry(model);
+            this.Entries.push(existingEntry);
+        }
+    }
+
 	public Add(model: Model) {
         var entry = this.Entries.find(x => {
             return x.Model === model;

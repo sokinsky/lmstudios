@@ -56,7 +56,7 @@ export class Repository<TModel extends Model> {
 	public async Select(value:Partial<TModel>):Promise<TModel|undefined> {
 		var result = this.Local.Select(value);
 		if (!result)
-			return this.Server.Select(value);
+			return await this.Server.Select(value);
 		return undefined;
 	}
 	public async Search(value:Partial<TModel>):Promise<TModel[]>{
@@ -79,6 +79,7 @@ export class LocalRepository<TModel extends Model> {
 	}
 
     public Select(value:Partial<TModel>) : TModel|undefined {
+		
 		var filter:Partial<TModel> = {};
 		this.Repository.Type.PrimaryKey.Properties.forEach(property =>{
 			property.SetValue(filter, property.GetValue(value));
@@ -95,7 +96,7 @@ export class LocalRepository<TModel extends Model> {
 			results = this.Search(filter);
 			if (results.length === 1)
 				return results[0];
-		})
+		});
 		return undefined;
 	}
 	public Search(...values:Partial<TModel>[]):TModel[]{
@@ -134,8 +135,8 @@ export class ServerRepository<TModel extends Model> {
 		};
 		var request:Request = new Request("Model/Select", body);
 		var response:Response = await request.Post(this.Repository.Context.API);
-		if (response.Result)			
-			this.Repository.Context.Load(response.Result);		
+		if (response.Result)
+			this.Repository.Context.Load(response.Result);
 		return this.Repository.Local.Select(value);
 	}
 	public async Search(...values:Partial<TModel>[]):Promise<TModel[]>{

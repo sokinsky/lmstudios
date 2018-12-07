@@ -1,4 +1,4 @@
-import { Type, Key, Property, Collection, Model } from "./";
+import { Type, Key, Property, Reference } from "./";
 
 export class Context {
     constructor(contextData?:any){
@@ -21,17 +21,20 @@ export class Context {
                     type.Properties.forEach(property =>{
                         var propertyData = typeData.Properties.find((propertyData:any)=>{ return (propertyData.Name === property.Name) });
                         if (propertyData !== undefined){
-                            property.PropertyType = this.GetType(propertyData.PropertyType);
-                            if (propertyData.Collection !== undefined)
-                                property.Collection = new Collection(property, propertyData.Collection);
-                            if (propertyData.Model !== undefined)
-                                property.Model = new Model(property, propertyData.Model);
+                            property.Type = this.GetType(propertyData.PropertyType);
+                            if (propertyData.References !== undefined){
+                                for (var referenceData of propertyData.References){
+                                    property.References.push(new Reference(property, referenceData));
+                                }
+                            }
+
                         }
                     });                    
                     type.Keys = Key.Create(type, typeData.Keys);
                 }
             })
         }
+        console.log(this);
     }
 
     public Name:string = "";

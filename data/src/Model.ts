@@ -7,6 +7,7 @@ export class Model {
 		this.__context = context;		
 		var decoration = ((<any>this).__proto__).decoration;
 		this.__schema = this.__context.GetType(decoration.type.name);
+		this.__status = {Value:"Ready", Properties:{}}
 
 		var proxy:Model|undefined = new Proxy(this, {
 			get: (target, propertyName: string, reciever) => {		
@@ -41,6 +42,7 @@ export class Model {
 	}
 	public __context:Context;
 	public __schema:Schema.Type;
+	public __status: { Value:string, Properties:{[key:string]:string}};
 	public __controller:Controller<Model>
 	public Server:{[p in keyof this]:Promise<this[p]>};
 
