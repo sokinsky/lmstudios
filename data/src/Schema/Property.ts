@@ -1,18 +1,15 @@
-import { Type, Reference } from "./";
+import { Type, Relationship } from "./";
 
 export class Property {
     constructor(parent:Type, data:{Name:string, Type:string, References:any[]}){
         this.Parent = parent;  
         this.Name = data.Name;
-        this.Type = this.Parent.Context.GetType(data.Type);
-        this.References = [];
-
-
     }
     public Parent:Type;
     public Name:string;
     public Type?:Type;
-    public References:Reference[];
+    public Relationships?:Relationship[];
+    public Reference?:Property;
     
     public GetValue(item:any):any{
         if (item === undefined)

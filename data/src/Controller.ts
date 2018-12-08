@@ -42,13 +42,11 @@ export class Controller<TModel extends Model> {
 		if (property instanceof Schema.Property){
 			
 			if (property.References.length > 0){
-				console.log(property);
 				for (var reference of property.References){
 					switch (reference.Type){
 						case Schema.ReferenceType.Key:
 							break;
 						case Schema.ReferenceType.Model:
-							console.log(reference);
 							if (reference.Relationship.Type === property.Type){
 								var filter:any = {};
 								for (var propertyName in reference.Relationship.Properties){
@@ -68,7 +66,6 @@ export class Controller<TModel extends Model> {
 				return undefined;
 			}
 			else{				
-				console.log(property);
 				return property.GetValue(this.__values.Actual.Model);
 			}
 		}		

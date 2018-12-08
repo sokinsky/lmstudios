@@ -1,24 +1,15 @@
-import { Type, Reference, Property } from ".";
+import { Type, Property } from ".";
 
 export class Relationship {
-    constructor(parent:Reference, data:{Type:string, Properties:any}) { 
-        this.Parent = parent;
-        if (this.Parent.Parent.Type === undefined)
-            throw new Error(``);
-        var type = this.Parent.Parent.Type.Context.GetType(data.Type);
-        if (type === undefined)
-            throw new Error(``);
-        this.Type = type;
-        this.Properties = {};
-        for (var propertyName in data.Properties){
-            var childProperty = this.Type.GetProperty(data.Properties[propertyName]);
-            if (childProperty === undefined)
-                throw new Error(``);
-            this.Properties[propertyName] = childProperty;
+    constructor(parent:Property, data:{Type:string, Properties:any}) { 
+        this.Parent = parent;   
+        this.Type = parent.Parent.Context.GetType(data.Type);     
+        for (var name in data.Properties){
+            this.Properties[name] = parent.Parent.GetProperty()
         }
     }
 
-    public Parent:Reference;
-    public Type:Type;
+    public Parent:Property;
+    public Type?:Type;
     public Properties:{[name:string]:Property} = {};
 }
