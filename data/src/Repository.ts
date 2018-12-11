@@ -38,8 +38,10 @@ export class Repository<TModel extends Model> {
 			if (value.GetType() !== this.Type)
 				throw new Error(`Repository.Add():Unable to add value`);
 			var existing = this.Items.find(x => { return x === value});
-			if (existing === undefined)
+			if (existing === undefined){
 				this.Items.push(value);
+				this.Context.Changes.Update(value);
+			}
 			return value;
 		}
 		else {

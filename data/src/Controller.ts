@@ -37,6 +37,11 @@ export class Controller<TModel extends Model> {
 		Change:{ Model:ChangeStatus, Properties:{[name:string]:ChangeStatus} }
 	}
 
+	public get PrimaryKey():any{
+		var keyProperty = this.__values.Actual.Model.GetType().PrimaryKey
+		return keyProperty.Properties[0].GetValue(this.__values.Actual.Model);
+	}
+
 
 	public GetValue(property:Schema.Property|string):any{	
 		if (property instanceof Schema.Property){
@@ -100,12 +105,22 @@ export class Controller<TModel extends Model> {
 		throw new Error(`Controller.SetValue():Invalid parameter`);
 	}
 	public GetChangeStatus(property?:Schema.Property|string):ChangeStatus{
-		if (property!== undefined){
+		if (property !== undefined ){
 			if (typeof(property) === "string"){
 				property = this.__schema.GetProperty(property);
 				if (property !== undefined)
 					return this.GetChangeStatus(property);
 			}				
+		}
+		else {
+			console.log(this.PrimaryKey);
+  			if (this.PrimaryKey === undefined){				
+				return ChangeStatus.Added;
+			}
+			var properties = this.__values.Actual.Model.GetType().Properties;
+			for (var p of properties){
+
+			}
 		}
 		if (property !== undefined){
 				var actualValue = property.GetValue(this.__values.Actual.Data)

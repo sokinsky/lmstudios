@@ -67,6 +67,7 @@ export class Context {
 	}
 	public async SaveChanges(): Promise<Response | undefined> {
 		let bridgeModels: any[] = this.Changes.GetBridgeChanges();
+		console.log(bridgeModels);
 		let request = new Request("Context/SaveChanges", bridgeModels);
 		let response = await request.Post(this.API);
 		if (response.Status == ResponseStatus.OK) {

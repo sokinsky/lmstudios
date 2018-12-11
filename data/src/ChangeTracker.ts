@@ -38,6 +38,7 @@ export class ChangeTracker {
         });
         if (existingEntry === undefined){
             existingEntry = new ChangeEntry(model);
+            existingEntry.Status = model.ChangeStatus();
             this.Entries.push(existingEntry);
         }
     }
