@@ -1,60 +1,37 @@
-import { Type, Key, Property, Relationship } from "./";
+import { Type, Key, Property } from "./";
 
 export class Context {
     constructor(contextData?:any){
         if (contextData !== undefined){
-            if (contextData.Name !== undefined) this.Name = contextData.Name;
+            if (contextData.Name !== undefined) 
+                this.Name = contextData.Name;
             if (contextData.Types !== undefined){
-                contextData.Types.forEach((typeData:any)=>{
-                     var type = new Type(this, typeData);                    
+                for (var typeData of contextData.Types){
+                    var type = new Type(this, typeData.Name);
                     if (typeData.Properties !== undefined){
-                        typeData.Properties.forEach((propertyData:any)=>{
-                            type.Properties.push(new Property(type, propertyData));
-                        });                        
+                        for (var propertyData of typeData.Properties){
+                            type.Properties.push(new Property(type, propertyData.Name));
+                        }
                     }
                     this.Types.push(type);
-                });       
+                }      
             }
-            this.Types.forEach(type => {           
-                var typeData = contextData.Types.find((tdata:any)=>{ return(tdata.Name === type.Name); });
-                if (typeData !== undefined){
-                    type.Properties.forEach(property =>{                        
-                        var propertyData = typeData.Properties.find((propertyData:any)=>{ return (propertyData.Name === property.Name) });                        
-                        if (propertyData !== undefined){
-                            property.Type = this.GetType(propertyData.Type);
-                            if (propertyData.Reference !== undefined)
-                                property.Reference = type.GetProperty(propertyData.Reference);
-                            if (propertyData.Relationships !== undefined){
-                                property.Relationships = [];
-                                for (var relationshipName in propertyData.Relationships){
-                                    var relationship = new Relationship(property, { Type: relationshipName, Properties:propertyData.Relationships});
-                                    property.Relationships.push(relationship);
-                                }
-                            }
-                                for (var referenceData of propertyData.References){
-                                    property.References.push(new Reference(property, referenceData));
-                                }
-                            }
-
-                        }
-                    });                    
-                    type.Keys = Key.Create(type, typeData.Keys);
-                }
-            })
+            for (let type of this.Types){
+                var typeData = contextData.Types.find((x:any) => { return x.Name === type.Name; } );
+                type.Initialize(typeData);
+            }
         }
+        console.log(this.Types);
+
     }
 
     public Name:string = "";
-    public APIUrl:string = "";
     public Types:Type[] = [];
 
     public GetType(name:string|(new (...args: any[]) => any)):Type|undefined {
         if (typeof(name) === "string"){
-            if (name === "STA.Data.Models.User"){
-                console.log(this.Types);
-            }
-        }
-        if (typeof(name) === "string"){
+            if (name.match(/\[\]$/))
+                name = name.replace(/\[\]$/, "");
             return this.Types.find(type => {
                 return (type.Name == name)
             }); 

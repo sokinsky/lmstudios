@@ -15,12 +15,4 @@ export class Key {
     public Type:Type;
     public Name:string;
     public Properties:Property[] = []
-
-    public static Create(type:Type, dataKeys:{Name:string,Properties:string[]}[]):Key[]{
-        var results:Key[] = [];
-        dataKeys.forEach((dataKey)=>{    
-            results.push(new Key(type, dataKey));
-        });
-        return results;
-    }
 }

@@ -40,32 +40,33 @@ export class Controller<TModel extends Model> {
 
 	public GetValue(property:Schema.Property|string):any{	
 		if (property instanceof Schema.Property){
+			if (property.Parent !== this.__values.Actual.Model.GetType())
+				throw new Error(``);
 			
-			if (property.References.length > 0){
-				for (var reference of property.References){
-					switch (reference.Type){
-						case Schema.ReferenceType.Key:
-							break;
-						case Schema.ReferenceType.Model:
-							if (reference.Relationship.Type === property.Type){
-								var filter:any = {};
-								for (var propertyName in reference.Relationship.Properties){
-									var parentProperty = this.__schema.GetProperty(propertyName);
-									if (parentProperty === undefined)
-										throw new Error(``);
-									var childProperty = reference.Relationship.Properties[propertyName];
-									filter[childProperty.Name] = parentProperty.GetValue(this.__values.Actual.Model);
-								}
-								console.log(filter);
+			if (property.Relationship !== undefined) {
+				var result = property.GetValue(this.__values.Actual.Model);
+				if (result === undefined){
+					if (property.Type !== undefined){	
+						var value:any = {};
+						for (var propertyName in property.Relationship){
+							var localProperty = this.__values.Actual.Model.GetType().GetProperty(propertyName);
+							if (localProperty){
+								var foreignProperty = property.Relationship[propertyName];
+								value[foreignProperty.Name] = localProperty.GetValue(this.__values.Actual.Model);
 							}
-							break;
-						case Schema.ReferenceType.Collection:
-							break;
+						}
+						var repository = this.__context.GetRepository(property.Type);
+						repository.Select(value).then(model =>{
+							this.SetValue(property, model);
+						});
+					}
+					else{
+						throw new Error(`Collections not implemented`);
 					}
 				}
-				return undefined;
+				return result;
 			}
-			else{				
+			else {
 				return property.GetValue(this.__values.Actual.Model);
 			}
 		}		
@@ -79,7 +80,6 @@ export class Controller<TModel extends Model> {
 				return this.GetValue(actualProperty);
 			}	
 		}
-
 		throw new Error(`Controller.GetValue(${property}):Invalid parameter`);
 	}
 	public SetValue(property:Schema.Property|string, value:any, server?:boolean):boolean{

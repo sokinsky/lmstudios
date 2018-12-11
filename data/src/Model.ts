@@ -7,8 +7,6 @@ export class Model {
 		this.__context = context;		
 		var decoration = ((<any>this).__proto__).decoration;
 		this.__schema = this.__context.GetType(decoration.type.name);
-		console.log(this.__schema);
-		
 
 		var proxy:Model|undefined = new Proxy(this, {
 			get: (target, propertyName: string, reciever) => {		
