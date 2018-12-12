@@ -12,27 +12,12 @@ export class Home implements OnInit {
     }
     public async ngOnInit(){
         var data = {
-            FirstName:"Steven",
-            LastName:"Okinsky",
             User:{
                 Username:"sokinsky",
                 Password:"musk4rat"
             }
         }
-        var person = this.context.People.Add(data);
-        //await this.context.SaveChanges();
-        console.log(this.context.Changes.Changes);
-
-        // console.log("here");
-        // //this.PersonEmail = await this.context.PeopleEmails.Select({ID:3})
-        // //this.Person = await this.context.People.Select({ID:2});
-        // // console.log(this.Person);
-        // // if (this.Person !== undefined)
-        // //     console.log(this.Person.User);
-        // var person = await this.context.People.Select({ID:2});
-        // console.log(person);
-        // if (person !== undefined)
-        //     console.log(person.User);
+        this.Person = this.context.People.Add(data);
     }
 
     public PersonEmail?:Models.PersonEmail;

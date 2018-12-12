@@ -28,7 +28,10 @@ export class Type {
     public get PrimaryKey():Key{
         if (this.Keys.length == 0)
             throw new Error(`Type(${this.Name}) does not have a PrimaryKey`);
-        return this.Keys[0];
+        var key = this.Keys[0];
+        if (key.Properties.length != 1)
+            throw new Error(`Type(${this.Name}) does not have a PrimaryKey`);
+        return key;
     }
     public get AdditionalKeys():Key[]{
         var result:Key[] = [];

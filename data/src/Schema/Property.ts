@@ -5,12 +5,18 @@ export class Property {
         this.Parent = parent;  
         this.Name = name;
     }
-    public Initialize(data:{ Name:string, Type:string, Relationship?:{ [name:string]:string }, Reference?:string }){
-        
+    public Initialize(data:{ Name:string, Type:string, Relationship?:{ [name:string]:string }, References?:string }){        
         this.Type = this.Parent.Context.GetType(data.Type);
         if (this.Type === undefined){
-            if (data.Reference !== undefined){
-                this.Reference = this.Parent.GetProperty(data.Reference);
+            if (data.References !== undefined){
+                this.References = [];
+                for (var dataReference of data.References){
+                    var referenceProperty = this.Parent.GetProperty(dataReference);
+                    if (referenceProperty === undefined)
+                        throw new Error(``);
+                    this.References.push(referenceProperty);
+                }
+
             }
         }
         else{
@@ -27,17 +33,27 @@ export class Property {
 
                     this.Relationship[name] = childProperty;
                 }
+
+                if (data.Type.match(/\[\]/)){
+                    this.IsCollection = true;
+                    this.Type = undefined;
+                }
+                else{
+                    this.IsModel = true;
+                }
+                    
             }
         }
 
-        if (data.Type.match(/\[\]/))
-            this.Type = undefined;
+
     }
     public Parent:Type;
     public Name:string;
     public Type?:Type;
+    public IsModel:boolean = false;
+    public IsCollection:boolean = false;
     public Relationship?:{[name:string]:Property};
-    public Reference?:Property;
+    public References?:Property[];
     
     public GetValue(item:any):any{
         if (item === undefined)

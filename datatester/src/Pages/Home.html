@@ -13,7 +13,7 @@
 </div>
 
 <div *ngIf="Person">
-        {{Person.FirstName}} {{Person.LastName}}
+        <span (click)="Log(Person)">Person:{{Person.FirstName}} {{Person.LastName}}</span>
         <div *ngIf="Person.User">
             <input [(ngModel)]="Person.User.Username" placeholder="Username" /><br />
             <input [(ngModel)]="Person.User.Password" placeholder="Password" /><br />
@@ -22,6 +22,6 @@
 
 
 <div>
-    <span (click)="Log(context)">Context</span>
+    <span (click)="Log(context)">Context <span (click)="context.SaveChanges()" *ngIf="context.Changes.Changes.length > 0">Save</span></span>
     <div (click)="Log(request)" *ngFor="let request of context.API.Requests">{{request.Url}}</div>
 </div>

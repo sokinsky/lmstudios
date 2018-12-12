@@ -21,8 +21,6 @@ export class Context {
                 type.Initialize(typeData);
             }
         }
-        console.log(this.Types);
-
     }
 
     public Name:string = "";

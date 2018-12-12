@@ -3,7 +3,7 @@ import { Schema, Utilities } from "./";
 import { Context, Model, Request } from "./";
 import { Repository } from "./Repository";
 
-export enum ServerStatus { None = "None", Serving = "Serving", Served = "Served" }
+export enum ServerStatus { Serving = "Serving", Served = "Served" }
 export enum ChangeStatus { Unchanged = "Unchanged", Modified = "Modified", Added = "Added", Deleted = "Deleted" }
 
 export class Controller<TModel extends Model> {
@@ -18,7 +18,7 @@ export class Controller<TModel extends Model> {
 			Pending:{}
 		}	
 		this.__status = {
-			Server: { Model:ServerStatus.None, Properties:{} },
+			Server: { Properties:{} },
 			Change: { Model:ChangeStatus.Unchanged,	Properties:{} }
 		}	
 	}
@@ -33,7 +33,7 @@ export class Controller<TModel extends Model> {
 		Pending:Partial<TModel> 
 	};
 	public __status: {
-		Server:{ Model:ServerStatus, Properties:{[name:string]:ServerStatus} },
+		Server:{ Model?:ServerStatus, Properties:{[name:string]:ServerStatus} },
 		Change:{ Model:ChangeStatus, Properties:{[name:string]:ChangeStatus} }
 	}
 
@@ -88,13 +88,38 @@ export class Controller<TModel extends Model> {
 		throw new Error(`Controller.GetValue(${property}):Invalid parameter`);
 	}
 	public SetValue(property:Schema.Property|string, value:any, server?:boolean):boolean{
-		if (property instanceof Schema.Property){
-			property.SetValue(this.__values.Actual.Model, value);
-			property.SetValue(this.__values.Actual.Data, value);
-			if (server !== undefined)
-				property.SetValue(this.__values.Server.Data, value);
-			return true;
+		if (property instanceof Schema.Property) {
+			if (property.IsModel){
+				return this.SetModel(property, value, server);
+			}
+			else if (property.IsCollection){
+
+			}	
+			else{
+				switch (this.__status.Server.Model){
+					case ServerStatus.Serving:
+						break;
+					case ServerStatus.Served:
+						break;
+					default:
+						switch (this.__status.Server.Properties[property.Name]){
+							case ServerStatus.Serving:
+								break;
+							case ServerStatus.Served:
+								break;
+							default:
+								property.SetValue(this.__values.Actual.Model, value);
+								property.SetValue(this.__values.Actual.Data, value);							
+								return true;
+						}
+						break;
+				}
+			}
 		}
+
+
+
+
 		if (typeof(property) === "string"){
 			var actualProperty:Schema.Property|undefined = this.__values.Actual.Model.GetType().GetProperty(<string>property);
 			if (actualProperty !== undefined)
@@ -103,6 +128,55 @@ export class Controller<TModel extends Model> {
 			return true;
 		}
 		throw new Error(`Controller.SetValue():Invalid parameter`);
+	}
+	public SetModel(property:Schema.Property, value:Model|Partial<Model>, server?:boolean):boolean{
+		if (value instanceof Model){
+			if (property.Type !== undefined && property.Type == value.GetType()){	
+			   var foreignKey = value.__controller.PrimaryKey;
+			   if (foreignKey === undefined)
+				   foreignKey = value.__controller.__id;
+				switch (this.__status.Server.Model){
+					case ServerStatus.Serving:
+						break;
+					case ServerStatus.Served:
+						break;
+					default:
+						switch (this.__status.Server.Properties[property.Name]){
+							case ServerStatus.Serving:
+								break;
+							case ServerStatus.Served:
+								break;
+							default:
+							property.SetValue(this.__values.Actual.Model, value);
+							property.SetValue(this.__values.Actual.Data, foreignKey);							
+							if (server)
+								property.SetValue(this.__values.Server.Data, foreignKey);
+						}
+						break;
+				}	
+				if (property.Type.PrimaryKey.Properties[0].References !== undefined){
+					var foreignReference = property.Type.PrimaryKey.Properties[0].References.find(r => { return r.Type === this.__schema});
+					if (foreignReference !== undefined){
+						if (foreignReference.GetValue(value.__controller.__values.Actual.Model) !== this.__values.Actual.Model){
+							value.SetValue(foreignReference, this.__values.Actual.Model);
+						}
+					}
+				}									
+		   }
+		   
+	   }
+	   else {
+		   if (property.Type !== undefined){
+				var repository = this.__context.GetRepository(property.Type);
+				var selectValue = repository.Local.Select(value);
+				if (selectValue === undefined){
+					selectValue = repository.Add(value);
+					return this.SetModel(property, selectValue, server);
+				}
+		   }
+		}
+		console.log(this.__values.Actual.Model);
+		return true;
 	}
 	public GetChangeStatus(property?:Schema.Property|string):ChangeStatus{
 		if (property !== undefined ){
@@ -113,7 +187,6 @@ export class Controller<TModel extends Model> {
 			}				
 		}
 		else {
-			console.log(this.PrimaryKey);
   			if (this.PrimaryKey === undefined){				
 				return ChangeStatus.Added;
 			}
