@@ -25,6 +25,9 @@ export class Type {
     public Name:string = "";
     public Properties:Property[] = [];
     public Keys:Key[] = [];
+
+
+
     public get PrimaryKey():Key{
         if (this.Keys.length == 0)
             throw new Error(`Type(${this.Name}) does not have a PrimaryKey`);
@@ -42,6 +45,29 @@ export class Type {
         return result;
     }
 
+    public CircularReferences(property?:Property):Property[]|undefined{
+        if (this.PrimaryKey.Properties[0].References === undefined || this.PrimaryKey.Properties[0].References.length === 0)
+            return undefined;
+        var result = this.PrimaryKey.Properties[0].References;
+        if (property !== undefined)
+            result = result.filter(x => {return x === property});
+        if (result.length === 0)
+            return undefined;
+        return result;
+    }
+    public LocalReferences(property?:Property):Property[]|undefined{
+        var result = this.Properties.filter(x => { 
+            return (x.References !== undefined && x.References.find(y => { 
+                return y.Type !== undefined && y.Type === this 
+            }));
+        });
+        if (property !== undefined)
+            result = result.filter(x => { return x.References != undefined && x.References.find(y => {return y === property}) !== undefined })
+        if (result.length == 0)
+            return undefined;
+        return result;
+    }
+
     public Constructor?:(new (...args: any[]) => any)
 
     public GetProperty(name:string):Property|undefined{
@@ -50,4 +76,3 @@ export class Type {
         });        
     }
 }
-

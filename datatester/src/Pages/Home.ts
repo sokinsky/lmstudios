@@ -12,10 +12,8 @@ export class Home implements OnInit {
     }
     public async ngOnInit(){
         var data = {
-            User:{
-                Username:"sokinsky",
-                Password:"musk4rat"
-            }
+            FirstName:"Steven",
+            LastName:"Okinsky"
         }
         this.Person = this.context.People.Add(data);
     }

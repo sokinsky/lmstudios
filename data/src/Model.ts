@@ -9,14 +9,14 @@ export class Model {
 		this.__schema = this.__context.GetType(decoration.type.name);
 
 		var proxy:Model|undefined = new Proxy(this, {
-			get: (target, propertyName: string, reciever) => {		
+			get: (target, propertyName: string, reciever) => {	
+
 				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
 				return this.__controller.GetValue(property);
 			},
 			set: (target, propertyName:string, propertyValue, reciever) => {
-				console.log(propertyName);
 				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property !== undefined){
 					this.__controller.SetValue(property, propertyValue);

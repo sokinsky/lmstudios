@@ -44,34 +44,28 @@ export class Controller<TModel extends Model> {
 
 
 	public GetValue(property:Schema.Property|string):any{	
-		if (property instanceof Schema.Property){
-			if (property.Parent !== this.__values.Actual.Model.GetType())
-				throw new Error(``);
-			
-			if (property.Relationship !== undefined) {
-				var result = property.GetValue(this.__values.Actual.Model);
-				if (result === undefined){
-					if (property.Type !== undefined){	
-						var value:any = {};
-						for (var propertyName in property.Relationship){
-							var localProperty = this.__values.Actual.Model.GetType().GetProperty(propertyName);
-							if (localProperty){
-								var foreignProperty = property.Relationship[propertyName];
-								value[foreignProperty.Name] = localProperty.GetValue(this.__values.Actual.Model);
-							}
-						}
-						var repository = this.__context.GetRepository(property.Type);
-						repository.Select(value).then(model =>{
-							this.SetValue(property, model);
-						});
-					}
-					else{
-						throw new Error(`Collections not implemented`);
-					}
+		if (property instanceof Schema.Property){		
+			if (property.Parent !== this.__schema)
+				throw new Error(`Property(${property.Parent.Name}:${property.Name}) does not belong to Type(${this.__schema.Name})`);
+			if (property.IsModel){
+				switch (this.__status.Server.Properties[property.Name]){
+					case ServerStatus.Serving:
+						break;
+					case ServerStatus.Served:
+						break;
+					default:
+						this.__status.Server.Properties[property.Name] = ServerStatus.Serving;
+						this.GetModelAsync(property).then(model =>{
+							 this.SetValue(property, model);
+							 this.__status.Server.Properties[property.Name] = ServerStatus.Served;
+						})								
 				}
-				return result;
+				return property.GetValue(this.__values.Actual.Model);
 			}
-			else {
+			else if (property.IsCollection){
+				return property.GetValue(this.__values.Actual.Model);
+			}
+			else{
 				return property.GetValue(this.__values.Actual.Model);
 			}
 		}		
@@ -89,7 +83,7 @@ export class Controller<TModel extends Model> {
 	}
 	public SetValue(property:Schema.Property|string, value:any, server?:boolean):boolean{
 		if (property instanceof Schema.Property) {
-			if (property.IsModel){
+			if (property.IsModel && value !== undefined){
 				return this.SetModel(property, value, server);
 			}
 			else if (property.IsCollection){
@@ -117,9 +111,6 @@ export class Controller<TModel extends Model> {
 			}
 		}
 
-
-
-
 		if (typeof(property) === "string"){
 			var actualProperty:Schema.Property|undefined = this.__values.Actual.Model.GetType().GetProperty(<string>property);
 			if (actualProperty !== undefined)
@@ -129,8 +120,27 @@ export class Controller<TModel extends Model> {
 		}
 		throw new Error(`Controller.SetValue():Invalid parameter`);
 	}
-	public SetModel(property:Schema.Property, value:Model|Partial<Model>, server?:boolean):boolean{
-		if (value instanceof Model){
+	public async GetModelAsync(property:Schema.Property):Promise<Model|undefined>{
+		if (property.Type !== undefined && property.Relationship !== undefined){
+			var repository = this.__context.GetRepository(property.Type);				
+
+			var filter:any = {};
+			for (var propertyName in property.Relationship){
+				var localProperty = this.__values.Actual.Model.GetType().GetProperty(propertyName);
+				if (localProperty){
+					var foreignProperty = property.Relationship[propertyName];
+					filter[foreignProperty.Name] = localProperty.GetValue(this.__values.Actual.Model);
+				}
+			}
+			var repository = this.__context.GetRepository(property.Type);
+			console.log(repository);
+			console.log(filter);
+			return await repository.Select(filter);
+		}
+		throw new Error(``);
+	}
+	public SetModel(property:Schema.Property, value:Model|Partial<Model>, server?:boolean):boolean{		
+		if (value instanceof Model){	
 			if (property.Type !== undefined && property.Type == value.GetType()){	
 			   var foreignKey = value.__controller.PrimaryKey;
 			   if (foreignKey === undefined)
@@ -153,7 +163,7 @@ export class Controller<TModel extends Model> {
 								property.SetValue(this.__values.Server.Data, foreignKey);
 						}
 						break;
-				}	
+				}				
 				if (property.Type.PrimaryKey.Properties[0].References !== undefined){
 					var foreignReference = property.Type.PrimaryKey.Properties[0].References.find(r => { return r.Type === this.__schema});
 					if (foreignReference !== undefined){
@@ -166,7 +176,10 @@ export class Controller<TModel extends Model> {
 		   
 	   }
 	   else {
-		   if (property.Type !== undefined){
+		   if (value === undefined){
+			   this.SetValue(property, undefined);
+		   }
+		   else if (property.Type !== undefined){
 				var repository = this.__context.GetRepository(property.Type);
 				var selectValue = repository.Local.Select(value);
 				if (selectValue === undefined){
@@ -175,7 +188,6 @@ export class Controller<TModel extends Model> {
 				}
 		   }
 		}
-		console.log(this.__values.Actual.Model);
 		return true;
 	}
 	public GetChangeStatus(property?:Schema.Property|string):ChangeStatus{
