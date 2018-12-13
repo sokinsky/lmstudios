@@ -5,11 +5,31 @@ export class ChangeTracker {
 		this.Context = context;
 	}
 	public Context: Context;
-    public Entries : ChangeEntry[] = []
+
+
+    public GetEntries(...statuses:ChangeStatus[]):ChangeEntry[]{
+        if (statuses.length == 0)
+            return [];
+        var results:ChangeEntry[] = [];
+        for (var status of statuses){
+            for (var repository of this.Context.Repositories){
+                var models = repository.Items.filter(x => { return x.__controller.__status.Change.Model === status; });
+                for (var model of models){
+                    var exists = results.find(x => { return x.Model === model; });
+                    if (exists === undefined){
+                        var result = new ChangeEntry(model, model.__controller.__status.Change.Model, model.__controller.__status.Change.Properties);
+                        results.push(result);
+                    }
+                }
+            }
+        }
+        return results;
+    }
+    public get Entries():ChangeEntry[]{
+        return this.GetEntries(ChangeStatus.Added, ChangeStatus.Modified, ChangeStatus.Deleted, ChangeStatus.Unchanged);;
+    }
     public get Changes():ChangeEntry[]{
-        return this.Entries.filter(x =>{
-            return (x.Status !== ChangeStatus.Unchanged && x.Status !== ChangeStatus.Detached);
-        })
+        return this.GetEntries(ChangeStatus.Added, ChangeStatus.Modified, ChangeStatus.Deleted);
     }
     public GetBridgeChanges():any[]{
         var results:any[] = [];
@@ -18,42 +38,4 @@ export class ChangeTracker {
         });
         return results;
     } 
-
-    public Contains(model:Model):boolean{
-        var exists = this.Entries.find(x => {
-            return x.Model === model;
-        });
-        return (exists !== undefined);
-    }
-
-    public Update(model?:Model){
-        if (model === undefined){
-            for (var entry of this.Entries){
-                this.Update(entry.Model);
-            }
-            return;
-        }
-        var existingEntry  = this.Entries.find(entry => {
-            return entry.Model === model;
-        });
-        if (existingEntry === undefined){
-            existingEntry = new ChangeEntry(model);
-            existingEntry.Status = model.ChangeStatus();
-            this.Entries.push(existingEntry);
-        }
-    }
-
-	public Add(model: Model) {
-        var entry = this.Entries.find(x => {
-            return x.Model === model;
-        });
-        if (entry === undefined){
-            entry = new ChangeEntry(model);
-            this.Entries.push(entry);
-        }
-        entry.Status = model.ChangeStatus();
-	}
-	public Clear() {
-		this.Entries = [];
-	}
 }

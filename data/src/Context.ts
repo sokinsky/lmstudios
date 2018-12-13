@@ -1,6 +1,7 @@
 ﻿import * as Schema from "./Schema";
 import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatus} from './'
 
+export enum ServerStatus { Serving = "Serving", Served = "Served" }
 export class Context {
 	constructor(apiUrl:string, schemaData:any) {	
 		this.API = new API(this, apiUrl);
@@ -16,7 +17,7 @@ export class Context {
 		return proxy;
 	}
 	public API:API;
-	public Changes:ChangeTracker = new ChangeTracker(this);
+	public Tracker:ChangeTracker = new ChangeTracker(this);
 	public Schema:Schema.Context;
 
 	private __repositories?:Repository<Model>[];
@@ -58,10 +59,10 @@ export class Context {
 		}
 		throw new Error(``);
 	}
-	public async Load(models: {ID:string,Type:string,Value:any}[]) {	
+	public async Load(models: {ID:string,Type:string,Value:any}[], fromServer?:boolean) {	
 		models.forEach((bridgeModel: any) => {
 			var dataModel = undefined;
-			var dataEntry = this.Changes.Entries.find(x => x.Model.ToBridge().ID === bridgeModel.ID);
+			var dataEntry = this.Tracker.Entries.find(x => x.Model.ToBridge().ID === bridgeModel.ID);
 			if (dataEntry !== undefined)
 				dataModel = dataEntry.Model;
 			if (dataModel === undefined){
@@ -78,13 +79,12 @@ export class Context {
 		});
 	}
 	public async SaveChanges(): Promise<Response | undefined> {
-		let bridgeModels: any[] = this.Changes.GetBridgeChanges();
+		let bridgeModels: any[] = this.Tracker.GetBridgeChanges();
 		console.log(bridgeModels);
 		let request = new Request("Context/SaveChanges", bridgeModels);
 		let response = await request.Post(this.API);
 		if (response.Status == ResponseStatus.OK) {
-			this.Changes.Clear();
-			this.Load(response.Result);
+			this.Load(response.Result, true);
 		}			
 		return response;
 	}

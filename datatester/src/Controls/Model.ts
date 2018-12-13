@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { Model as Data, Collection, Schema } from "@lmstudios/data";
+import { overrideProvider } from "@angular/core/src/view";
 
 @Component({
     selector:"model-control",
@@ -20,7 +21,6 @@ export class Model implements OnInit {
             this.__model = value;
         }
     }
-
     public get dataProperties():Schema.Property[]{
         if (this.model === undefined)
             return [];
@@ -51,11 +51,46 @@ export class Model implements OnInit {
         else if (item instanceof Collection)
             return "not implemented";
     }
+
+
+    public Add(property:Schema.Property){
+
+
+        if (this.model !== undefined && property.Type !== undefined) {
+            let parentModel:Data = this.model;
+
+            var newModel = parentModel.__context.GetRepository(property.Type).Add({});
+            this.model = newModel;
+
+
+            if (property.Relationship !== undefined){
+                let relationship:{[name:string]:Schema.Property} = property.Relationship;
+                for (var propertyName in relationship){
+                    let foreignProperty = property.Relationship[propertyName];
+                    if (foreignProperty.References !== undefined){
+                        let references:Schema.Property[] = foreignProperty.References;
+                        if (this.model !== undefined){
+                            let reference = references.find(x => x.Type === parentModel.GetType());
+                            if (reference !== undefined){
+                                newModel.SetValue(reference, parentModel);
+                            }
+                        }                        
+                    }
+                }
+            }
+
+        }
+    }
     
 
     
 
-
+    public GetValue(property:Schema.Property){
+        console.log(this.model);
+        console.log(property);
+        console.log(property.GetValue(this.model));
+         return property.GetValue(this.model);
+    }
     public Log(item:any){
         console.log(item);
     }

@@ -1,6 +1,6 @@
 import { Context, Model, Request, Response, Schema } from "./";
-import { ServerStatus } from "./Controller";
-import { Repository, ServerRepository } from "./Repository";
+import { ServerStatus } from "./Context";
+import { Repository } from "./Repository";
 
 export class Collection<TModel extends Model> {
     constructor(model:Model, type:(new (...args:any[])=>TModel)){

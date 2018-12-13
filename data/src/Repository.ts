@@ -1,4 +1,5 @@
 import { Context, Model, Request, Response, Schema } from "./";
+import { ChangeStatus } from "./ChangeEntry";
 
 export class Repository<TModel extends Model> {
 	constructor(context:Context, type: (new (...args: any[]) => TModel)) {
@@ -31,29 +32,33 @@ export class Repository<TModel extends Model> {
 		}
 		throw new Error(`Repository.Create was unable to create Model`);
 	}
-	public Add(value?:TModel|Partial<TModel>, server?:boolean):TModel{	
+	public Add(value?:TModel|Partial<TModel>, fromServer?:boolean):TModel{	
 		if (value === undefined)
-			value = this.Add({});	
-
-		if (value instanceof Model) {
-			if (value.GetType() !== this.Type)
-				throw new Error(`Repository.Add():Unable to add value`);
-			var existing = this.Items.find(x => { return x === value});
-			if (existing === undefined){
-				this.Items.push(value);
-				this.Context.Changes.Update(value);
-			}
-			return value;
-		}
-		else {
-			var result = this.Local.Select(value);
+			value = this.Add({});
+		var result:TModel|undefined = undefined;	
+		if (! (value instanceof Model)){
+			result = this.Local.Select(value);
 			if (result === undefined){
 				result = this.Create();
-				result.Load(value, server);
-				result = this.Add(result, server);
-			}				
-			return result;
+				result.Load(value, fromServer);
+				return this.Add(result, fromServer);
+			}	
 		}
+		if (value instanceof Model){
+			if (value.GetType() !== this.Type)
+				throw new Error(`Repository.Add():Model(${value.GetType().Name}) is not valid in Repository<${this.Type.Name}>`);
+			var exists = this.Items.find(x => { return x === value});
+			if (exists === undefined){
+				this.Items.push(value);
+			}
+			
+			if (fromServer === true)
+				value.__controller.__status.Change.Model = ChangeStatus.Unchanged;
+			else
+				value.__controller.__status.Change.Model = ChangeStatus.Added;
+			return value;
+		}	
+		throw Error(``);
 	}
 
 	public async Select(value:Partial<TModel>):Promise<TModel|undefined> {

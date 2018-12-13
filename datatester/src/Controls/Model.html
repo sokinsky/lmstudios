@@ -1,5 +1,5 @@
 <fieldset *ngIf="model">
-    <legend>{{model.toString()}}</legend>
+    <legend (click)="Log(model)">{{model.toString()}}</legend>
     <fieldset *ngIf="dataProperties.length > 0">
         <legend>Data</legend>
         <div *ngFor="let property of dataProperties">
@@ -10,8 +10,14 @@
     <fieldset *ngIf="modelProperties.length > 0">
         <legend>Models</legend>
         <div *ngFor="let property of modelProperties">
-            <span>{{property.Name}}:</span><br />
-            <pre>{{getPre(property)}}</pre>
+            <span>{{property.Name}}:</span>
+            <span *ngIf="! this.GetValue(property)">
+                <a (click)="Add(property)">Add</a>
+            </span>
+            <br /> 
+            <div *ngIf="this.GetValue(property)">
+                Show
+            </div>
         </div>
     </fieldset>
     <fieldset *ngIf="collectionProperies.length > 0">

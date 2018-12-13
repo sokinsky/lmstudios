@@ -1,11 +1,11 @@
 import { Guid } from "./Utilities";
 import { Schema, Utilities } from "./";
-import { Context, Model, Request } from "./";
+import { Context, Model, Request, ServerStatus, ChangeStatus} from "./";
 import { Repository } from "./Repository";
 import { Collection } from "./Collection";
 
-export enum ServerStatus { Serving = "Serving", Served = "Served" }
-export enum ChangeStatus { Unchanged = "Unchanged", Modified = "Modified", Added = "Added", Deleted = "Deleted" }
+
+
 
 export class Controller<TModel extends Model> {
 	constructor(context:Context, actual: TModel, proxy:TModel) {
@@ -50,6 +50,8 @@ export class Controller<TModel extends Model> {
 
 
 	public GetValue(property:Schema.Property|string):any{	
+		console.log(property);
+
 		if (typeof(property) === "string")
 			return this.getValue_byPropertyName(<string>property);
 		else if (property instanceof Schema.Property)
@@ -57,15 +59,6 @@ export class Controller<TModel extends Model> {
 		else
 			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
 	}
-	public SetValue(property:Schema.Property|string, value:any, fromServer?:boolean){		
-		if (typeof(property) === "string")
-			this.setValue_byPropertyName(<string>property, value, fromServer);
-		else if (property instanceof Schema.Property)
-			this.setValue_byProperty(<Schema.Property>property, value, fromServer);
-		else
-			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
-	}
-
 	private getValue_byProperty(property:Schema.Property):any{
 		if (! (property instanceof Schema.Property))
 			throw new Error(`Controller.getValue_byProperty(property):property is not an @lmstudios/data/Schema.Property`);
@@ -95,13 +88,32 @@ export class Controller<TModel extends Model> {
 		var selectFilter:any = {};
 		for (var propertyName in property.Relationship){
 			var referenceProperty = property.Relationship[propertyName];
-			referenceProperty.SetValue(selectFilter, property.GetValue(this.Model));
+			referenceProperty.SetValue(selectFilter, property.GetValue(this.__values.Actual.Data));
 		}		
 		var repository = this.__context.GetRepository(property.Type);
-		var result = await repository.Select(selectFilter);
+		var result = repository.Local.Select(selectFilter);
+		if (result === undefined){
+			if (this.__status.Server.Properties[property.Name] === undefined){
+				console.log(selectFilter);
+				this.__status.Server.Properties[property.Name] = ServerStatus.Serving;
+				result = await repository.Server.Select(selectFilter);
+				this.__status.Server.Properties[property.Name] = ServerStatus.Served;
+				this.SetValue(property, result, true);
+			}
+		}
 		return result;
 	}
+
+	public SetValue(property:Schema.Property|string, value:any, fromServer?:boolean){		
+		if (typeof(property) === "string")
+			this.setValue_byPropertyName(<string>property, value, fromServer);
+		else if (property instanceof Schema.Property)
+			this.setValue_byProperty(<Schema.Property>property, value, fromServer);
+		else
+			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
+	}
 	private setValue_byProperty(property:Schema.Property, value:any, fromServer?:boolean){
+		
 		if (property.Parent !== this.Model.GetType())
 			throw new Error(`Controller.setValue_byProperty(property, value, fromServer):property's parent type(${property.Parent.Name}) is not the same as the controller's model type(${this.Model.GetType().Name})`);
 		if (property.IsModel)
@@ -109,19 +121,19 @@ export class Controller<TModel extends Model> {
 		else if (property.IsCollection)
 			this.setCollection_byProperty(property, value, fromServer);
 		else{
+			property.SetValue(this.__values.Actual.Model, value);
+			property.SetValue(this.__values.Actual.Data, value);
 			switch (this.__status.Server.Properties[property.Name]){
 				case ServerStatus.Serving:
 					property.SetValue(this.__values.Pending, value);
 					break;
-				default:
-					property.SetValue(this.__values.Actual.Model, value);
-					property.SetValue(this.__values.Actual.Data, value);
 			}
 			if (fromServer)
 				property.SetValue(this.__values.Server.Data, value);
 		}
 		var serverValue = property.GetValue(this.__values.Server.Data);
 		var actualValue = property.GetValue(this.__values.Actual.Data);
+
 		if (serverValue !== actualValue){
 			if (serverValue === undefined){
 				if (actualValue !== undefined)
@@ -136,6 +148,19 @@ export class Controller<TModel extends Model> {
 					this.__status.Change.Properties[property.Name] = ChangeStatus.Modified;
 			}
 		}
+		else{
+			this.__status.Change.Properties[property.Name] = ChangeStatus.Unchanged;
+		}
+		if (this.__status.Change.Model !== ChangeStatus.Added && this.__status.Change.Model !== ChangeStatus.Deleted){
+			var newStatus:ChangeStatus = ChangeStatus.Unchanged;
+			for (var propertyName in this.__status.Change.Properties){
+				if (this.__status.Change.Properties[propertyName] !== ChangeStatus.Unchanged){
+					newStatus = ChangeStatus.Modified
+					break;
+				}					
+			}
+			this.__status.Change.Model = newStatus;
+		}
 	}
 	private setValue_byPropertyName(propertyName:string, value:any, fromServer?:boolean){
 		if (typeof(propertyName) !== "string")
@@ -148,14 +173,45 @@ export class Controller<TModel extends Model> {
 	private setModel_byProperty(property:Schema.Property, value:Model, fromServer?:boolean){
 		if (! property.IsModel)
 			throw new Error(`Controller.setModel_byProperty(property, value, fromServer):property.IsModel is false`);
-		if (! (value instanceof Model))
-			throw new Error(`Controller.setModel_byProperty(property, value, fromServer):value is not a Model`);
 		if (property.Type === undefined)
 			throw new Error(`Contoller.setModel_byProperty(property, value, fromServer):property.Type is undefined.`);
-		if (value.GetType() !== property.Type)
-			throw new Error(`Controller.setModel_byProperty(property, value, fromServer):property.Type(${property.Type.Name}) !== value.Type(${value.GetType().Name}).`);
+
+		var referenceProperty = undefined;
+		var referenceProperties = this.Model.GetType().Properties.filter(x => { return x.References !== undefined; });
+		referenceProperties = referenceProperties.filter(x => {
+			return x.References !== undefined && x.References.find(y => {return y === property}) != undefined;
+		});
+		switch (referenceProperties.length){
+			case 0:
+				throw new Error(`Unknown Reference`);
+			case 1:
+				referenceProperty = referenceProperties[0];
+				break;
+			default:
+				throw new Error(`Amibuous Reference`);
+		}
+		if (value === undefined){
+		}
+		else{
+			if (!(value instanceof Model))
+				throw new Error(`Controller.setModel_byProperty(property, value, fromServer):value is not a Model`);
+			if (value.GetType() !== property.Type)
+				throw new Error(`Controller.setModel_byProperty(property, value, fromServer):property.Type(${property.Type.Name}) !== value.Type(${value.GetType().Name}).`);
+
+			property.SetValue(this.__values.Actual.Model, value);
+			property.SetValue(this.__values.Actual.Data, value.__controller.PrimaryKey);
+			switch (this.__status.Server.Properties[property.Name]){
+				case ServerStatus.Serving:
+					property.SetValue(this.__values.Pending, value);
+					break;
+			}
+			if (fromServer)
+				property.SetValue(this.__values.Server.Data, value);
+		}
+
+
+
 		
-		var referenceProperty = this.Model.GetType().LocalReferences(property);
 		
 	}
 	private setCollection_byProperty(property:Schema.Property, value:Collection<Model>, fromServer?:boolean){
@@ -164,107 +220,14 @@ export class Controller<TModel extends Model> {
 		if (! (value instanceof Collection))
 			throw new Error(`Collection.setCollection_byProperty():value is not a collection`);
 		property.SetValue(this.Model, value);
-	}
+	}	
 
-
-	public SetModel(property:Schema.Property, value:Model|Partial<Model>, server?:boolean):boolean{	
-		if (value instanceof Model){	
-			if (property.Type !== undefined && property.Type == value.GetType()){	
-			   var foreignKey = value.__controller.PrimaryKey;
-			   if (foreignKey === undefined)
-				   foreignKey = value.__controller.__id;
-
-				switch (this.__status.Server.Model){
-					case ServerStatus.Serving:
-						break;
-					case ServerStatus.Served:
-						break;
-					default:
-						switch (this.__status.Server.Properties[property.Name]){
-							case ServerStatus.Serving:
-								break;
-							case ServerStatus.Served:
-								break;
-							default:
-							property.SetValue(this.__values.Actual.Model, value);
-							property.SetValue(this.__values.Actual.Data, foreignKey);							
-							if (server)
-								property.SetValue(this.__values.Server.Data, foreignKey);
-						}
-						break;
-				}				
-				if (property.Type.PrimaryKey.Properties[0].References !== undefined){
-					var foreignReference = property.Type.PrimaryKey.Properties[0].References.find(r => { return r.Type === this.__schema});
-					if (foreignReference !== undefined){
-						if (foreignReference.GetValue(value.__controller.__values.Actual.Model) !== this.__values.Actual.Model){
-							value.SetValue(foreignReference, this.__values.Actual.Model);
-						}
-					}
-				}									
-		   }
-		   
-	   }
-	   else {
-		   if (value === undefined){
-			   this.SetValue(property, undefined);
-		   }
-		   else if (property.Type !== undefined){
-				var repository = this.__context.GetRepository(property.Type);
-				var selectValue = repository.Local.Select(value);
-				if (selectValue === undefined){
-					selectValue = repository.Add(value);
-					return this.SetModel(property, selectValue, server);
-				}
-		   }
-		}
-		return true;
-	}
-	public GetChangeStatus(property?:Schema.Property|string):ChangeStatus{
-		if (property !== undefined ){
-			if (typeof(property) === "string"){
-				property = this.__schema.GetProperty(property);
-				if (property !== undefined)
-					return this.GetChangeStatus(property);
-			}				
-		}
-		else {
-  			if (this.PrimaryKey === undefined){				
-				return ChangeStatus.Added;
-			}
-			var properties = this.__values.Actual.Model.GetType().Properties;
-			for (var p of properties){
-
-			}
-		}
-		if (property !== undefined){
-				var actualValue = property.GetValue(this.__values.Actual.Data)
-				var serverValue = property.GetValue(this.__values.Server.Data);
-				if (serverValue === actualValue)
-					return ChangeStatus.Unchanged;
-				else{
-					if (serverValue === undefined)
-						return ChangeStatus.Added;
-					else if (actualValue === undefined)
-						return ChangeStatus.Deleted;
-					else
-						return ChangeStatus.Modified;
-				}				
-	
-		}
-		else{
-			
-		}
-		return ChangeStatus.Unchanged;
-	}
-	
-	
-
-	public Load(values: Partial<TModel>, server?:boolean) {
+	public Load(values: Partial<TModel>, fromServer?:boolean) {
 		for (var propertyName in values){
 			var property:Schema.Property|undefined = this.__schema.GetProperty(propertyName);
 			if (property !== undefined){
 				var value = property.GetValue(values);				
-				this.SetValue(property, value, server);	
+				this.SetValue(property, value, fromServer);	
 			}			
 		}
 	}

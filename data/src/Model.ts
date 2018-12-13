@@ -11,10 +11,11 @@ export class Model {
 
 		var proxy:Model|undefined = new Proxy(this, {
 			get: (target, propertyName: string, reciever) => {	
-
+				
 				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
+				console.log(propertyName);
 				return this.__controller.GetValue(property);
 			},
 			set: (target, propertyName:string, propertyValue, reciever) => {
@@ -43,7 +44,6 @@ export class Model {
 			this.__controller = new Controller(context, this, proxy);
 		}
 			
-		this.__context.Changes.Add(proxy);
 		return proxy;
 	}
 	public __context:Context;
@@ -70,10 +70,6 @@ export class Model {
 	public SetValue(property:Schema.Property|string, value:any){
 		this.__controller.SetValue(property, value);
 	}
-	public ChangeStatus():ChangeStatus{
-		return this.__controller.GetChangeStatus();
-	}
-
 	public toString():string{
 		return this.__controller.toString();
 	}
