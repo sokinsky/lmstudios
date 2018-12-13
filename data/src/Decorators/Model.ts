@@ -1,12 +1,11 @@
 import { Controller } from "../";
 
 export function Model(name:string, controllerType?:(()=>new(...args:any[])=>any)){
-    var controllerType:(()=>new(...args:any[])=>any)|undefined = controllerType;     
+    var controllerType:(()=>new(...args:any[])=>any)|undefined = controllerType;  
     return function(target:any){        
         target.prototype.decoration = {
             type: {
-                name:name,
-                controller:(()=>Controller)
+                name:name
             }
         }
         if (controllerType !== undefined)

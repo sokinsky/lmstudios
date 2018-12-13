@@ -19,6 +19,7 @@ export class Repository<TModel extends Model> {
 	}
 	public Context:Context;
 	public Type:Schema.Type;
+	public Name:string = "";
 
     public Local: LocalRepository<TModel> = new LocalRepository(this);
 	public Server: ServerRepository<TModel> = new ServerRepository(this);
@@ -58,14 +59,15 @@ export class Repository<TModel extends Model> {
 	public async Select(value:Partial<TModel>):Promise<TModel|undefined> {
 		var result = this.Local.Select(value);
 		if (!result)
-			return await this.Server.Select(value);
-		return undefined;
+			result = await this.Server.Select(value);
+		return result;
 	}
-	public async Search(value:Partial<TModel>):Promise<TModel[]>{
-		if (value === undefined)
+	public async Search(...values:any[]):Promise<TModel[]>{
+		if (values === undefined || values.length === 0)
 			return [];
-		await this.Server.Search(value);
-		return this.Local.Search(value);
+
+		await this.Server.Search(...values);
+		return this.Local.Search(...values);
 	}
 }
 export class LocalRepository<TModel extends Model> {
@@ -80,13 +82,13 @@ export class LocalRepository<TModel extends Model> {
 		return this.Repository.Type;
 	}
 
-    public Select(value:Partial<TModel>) : TModel|undefined {
-		
+
+    public Select(value:Partial<TModel>) : TModel|undefined {				
 		var filter:Partial<TModel> = {};
 		this.Repository.Type.PrimaryKey.Properties.forEach(property =>{
 			property.SetValue(filter, property.GetValue(value));
 		})
-		var results = this.Search(filter);
+		var results = this.Search(filter);		
 		if (results.length === 1)
 			return results[0];
 		
@@ -101,7 +103,7 @@ export class LocalRepository<TModel extends Model> {
 		});
 		return undefined;
 	}
-	public Search(...values:Partial<TModel>[]):TModel[]{
+	public Search(...values:any[]):TModel[]{
 		var results:TModel[] = [];
 		for (let value of values){
 			for (let item of this.Repository.Items){
@@ -116,9 +118,9 @@ export class LocalRepository<TModel extends Model> {
 				if (include){
 					var included = results.find(x => { return (x === item); });
 					if (!included)
-						results.push(item);
+						results.push(item);									
 				}	
-			}
+			}			
 		}
 		return results;
 	}
@@ -141,10 +143,9 @@ export class ServerRepository<TModel extends Model> {
 			this.Repository.Context.Load(response.Result);
 		return this.Repository.Local.Select(value);
 	}
-	public async Search(...values:Partial<TModel>[]):Promise<TModel[]>{
+	public async Search(...values:any[]):Promise<TModel[]>{
 		if (this.Repository.Type === undefined)
 			return [];
-
 		var body = {
 			Type:this.Repository.Type.Name,
 			Values:values

@@ -12,15 +12,21 @@ export class Home implements OnInit {
     }
     public async ngOnInit(){
         var data = {
-            FirstName:"Steven",
-            LastName:"Okinsky"
+            Username:"Steven",
+            Password:"Okinsky",
+            Person:{
+                FirstName:"Steven",
+                LastName:"Okinsky"
+            }
         }
-        this.Person = this.context.People.Add(data);
+        //this.Email = await this.context.Emails.Select({ID:1});
     }
 
     public PersonEmail?:Models.PersonEmail;
     public User?:Models.User;
     public Person?:Models.Person;
+    public Email?:Models.Email;
+
 
     public async Test(){
     }

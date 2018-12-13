@@ -5,7 +5,9 @@ import { HttpModule } from "@angular/http";
 import { RouterModule } from '@angular/router';
 
 import { HttpClientModule } from '@angular/common/http';
-import * as Pages from './pages';
+import * as Pages from './Pages';
+import * as Controls from "./Controls";
+
 import { Context, ContextService } from "./STA/Data/Context";
 
 export function schemaFactory(service:ContextService){
@@ -16,6 +18,7 @@ export function schemaFactory(service:ContextService){
 	bootstrap: [Pages.Master],
 	declarations: [
 		Pages.Master, Pages.Home,
+		Controls.Context, Controls.Repository, Controls.Model
 	],
     imports: [
 		BrowserModule,
@@ -30,8 +33,6 @@ export function schemaFactory(service:ContextService){
 	],
 	providers: [
 		ContextService, { provide: APP_INITIALIZER, useFactory:schemaFactory, deps:[ContextService], multi:true}
-		//Context, { provide:APP_INITIALIZER,useFactory:(url:string, ...paths:string[])=>{return Schema.Context.GetSchema(appSettings.apiUrl, "Context", "Initialize")}, multi:true }
-		//appLoader, { provide:APP_INITIALIZER,useFactory: (appLoader:appLoader)=>{return appLoader.Initialize()}, deps: [appLoader], multi:true}
 	]
 })
 export default class {

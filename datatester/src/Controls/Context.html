@@ -1,0 +1,20 @@
+<table style="width:100%;">
+    <tr>
+        <td style="vertical-align: top; width: 20%;">
+            <div>
+                <span (click)="Log(this.data)">Context</span>
+                <div *ngFor="let repository of this.data.Repositories" (click)="selectedRepository=repository" style="padding:0 0 0 10px;">
+                    {{repository.Name}}
+                </div>
+            </div>
+            
+        </td>
+        <td style="vertical-align: top;">
+            <repository-control [repository]=selectedRepository></repository-control>
+        </td>
+    </tr>
+</table>
+<div *ngFor="let request of this.data.API.Requests" (click)="Log(request)">
+    {{request.Path}}
+</div>
+

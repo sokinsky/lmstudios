@@ -5,8 +5,15 @@ export class Context {
 	constructor(apiUrl:string, schemaData:any) {	
 		this.API = new API(this, apiUrl);
 		this.Schema = new Schema.Context(schemaData);
-		//this.Load(modelData);
+		var proxy:Context = new Proxy(this, {
+			set: (target, propertyName:string, propertyValue, reciever) => {
+				if (propertyValue instanceof Repository)
+					propertyValue.Name = propertyName;
+				return Reflect.set(target, propertyName, propertyValue, reciever);
+			}
+		});
 		this.Initialize();
+		return proxy;
 	}
 	public API:API;
 	public Changes:ChangeTracker = new ChangeTracker(this);
@@ -42,6 +49,11 @@ export class Context {
 					if (result !== undefined)
 						return result;
 				}
+				break;
+			case "function":
+				var result = this.Repositories.find((repository:Repository<Model>) => { return type == repository.Type.Constructor});
+				if (result !== undefined)
+					return result;
 				break;
 		}
 		throw new Error(``);

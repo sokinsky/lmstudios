@@ -1,0 +1,25 @@
+<fieldset *ngIf="model">
+    <legend>{{model.toString()}}</legend>
+    <fieldset *ngIf="dataProperties.length > 0">
+        <legend>Data</legend>
+        <div *ngFor="let property of dataProperties">
+            <span>{{property.Name}}:</span><br />
+            <input type="text" [(ngModel)]=model[property.Name] />
+        </div>
+    </fieldset>
+    <fieldset *ngIf="modelProperties.length > 0">
+        <legend>Models</legend>
+        <div *ngFor="let property of modelProperties">
+            <span>{{property.Name}}:</span><br />
+            <pre>{{getPre(property)}}</pre>
+        </div>
+    </fieldset>
+    <fieldset *ngIf="collectionProperies.length > 0">
+        <legend>Collections</legend>
+        <div *ngFor="let property of collectionProperies">
+            <span>{{property.Name}}:</span><br />
+            <pre></pre>
+        </div>
+    </fieldset>
+</fieldset>
+    

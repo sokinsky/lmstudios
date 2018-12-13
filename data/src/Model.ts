@@ -8,6 +8,7 @@ export class Model {
 		var decoration = ((<any>this).__proto__).decoration;
 		this.__schema = this.__context.GetType(decoration.type.name);
 
+
 		var proxy:Model|undefined = new Proxy(this, {
 			get: (target, propertyName: string, reciever) => {	
 
@@ -33,9 +34,15 @@ export class Model {
 				return this.__controller.GetValue(property);
 			}
 		});
-		this.__controller = new Controller(context, this, this);	
-		if (decoration.controller !== undefined)
-			this.__controller = new decoration.controller()(this.__context, this, proxy);
+			
+		if (decoration.type.controller !== undefined){
+			var controllerConstructor = decoration.type.controller()
+			this.__controller = new controllerConstructor(context, this, proxy);
+		}
+		else{
+			this.__controller = new Controller(context, this, proxy);
+		}
+			
 		this.__context.Changes.Add(proxy);
 		return proxy;
 	}
