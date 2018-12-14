@@ -30,7 +30,7 @@ export class Type {
             (<any>window).lmstudios.Types = [];
         return (<any>window).lmstudios.Types;
     }
-    public static GetType(type:string|(new (...args: any[]) => any)|object):Type|undefined{
+    public static GetType(type:string|(new (...args: any[]) => any)|object):Type{
         switch (typeof(type)){
             case "string":
                 return Type.getType_byName(<string>type);
@@ -38,50 +38,75 @@ export class Type {
                 return Type.getType_byConstructor(<new (...args: any[])=>any>type);
             case "object":
                 return Type.getType_byObject(<object>type);
+            default:
+                console.log(type);
+                throw new Error(`Type.GetType():Invalid Parameter`);
         }
-        return undefined;
+        
     }
-    private static getType_byName(name:string):Type|undefined{
-        return Type.GetTypes().find((type:Type)=>{ return type.FullName === name});
+    private static getType_byName(name:string):Type{
+        var results = Type.GetTypes().filter((type:Type)=>{ return type.FullName === name});
+        switch (results.length){
+            case 0:
+                return Type.Parse(name);
+            case 1:
+                return results[0];
+            default:
+                throw new Error(`Type.getType_byName():Type(${name}) was ambiguous.`);
+        }
     }
-    private static getType_byConstructor(constructor:(new (...args: any[]) => any)):Type|undefined{
-        return Type.GetTypes().find((type:Type)=>{ return type.Constructor === constructor});
+    private static getType_byConstructor(constructor:(new (...args: any[]) => any)):Type{
+        var results = Type.GetTypes().filter((type:Type)=>{return type.Constructor === constructor;});
+        switch (results.length){
+            case 0:
+                throw new Error(`Type.getType_byConstructor():Unknown constructor`);
+            case 1:
+                return results[0];
+            default:
+                throw new Error(`Type.getType_byConstructor():Anbiguous constructor`);
+        }
     }
-    private static getType_byObject(object:object):Type|undefined{
-        throw new Error(`Not Implemented`);
+    private static getType_byObject(obj:object):Type{
+        return this.getType_byConstructor((<any>obj).prototype.constrcutor);
     }
-    public static Parse(name:string){
+    public static Parse(name:string) : Type{        
+        var result:Type|undefined;
         name = name.replace(/\s+/, "");          
         var match = name.match(/^\s*([^<]+)<([^>]*)>/);
         if (match !== null && match.length == 3){
-            var rootName = match[1];
-            var genericNames = match[2];
+            var rootName = match[1];          
+            var genericNames = match[2].split(',');
             var genericTypes:Type[] = [];
-            for (var genericName in genericNames.split(',')){
-                var genericType = Type.GetType(genericName);
-                if (genericType === undefined)
-                    genericType = Type.Create(genericName);
+            for (var genericName of genericNames){
+                var genericType = Type.Parse(genericName);
                 genericTypes.push(genericType);
             }
-            var rootType = this.GetType(rootName);
-            if (rootType === undefined)
-                rootType = Type.Create(rootName);
-            rootType.GenericTypes = genericTypes;
-            return rootType;                
+            result = Type.Parse(rootName);
+            result.GenericTypes = genericTypes;           
         }
         else{
-            var rootType = this.GetType(name);
-            if (rootType === undefined)
-                rootType = Type.Create(name);
-            return rootType;
+            result = new Type(name);
         }
-    }
-    public static Create(name:string, constructor?:(new (...args: any[]) => any)){
-        var result = Type.GetType(name);
-        if (result === undefined){
-            result = new Type(name, constructor);
-            Type.GetTypes().push(result);
+        if (result !== undefined){
+            var storedType:Type|undefined = Type.GetTypes().find((type:Type)=>{ return type.FullName === (<Type>result).FullName});
+            if (storedType === undefined){
+                Type.GetTypes().push(result);
+            }                
+            else 
+                result = storedType;
+
+            if (result.GenericTypes !== undefined){
+                for (var i=0; i<result.GenericTypes.length; i++){
+                    var genericType = result.GenericTypes[i];
+                    storedType = Type.GetTypes().find((type:Type)=>{ return type.FullName === genericType.FullName});
+                    if (storedType === undefined)
+                        Type.GetTypes().push(genericType);
+                    else 
+                        result.GenericTypes[i] = storedType;
+                }
+            }
+            return result;
         }
-        return result;
+        throw new Error(`Type.Parse():Unable to parse Type(${name})`);
     }
  }

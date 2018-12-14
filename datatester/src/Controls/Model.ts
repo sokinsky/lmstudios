@@ -47,7 +47,7 @@ export class Model implements OnInit {
         }
 
         if (item instanceof Data)
-            return JSON.stringify(item.__controller.__values.Actual.Data, null, "\t");
+            return JSON.stringify(item.__controller.Actual.Data, null, "\t");
         else if (item instanceof Collection)
             return "not implemented";
     }
@@ -67,7 +67,7 @@ export class Model implements OnInit {
                     if (foreignProperty.References !== undefined){
                         let references:Schema.Property[] = foreignProperty.References;
                         if (this.model !== undefined){
-                            let reference = references.find(x => x.Model === parentModel.GetType());
+                            let reference = references.find(x => x.Model === parentModel.GetSchema());
                             if (reference !== undefined){
                                 newModel.SetValue(reference, parentModel);
                             }

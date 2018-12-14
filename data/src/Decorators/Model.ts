@@ -8,7 +8,6 @@ export function Model(fullName:string, controllerType?:(()=>new(...args:any[])=>
             Controller: controllerType
         }
         var type = LMS.Type.GetType(fullName);
-        if (type === undefined)
-            LMS.Type.Create(fullName, target);    
+        type.Constructor = target;  
      }    
 }

@@ -40,10 +40,11 @@ export class Home implements OnInit {
 
     public async GetPerson(){
         this.Person = await this.context.People.Select({ID:2});
+        console.log(this.Person);
     }
     public async GetPersonUser(){
         if (this.Person !== undefined){
-            var user = await this.Person.Server.User;
+            console.log(await this.Person.Server.User);
         }
             
     }

@@ -11,10 +11,7 @@ export class Repository<TModel extends LMS.Model> {
 		var type = LMS.Type.GetType(fullName);
 		if (type === undefined)
 			throw new Error(``);
-		this.Model = {
-			Schema:schema,
-			Type:type
-		}		
+		this.Schema = schema;
 	}
 	private __items:TModel[] = [];
 	public get Items():TModel[]{
@@ -27,46 +24,45 @@ export class Repository<TModel extends LMS.Model> {
 	}
 	public Context:LMS.Context;
 	public Name:string = "";
-	public Model:{
-		Schema:LMS.Schema.Model,
-		Type:LMS.Type
-	}	
+	public Schema:LMS.Schema.Model;
 
     public Local: LocalRepository<TModel> = new LocalRepository(this);
 	public Server: ServerRepository<TModel> = new ServerRepository(this);
 
 	public Create():TModel{
-		var constructor = this.Model.Schema.GetConstructor();
+		var constructor = this.Schema.GetConstructor();
 		if (constructor !== undefined){
-			var result = new constructor()(this.Context);
+			var result = new constructor(this.Context);
 			return result;
 		}
 		throw new Error(`Repository.Create was unable to create Model`);
 	}
 	public Add(value?:TModel|Partial<TModel>, fromServer?:boolean):TModel{	
+		
 		if (value === undefined)
 			value = this.Add({});
 		var result:TModel|undefined = undefined;	
 		if (! (value instanceof LMS.Model)){
 			result = this.Local.Select(value);
-			if (result === undefined){
+			if (result === undefined){				
 				result = this.Create();
+				
 				result.Load(value, fromServer);
 				return this.Add(result, fromServer);
 			}	
 		}
 		if (value instanceof LMS.Model){
-			if (value.GetType() !== this.Model.Schema)
-				throw new Error(`Repository.Add():Model(${value.GetType().FullName}) is not valid in Repository<${this.Model.Type.FullName}>`);
+			if (value.GetSchema() !== this.Schema)
+				throw new Error(`Repository.Add():Model(${value.GetSchema().FullName}) is not valid in Repository<${this.Schema.FullName}>`);
 			var exists = this.Items.find(x => { return x === value});
 			if (exists === undefined){
 				this.Items.push(value);
 			}
 			
 			if (fromServer === true)
-				value.__controller.__status.Change.Model = LMS.ChangeStatus.Unchanged;
+				value.__controller.Status.Change.Model = LMS.ChangeStatus.Unchanged;
 			else
-				value.__controller.__status.Change.Model = LMS.ChangeStatus.Added;
+				value.__controller.Status.Change.Model = LMS.ChangeStatus.Added;
 			return value;
 		}	
 		throw Error(``);
@@ -95,7 +91,7 @@ export class LocalRepository<TModel extends LMS.Model> {
 		return this.Repository.Items;
 	}
 	public get Schema():LMS.Schema.Model{
-		return this.Repository.Model.Schema;
+		return this.Repository.Schema;
 	}
 
 
@@ -147,11 +143,11 @@ export class ServerRepository<TModel extends LMS.Model> {
     }
 	public Repository: Repository<TModel>;
 	public get Schema():LMS.Schema.Model{
-		return this.Repository.Model.Schema;
+		return this.Repository.Schema;
 	}
 	public async Select(value: Partial<TModel>) : Promise<TModel|undefined> {
 		var body = {
-			Type: this.Schema.Name,
+			Type: this.Schema.FullName,
 			Value: value
 		};
 		var request:LMS.Request = new LMS.Request("Model/Select", body);
@@ -162,7 +158,7 @@ export class ServerRepository<TModel extends LMS.Model> {
 	}
 	public async Search(...values:any[]):Promise<TModel[]>{
 		var body = {
-			Type:this.Schema.Name,
+			Type:this.Schema.FullName,
 			Values:values
 		}
 		var request:LMS.Request = new LMS.Request("Model/Search", body);

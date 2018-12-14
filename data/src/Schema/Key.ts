@@ -1,13 +1,22 @@
 import { Type, Property, Model } from "./";
 
 export class Key {
-    constructor(model:Model, init:{Name:string, Properties:string[]}) { 
+    constructor(model:Model, init:any) { 
         this.Model = model; 
+        if (init.Name === undefined)
+            throw new Error(`Key.constructor():Name is required`);
         this.Name = init.Name;
-        init.Properties.forEach(propertyName=>{
-            var property = this.Model.GetProperty(propertyName);
+        if (init.Properties === undefined)
+            throw new Error(`Key.constructor():Properties are required`);
+        
+        init.Properties.forEach((data:{Model:string, Name:string})=>{
+            var model = this.Model.Context.GetModel(data.Model);
+            if (model !== this.Model)
+                throw new Error(`Key.constructor():Key properties can not be foreign`);
+                
+            var property = model.GetProperty(data.Name);
             if (property === undefined)
-                throw new Error(`Key.constructor():Type(${this.Model.FullName}) does not have property(${propertyName})`)
+                throw new Error(`Property(${data.Name}) does not exist on Model(${data.Model})`);
             this.Properties.push(property);
         });
     }

@@ -1,8 +1,10 @@
 import * as LMS from "../";
 import { Context, Property, Key, Type } from "./";
 
-export class Model {
+export class Model extends LMS.Type {
     constructor(context:Context, name:string){
+        super(name);
+
         this.Context = context;
         this.FullName = name;
         this.Name = "";
@@ -20,7 +22,7 @@ export class Model {
         for (let property of this.Properties){
             let propertyData = properties.find(x => { return (x.Name === property.Name); });
             if (propertyData !== undefined)
-                property.Initialize(propertyData.PropertyType, propertyData.Relationship, propertyData.References);
+                property.Initialize(propertyData);
         }
         for (let keyData of keys){
             let key = this.Keys.find((x:any) => {return x.Name == keyData.Name});

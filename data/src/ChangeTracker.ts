@@ -13,11 +13,11 @@ export class ChangeTracker {
         var results:ChangeEntry[] = [];
         for (var status of statuses){
             for (var repository of this.Context.Repositories){
-                var models = repository.Items.filter(x => { return x.__controller.__status.Change.Model === status; });
+                var models = repository.Items.filter(x => { return x.__controller.Status.Change.Model === status; });
                 for (var model of models){
                     var exists = results.find(x => { return x.Model === model; });
                     if (exists === undefined){
-                        var result = new ChangeEntry(model, model.__controller.__status.Change.Model, model.__controller.__status.Change.Properties);
+                        var result = new ChangeEntry(model, model.__controller.Status.Change.Model, model.__controller.Status.Change.Properties);
                         results.push(result);
                     }
                 }

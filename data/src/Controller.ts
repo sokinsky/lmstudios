@@ -1,198 +1,207 @@
-import { Guid } from "./Utilities";
-import { Schema, Utilities, Context, Model, ServerStatus, ChangeStatus, Repository, Collection } from "./";
+import * as LMS from "./";
 
-export class Controller<TModel extends Model> {
-	constructor(context:Context, actual: TModel, proxy:TModel) {
-		this.__context = context;
-		this.__schema = actual.GetSchema();
-		this.__repository = <Repository<TModel>>this.__context.GetRepository(actual);
-		this.__values = {
-			Actual:{ Model:actual, Data:{} },
-			Server:{ Data:{} },
-			Proxy:proxy,
-			Pending:{}
-		}	
-		this.__status = {
+export class Controller<TModel extends LMS.Model> {
+	constructor(context:LMS.Context, actual: TModel, proxy:TModel) {
+		this.ID = LMS.Utilities.Guid.Create().toString();
+		this.Context = context;
+		this.Values = {
+			Actual: { Model: actual, Data: {} },
+			Server: { Data: {} },
+			Pending: {},
+			Proxy: proxy
+		}
+		this.Status = {
 			Server: { Properties:{} },
-			Change: { Model:ChangeStatus.Unchanged,	Properties:{} }
-		}	
+			Change: { Properties:{} }
+		}
 	}
-	public __id:string = Utilities.Guid.Create().toString();
-	public __context:Context;
-	public __schema:Schema.Model;
-	public __repository:Repository<TModel>;
-	public __values:{ 
-		Actual:{ Model:TModel, Data:Partial<TModel>	}, 
-		Server:{	Data:Partial<TModel> },	
-		Proxy:TModel, 
-		Pending:Partial<TModel> 
-	};
-	public __status: {
-		Server:{ Model?:ServerStatus, Properties:{[name:string]:ServerStatus} },
-		Change:{ Model:ChangeStatus, Properties:{[name:string]:ChangeStatus} }
+	public ID:string;
+	public Context:LMS.Context;
+	public Values:{
+		Actual: { Model:TModel, Data:Partial<TModel> },
+		Server: { Time?:Date, Data:Partial<TModel> },
+		Pending: Partial<TModel>,
+		Proxy: TModel
 	}
-
+	public get Actual(): { Model:TModel, Data:Partial<TModel> }{
+		return this.Values.Actual;
+	}
+	public get Server(): { Time?:Date, Data:Partial<TModel> }{
+		return this.Values.Server;
+	}
+	public get Pending(): Partial<TModel>{
+		return this.Values.Pending;
+	}
+	public Status:{
+		Server: { Model?:LMS.ServerStatus, Properties:{[name:string]:LMS.ServerStatus }},
+		Change: { Model?:LMS.ChangeStatus, Properties:{[name:string]:LMS.ChangeStatus }}
+	}
+	public get Schema():LMS.Schema.Model{
+		return this.Actual.Model.GetSchema();
+	}
 	public get PrimaryKey():any{
-		var keyProperty = this.__values.Actual.Model.GetSchema().PrimaryKey
-		return keyProperty.Properties[0].GetValue(this.__values.Actual.Model);
+		var keyProperty = this.Schema.PrimaryKey
+		return keyProperty.Properties[0].GetValue(this.Actual.Model);
 	}
 
-	public get Model():TModel{
-		return this.__values.Actual.Model;
-	}
-
-
-
-	public GetValue(property:Schema.Property|string):any{	
+	public GetValue(property:LMS.Schema.Property|string):any{	
 		if (typeof(property) === "string")
 			return this.getValue_byPropertyName(<string>property);
-		else if (property instanceof Schema.Property)
-			return this.getValue_byProperty(<Schema.Property>property);
+		else if (property instanceof LMS.Schema.Property)
+			return this.getValue_byProperty(<LMS.Schema.Property>property);
 		else
 			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
 	}
-	private getValue_byProperty(property:Schema.Property):any{
-		if (property.PropertyType instanceof Schema.Model)
+	private getValue_byProperty(property:LMS.Schema.Property):any{
+		if (property.PropertyType instanceof LMS.Schema.Model)
 			return this.getModel_byProperty(property);		
 		else if (property.PropertyType.Name === "Collection")
-			return property.GetValue(this.Model);
+			return property.GetValue(this.Actual.Model);
 		else
-			return property.GetValue(this.Model);
+			return property.GetValue(this.Actual.Model);
     }
 	private getValue_byPropertyName(propertyName:string):any{
 		if (typeof(propertyName) !== "string")
-			throw new Error(`Controller.getValue_byPropertyName(propertyName):propertyName is not a string`);
-		var property:Schema.Property|undefined = this.__values.Actual.Model.GetSchema().GetProperty(propertyName);
+			throw new Error(`Controller.getValue_byPropertyName():propertyName is not a string`);
+		var property:LMS.Schema.Property|undefined = this.Schema.GetProperty(propertyName);
 		if (property === undefined)
-			throw new Error(`Controller.getValue_byPropertyName(propertyName):type(${this.Model.GetType().Name})propertyName(${propertyName})`);
+			throw new Error(`Controller.getValue_byPropertyName(propertyName):type(${this.Schema.FullName})propertyName(${propertyName})`);
 		return this.getValue_byProperty(property);
 	}
-	private getModel_byProperty(property:Schema.Property):Model|undefined{
+	private getModel_byProperty(property:LMS.Schema.Property):LMS.Model|undefined{
 		var selectFilter:any = {};
 		for (var propertyName in property.Relationship){
 			var referenceProperty = property.Relationship[propertyName];
-			referenceProperty.SetValue(selectFilter, property.GetValue(this.__values.Actual.Data));
+			referenceProperty.SetValue(selectFilter, property.GetValue(this.Actual.Data));
 		}		
-		var repository = this.__context.GetRepository(property.Model);
+		var repository = this.Context.GetRepository(property.Model);
 		var result = repository.Local.Select(selectFilter);
 		return result;
 	}
-	private searchCollection_byProperty(property:Schema.Property):Model[]{
+	private searchCollection_byProperty(property:LMS.Schema.Property):LMS.Model[]{
 		return [];
 	}
 
-	public async GetValueAsync(property:Schema.Property|string):Promise<any>{
+	public async GetValueAsync(property:LMS.Schema.Property|string):Promise<any>{
 		if (typeof(property) === "string")
 			return this.getValueAsync_byPropertyName(<string>property);
-		else if (property instanceof Schema.Property)
-			return this.getValue_byProperty(<Schema.Property>property);
+		else if (property instanceof LMS.Schema.Property)
+			return this.getValueAsync_byProperty(<LMS.Schema.Property>property);
 		else
 			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
-	}
-	private async getValueAsync_byProperty(property:Schema.Property):Promise<any>{
-		if (property.PropertyType instanceof Schema.Model)
-			this.getModel_byProperty(property);		
-		else if (property.PropertyType.Name == "Collection")
-			return property.GetValue(this.Model);
-		else
-			return property.GetValue(this.Model);
 	}
 	private async getValueAsync_byPropertyName(propertyName:string):Promise<any>{
 		if (typeof(propertyName) !== "string")
 			throw new Error(`Controller.getValueAsync_byPropertyName():propertyName is not a string`);
-		var property:Schema.Property|undefined = this.__values.Actual.Model.GetSchema().GetProperty(propertyName);
+		var property:LMS.Schema.Property|undefined = this.Actual.Model.GetSchema().GetProperty(propertyName);
 		if (property === undefined)
-			throw new Error(`Controller.getValueAsync_byPropertyName():type(${this.Model.GetType().Name})propertyName(${propertyName})`);
+			throw new Error(`Controller.getValueAsync_byPropertyName():type(${this.Schema.FullName})propertyName(${propertyName})`);
 		return this.getValue_byProperty(property);
 	}
-	private async selectModelAsync_byProperty(property:Schema.Property):Promise<Model|undefined>{
+	private async getValueAsync_byProperty(property:LMS.Schema.Property):Promise<any>{
+		console.log(property.PropertyType);
+		if (property.PropertyType instanceof LMS.Schema.Model){
+			console.log(property.PropertyType);
+			this.getModelAsync_byProperty(property);
+		}
+					
+		else if (property.PropertyType.Name == "Collection")
+			return property.GetValue(this.Actual.Model);
+		else
+			return property.GetValue(this.Actual.Model);
+	}
+
+	private async getModelAsync_byProperty(property:LMS.Schema.Property):Promise<LMS.Model|undefined>{
 		var selectFilter:any = {};
 		for (var propertyName in property.Relationship){
 			var referenceProperty = property.Relationship[propertyName];
-			referenceProperty.SetValue(selectFilter, property.GetValue(this.__values.Actual.Data));
+			referenceProperty.SetValue(selectFilter, property.GetValue(this.Actual.Data));
 		}		
-		var repository = this.__context.GetRepository(property.Model);
+		var repository = this.Context.GetRepository(property.Model);
 		var result = repository.Local.Select(selectFilter);
 		if (result === undefined){
-			if (this.__status.Server.Properties[property.Name] === undefined){
-				this.__status.Server.Properties[property.Name] = ServerStatus.Serving;
+			if (this.Status.Server.Properties[property.Name] === undefined){
+				this.Status.Server.Properties[property.Name] = LMS.ServerStatus.Serving;
 				result = await repository.Server.Select(selectFilter);
-				this.__status.Server.Properties[property.Name] = ServerStatus.Served;
+				this.Status.Server.Properties[property.Name] = LMS.ServerStatus.Served;
 				this.SetValue(property, result, true);
 			}
 		}
 		return result;
 	}
-	private async searchCollectionAsyn_byProperty(property:Schema.Property):Promise<Model[]>{
+	private async searchCollectionAsyn_byProperty(property:LMS.Schema.Property):Promise<LMS.Model[]>{
 		return [];
 	}
 
-	public SetValue(property:Schema.Property|string, value:any, fromServer?:boolean){		
+	public SetValue(property:LMS.Schema.Property|string, value:any, fromServer?:boolean){		
 		if (typeof(property) === "string")
 			this.setValue_byPropertyName(<string>property, value, fromServer);
-		else if (property instanceof Schema.Property)
-			this.setValue_byProperty(<Schema.Property>property, value, fromServer);
+		else if (property instanceof LMS.Schema.Property)
+			this.setValue_byProperty(<LMS.Schema.Property>property, value, fromServer);
 		else
 			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
 	}
-	private setValue_byProperty(property:Schema.Property, value:any, fromServer?:boolean){		
-		if (property.Model !== this.Model.GetType())
-			throw new Error(`Controller.setValue_byProperty(property, value, fromServer):property's parent type(${property.Model.FullName}) is not the same as the controller's model type(${this.Model.GetType().Name})`);
-		if (property.PropertyType instanceof Schema.Model)
+	private setValue_byProperty(property:LMS.Schema.Property, value:any, fromServer?:boolean){		
+		if (property.Model !== this.Schema)
+			throw new Error(`Controller.setValue_byProperty(property, value, fromServer):property's parent type(${property.Model.FullName}) is not the same as the controller's model type(${this.Schema.FullName})`);
+		if (property.PropertyType instanceof LMS.Schema.Model)
 			this.setModel_byProperty(property, value, fromServer);
 		else if (property.PropertyType.Name == "Collection")
 			this.setCollection_byProperty(property, value, fromServer);
 		else{
-			property.SetValue(this.__values.Actual.Model, value);
-			property.SetValue(this.__values.Actual.Data, value);
-			switch (this.__status.Server.Properties[property.Name]){
-				case ServerStatus.Serving:
-					property.SetValue(this.__values.Pending, value);
+			property.SetValue(this.Actual.Model, value);
+			property.SetValue(this.Actual.Data, value);
+			switch (this.Status.Server.Properties[property.Name]){
+				case LMS.ServerStatus.Serving:
+					property.SetValue(this.Pending, value);
 					break;
 			}
-			if (fromServer)
-				property.SetValue(this.__values.Server.Data, value);
+			if (fromServer){
+				this.Status.Server.Properties[property.Name] = LMS.ServerStatus.Served;
+				property.SetValue(this.Server.Data, value);
+			}
+				
 		}
-		var serverValue = property.GetValue(this.__values.Server.Data);
-		var actualValue = property.GetValue(this.__values.Actual.Data);
+		var serverValue = property.GetValue(this.Server.Data);
+		var actualValue = property.GetValue(this.Actual.Data);
 
 		if (serverValue !== actualValue){
 			if (serverValue === undefined){
 				if (actualValue !== undefined)
-					this.__status.Change.Properties[property.Name] = ChangeStatus.Added;
+					this.Status.Change.Properties[property.Name] = LMS.ChangeStatus.Added;
 				else
-					this.__status.Change.Properties[property.Name] = ChangeStatus.Modified;			
+					this.Status.Change.Properties[property.Name] = LMS.ChangeStatus.Modified;			
 			}
 			else {
 				if (actualValue === undefined)
-					this.__status.Change.Properties[property.Name] = ChangeStatus.Deleted;
+					this.Status.Change.Properties[property.Name] = LMS.ChangeStatus.Deleted;
 				else
-					this.__status.Change.Properties[property.Name] = ChangeStatus.Modified;
+					this.Status.Change.Properties[property.Name] = LMS.ChangeStatus.Modified;
 			}
 		}
 		else{
-			this.__status.Change.Properties[property.Name] = ChangeStatus.Unchanged;
+			this.Status.Change.Properties[property.Name] = LMS.ChangeStatus.Unchanged;
 		}
-		if (this.__status.Change.Model !== ChangeStatus.Added && this.__status.Change.Model !== ChangeStatus.Deleted){
-			var newStatus:ChangeStatus = ChangeStatus.Unchanged;
-			for (var propertyName in this.__status.Change.Properties){
-				if (this.__status.Change.Properties[propertyName] !== ChangeStatus.Unchanged){
-					newStatus = ChangeStatus.Modified
+		if (this.Status.Change.Model !== LMS.ChangeStatus.Added && this.Status.Change.Model !== LMS.ChangeStatus.Deleted){
+			var newStatus:LMS.ChangeStatus = LMS.ChangeStatus.Unchanged;
+			for (var propertyName in this.Status.Change.Properties){
+				if (this.Status.Change.Properties[propertyName] !== LMS.ChangeStatus.Unchanged){
+					newStatus = LMS.ChangeStatus.Modified
 					break;
 				}					
 			}
-			this.__status.Change.Model = newStatus;
+			this.Status.Change.Model = newStatus;
 		}
 	}
 	private setValue_byPropertyName(propertyName:string, value:any, fromServer?:boolean){
-		var property:Schema.Property|undefined = this.__values.Actual.Model.GetSchema().GetProperty(propertyName);
+		var property:LMS.Schema.Property|undefined = this.Schema.GetProperty(propertyName);
 		if (property === undefined)
-			throw new Error(`Controller.setValue_byPropertyName(propertyName):type(${this.Model.GetType().Name})propertyName(${propertyName})`);
+			throw new Error(`Controller.setValue_byPropertyName(propertyName):type(${this.Schema.FullName})propertyName(${propertyName})`);
 		return this.setValue_byProperty(property, value, fromServer);
 	}
-	private setModel_byProperty(property:Schema.Property, value:Model, fromServer?:boolean){
+	private setModel_byProperty(property:LMS.Schema.Property, value:LMS.Model, fromServer?:boolean){
 		var referenceProperty = undefined;
-		var referenceProperties = this.Model.GetSchema().Properties.filter(x => { return x.References !== undefined; });
+		var referenceProperties = this.Schema.Properties.filter(x => { return x.References !== undefined; });
 		referenceProperties = referenceProperties.filter(x => {
 			return x.References !== undefined && x.References.find(y => {return y === property}) != undefined;
 		});
@@ -208,15 +217,15 @@ export class Controller<TModel extends Model> {
 		if (value === undefined){
 		}
 		else{
-			property.SetValue(this.__values.Actual.Model, value);
-			property.SetValue(this.__values.Actual.Data, value.__controller.PrimaryKey);
-			switch (this.__status.Server.Properties[property.Name]){
-				case ServerStatus.Serving:
-					property.SetValue(this.__values.Pending, value);
+			property.SetValue(this.Actual.Model, value);
+			property.SetValue(this.Actual.Data, value.__controller.PrimaryKey);
+			switch (this.Status.Server.Properties[property.Name]){
+				case LMS.ServerStatus.Serving:
+					property.SetValue(this.Pending, value);
 					break;
 			}
 			if (fromServer)
-				property.SetValue(this.__values.Server.Data, value);
+				property.SetValue(this.Server.Data, value);
 		}
 
 
@@ -224,23 +233,23 @@ export class Controller<TModel extends Model> {
 		
 		
 	}
-	private setCollection_byProperty(property:Schema.Property, value:Collection<Model>, fromServer?:boolean){
-		property.SetValue(this.Model, value);
+	private setCollection_byProperty(property:LMS.Schema.Property, value:LMS.Collection<LMS.Model>, fromServer?:boolean){
+		property.SetValue(this.Actual.Model, value);
 	}	
 
 	public Load(values: Partial<TModel>, fromServer?:boolean) {
 		for (var propertyName in values){
-			var property:Schema.Property|undefined = this.__schema.GetProperty(propertyName);
+			var property:LMS.Schema.Property|undefined = this.Schema.GetProperty(propertyName);
 			if (property !== undefined){
 				var value = property.GetValue(values);				
 				this.SetValue(property, value, fromServer);	
 			}			
 		}
+		if (fromServer)
+			this.Status.Server.Model = LMS.ServerStatus.Served;		
 	}
 
 	public toString():string{
-		var name = this.__schema.Name;
-		name = this.__schema.Name.split('.')[this.__schema.Name.split('.').length -1];
-		return `${name}(${this.PrimaryKey})`
+		return `${this.Schema.Name}(${this.PrimaryKey})`
 	}
 }

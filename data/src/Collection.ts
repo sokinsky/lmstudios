@@ -1,56 +1,82 @@
-import { Schema, Model, ServerStatus, Repository } from "./";
+import * as LMS from "./";
+import { Repository } from "./Repository";
 
-export class Collection<TModel extends Model> {
-    constructor(model:Model, type:(new (...args:any[])=>TModel)){
-        this.__model = model;
-        this.__repository = <Repository<TModel>>this.__model.__context.GetRepository(type);
-    }
-    public __model:Model;
-    public __repository:Repository<TModel>;
-    public __property?:Schema.Property;
-    public __status?:ServerStatus;
-    public get __filter():any{
-        var result = {};
-        if (this.__property !== undefined){
-            if (this.__property.Relationship !== undefined){
-                for (var propertyName in this.__property.Relationship){
-                    var parentProperty = this.__model.GetSchema().GetProperty(propertyName);
-                    var childProperty = this.__property.Relationship[propertyName];
-                    if (parentProperty !== undefined && childProperty !== undefined){
-                        childProperty.SetValue(result, parentProperty.GetValue(this.__model.__controller.__values.Actual.Model));
-                    }
-                }
-            }
+export class Collection<TModel extends LMS.Model> {
+    constructor(parentModel:LMS.Model, type:(new (...args:any[])=>TModel)){
+        this.Parent = {
+            Model: parentModel            
+        };
+        this.Child = {
+            Schema:this.Context.Schema.GetModel(type),
+            Repository: <LMS.Repository<TModel>>parentModel.__context.GetRepository(type)
         }
+        this.Filters = {
+            Default: this.generateDefaultFilter(),
+            Additional: []
+        }
+    }
+    public Parent:{
+        Model:LMS.Model,
+        Property?:LMS.Schema.Property,
+    }
+    public Child:{
+        Schema:LMS.Schema.Model,
+        Repository:LMS.Repository<TModel>
+    }
+    public Status?:LMS.ServerStatus;
+    public get Context():LMS.Context{
+        return this.Parent.Model.__context;
+    }
+    public Filters:{
+        Default:Partial<TModel>,
+        Additional:Partial<TModel>[]
+    };
+
+    private generateDefaultFilter() : Partial<TModel>{
+        if (this.Parent.Property === undefined)
+            throw new Error(`Collection.generateDefaultFilter():Parent.Property was undefined`);
+        if (this.Parent.Property.Relationship === undefined)
+            throw new Error(`Collection.generateDefaultFilter():Parent.Property is not a navigation property`);
+        
+        var result:Partial<TModel> = {};
+        for (var propertyName in this.Parent.Property.Relationship){
+            var parentProperty = this.Parent.Model.GetSchema().GetProperty(propertyName);
+            if (parentProperty === undefined)
+                throw new Error(`Collection,.generateDefaultFilter():Parent(${this.Parent.Model.GetSchema().FullName}) does not have property(${propertyName})`);
+            var childProperty = this.Parent.Property.Relationship[propertyName];
+            if (childProperty.Model !== this.Child.Schema)
+                throw new Error(`Collection.generateDefaultFilter():Relationship does not belog to child(${this.Child.Schema.FullName})`);
+            childProperty.SetValue(result, parentProperty.GetValue(this.Parent.Model));
+        }    
         return result;
+        
     }
 
 	public *[Symbol.iterator]() {  
-        if (this.__status===undefined)
+        if (this.Status===undefined)
             this.Intialize();
-
-        var items = this.__repository.Local.Search(this.__filter);
+        var items = this.Child.Repository.Local.Search(this.Filters.Default);
         for (const item of items) {
             yield item;
         }
     }  
     public get length():number{
-        if (this.__status === undefined)
+        if (this.Status === undefined)
              this.Intialize();
 
-         return this.__repository.Local.Search(this.__filter).length;
-        return 0;
+        var items = this.Child.Repository.Local.Search(this.Filters.Default);
+        return items.length;
     }
     public Intialize(){
-        switch (this.__status){
-            case ServerStatus.Served:
+        switch (this.Status){
+            case LMS.ServerStatus.Served:
                 break;
-            case ServerStatus.Serving:
+            case LMS.ServerStatus.Serving:
                 break;
             default:   
-                this.__status = ServerStatus.Serving;             
-                this.__repository.Search(this.__filter).then(items =>{
-                    this.__status = ServerStatus.Served;
+                this.Status = LMS.ServerStatus.Serving;             
+                this.Child.Repository.Search(this.Filters.Default).then(items =>{
+                    this.Status = LMS.ServerStatus.Served;
                 });
                 break;
         }
