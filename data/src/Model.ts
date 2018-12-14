@@ -1,25 +1,28 @@
-import {Schema } from "./";
-import { Context, Controller, ChangeStatus } from "./"
-import { Repository } from "./Repository";
-
+import * as LMS from "./";
 export class Model {
-	constructor(context:Context, data?:Partial<Model>)	{
+	constructor(context:LMS.Context, data?:Partial<Model>)	{
 		this.__context = context;		
 		var decoration = ((<any>this).__proto__).decoration;
-		this.__schema = this.__context.GetType(decoration.type.name);
+		var type = LMS.Type.GetType(decoration.model.FullName);
+		if (type === undefined)
+			throw new Error(``);
 
+		this.__type = LMS.Type.Create(decoration.model.FullName);
+		var schema = this.__context.Schema.Models.find(x => x.FullName === decoration.model.FullName);
+		if (schema === undefined)
+			throw new Error(``);
+
+		this.__schema = schema;
 
 		var proxy:Model|undefined = new Proxy(this, {
-			get: (target, propertyName: string, reciever) => {	
-				
-				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
+			get: (target, propertyName: string, reciever) => {
+				let property:LMS.Schema.Property|undefined = this.GetSchema().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
-				console.log(propertyName);
 				return this.__controller.GetValue(property);
 			},
 			set: (target, propertyName:string, propertyValue, reciever) => {
-				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
+				let property:LMS.Schema.Property|undefined = this.GetSchema().GetProperty(propertyName);
 				if (property !== undefined){
 					this.__controller.SetValue(property, propertyValue);
 					return true;
@@ -29,7 +32,7 @@ export class Model {
 		});
 		this.Server = <any>new Proxy(this, {
 			get: async (target, propertyName: string, reciever) => {
-				let property:Schema.Property|undefined = this.GetType().GetProperty(propertyName);
+				let property:LMS.Schema.Property|undefined = this.GetSchema().GetProperty(propertyName);
 				if (property === undefined)
 					return Reflect.get(target, propertyName, reciever);
 				return this.__controller.GetValue(property);
@@ -41,17 +44,21 @@ export class Model {
 			this.__controller = new controllerConstructor(context, this, proxy);
 		}
 		else{
-			this.__controller = new Controller(context, this, proxy);
+			this.__controller = new LMS.Controller(context, this, proxy);
 		}
 			
 		return proxy;
 	}
-	public __context:Context;
-	public __schema:Schema.Type;	
-	public __controller:Controller<Model>
+	public __context:LMS.Context;
+	public __type:LMS.Type;
+	public __schema:LMS.Schema.Model;
+	public __controller:LMS.Controller<Model>
 	public Server:{[p in keyof this]:Promise<this[p]>};
 
-	public GetType() : Schema.Type {
+	public GetType() : LMS.Type {
+		return this.__type;
+	}
+	public GetSchema(): LMS.Schema.Model{
 		return this.__schema;
 	}
 	public ToBridge():{ID:string, Type:string, Value:any}{
@@ -64,10 +71,10 @@ export class Model {
 	public Load(value:any, server?:boolean){
 		this.__controller.Load(value, server);
 	}
-	public GetValue(property:Schema.Property|string){
+	public GetValue(property:LMS.Schema.Property|string){
 		return this.__controller.GetValue(property);
 	}
-	public SetValue(property:Schema.Property|string, value:any){
+	public SetValue(property:LMS.Schema.Property|string, value:any){
 		this.__controller.SetValue(property, value);
 	}
 	public toString():string{

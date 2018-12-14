@@ -11,7 +11,7 @@ export class Context implements OnInit {
 	constructor(private data: Data) {
     }
     public async ngOnInit(){
-        console.log(this.data.Repositories.length);
+
     }
 
     public selectedRepository?:Repository;

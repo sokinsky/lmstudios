@@ -1,6 +1,4 @@
-import { Context, Model, Request, Response, Schema } from "./";
-import { ServerStatus } from "./Context";
-import { Repository } from "./Repository";
+import { Schema, Model, ServerStatus, Repository } from "./";
 
 export class Collection<TModel extends Model> {
     constructor(model:Model, type:(new (...args:any[])=>TModel)){
@@ -16,7 +14,7 @@ export class Collection<TModel extends Model> {
         if (this.__property !== undefined){
             if (this.__property.Relationship !== undefined){
                 for (var propertyName in this.__property.Relationship){
-                    var parentProperty = this.__model.GetType().GetProperty(propertyName);
+                    var parentProperty = this.__model.GetSchema().GetProperty(propertyName);
                     var childProperty = this.__property.Relationship[propertyName];
                     if (parentProperty !== undefined && childProperty !== undefined){
                         childProperty.SetValue(result, parentProperty.GetValue(this.__model.__controller.__values.Actual.Model));

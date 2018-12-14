@@ -1,11 +1,11 @@
-﻿import * as Schema from "./Schema";
+﻿import { Context as SchemaContext, Type as SchemaType } from "./Schema";
 import { API, ChangeTracker, Model, Repository, Request, Response, ResponseStatus} from './'
 
-export enum ServerStatus { Serving = "Serving", Served = "Served" }
+
 export class Context {
 	constructor(apiUrl:string, schemaData:any) {	
 		this.API = new API(this, apiUrl);
-		this.Schema = new Schema.Context(schemaData);
+		this.Schema = new SchemaContext(schemaData);
 		var proxy:Context = new Proxy(this, {
 			set: (target, propertyName:string, propertyValue, reciever) => {
 				if (propertyValue instanceof Repository)
@@ -18,7 +18,7 @@ export class Context {
 	}
 	public API:API;
 	public Tracker:ChangeTracker = new ChangeTracker(this);
-	public Schema:Schema.Context;
+	public Schema:SchemaContext;
 
 	private __repositories?:Repository<Model>[];
 	public get Repositories(){
@@ -38,26 +38,38 @@ export class Context {
 		if (response !== undefined)
 			this.Load(response.Result);
 	}
-	public GetRepository(type:string|Schema.Type|(new (...args: any[]) => Model)|Model):Repository<Model> {
+	public GetRepository(type:string|SchemaType|(new (...args: any[]) => Model)|Model):Repository<Model> {
 		switch (typeof(type)){
 			case "string":
-				return this.GetRepository(this.GetType(<string>type));					
+				return this.GetRepository(<string>type);					
 			case "object":
 				if (type instanceof Model)
 					return this.GetRepository(type.GetType());
-				else if (type instanceof Schema.Type ){
-					var result = this.Repositories.find((repository:Repository<Model>) => { return type === repository.Type });
+				else if (type instanceof SchemaType ){
+					var result = this.Repositories.find((repository:Repository<Model>) => { return type === repository.Model.Schema });
 					if (result !== undefined)
 						return result;
 				}
 				break;
 			case "function":
-				var result = this.Repositories.find((repository:Repository<Model>) => { return type == repository.Type.Constructor});
+				var result = this.Repositories.find((repository:Repository<Model>) => { return type == repository.Model.Schema.GetConstructor()});
 				if (result !== undefined)
 					return result;
 				break;
 		}
 		throw new Error(``);
+	}
+	private getRepository_byFullName(fullName:string){
+
+	}
+	private getRepository_byType(type:SchemaType){
+
+	}
+	private getRepository_byObject(object:object){
+
+	}
+	private getRepository_byConstructor(constructor:(new (...args: any[]) => Model)){
+
 	}
 	public async Load(models: {ID:string,Type:string,Value:any}[], fromServer?:boolean) {	
 		models.forEach((bridgeModel: any) => {
@@ -87,13 +99,6 @@ export class Context {
 			this.Load(response.Result, true);
 		}			
 		return response;
-	}
-
-	public GetType(name:string|(new (...args: any[]) => any)):Schema.Type{
-		var result = this.Schema.GetType(name);
-		if (result === undefined)
-			throw new Error(``);
-		return result;
 	}
 }
 

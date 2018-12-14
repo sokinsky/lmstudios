@@ -1,13 +1,20 @@
-import { Context, Model, Request, Response, Schema } from "./";
-import { ChangeStatus } from "./ChangeEntry";
+import * as LMS from "./";
 
-export class Repository<TModel extends Model> {
-	constructor(context:Context, type: (new (...args: any[]) => TModel)) {
+export class Repository<TModel extends LMS.Model> {
+	constructor(context:LMS.Context, model: (new (...args: any[]) => TModel)) {
+		var fullName = ((<any>model).prototype).model.FullName;
+
 		this.Context = context;
-		if (type.prototype.decoration === undefined)
-			throw new Error(`'${type.prototype.constructor.name}' was not decorated`);	
-		this.Type = this.Context.GetType(type.prototype.decoration.type.name);
-		this.Type.Constructor = type;
+		var schema = this.Context.Schema.Models.find(x => { return x.FullName === fullName});
+		if (schema === undefined)
+			throw new Error(``);
+		var type = LMS.Type.GetType(fullName);
+		if (type === undefined)
+			throw new Error(``);
+		this.Model = {
+			Schema:schema,
+			Type:type
+		}		
 	}
 	private __items:TModel[] = [];
 	public get Items():TModel[]{
@@ -18,16 +25,20 @@ export class Repository<TModel extends Model> {
 			yield value;
 		}
 	}
-	public Context:Context;
-	public Type:Schema.Type;
+	public Context:LMS.Context;
 	public Name:string = "";
+	public Model:{
+		Schema:LMS.Schema.Model,
+		Type:LMS.Type
+	}	
 
     public Local: LocalRepository<TModel> = new LocalRepository(this);
 	public Server: ServerRepository<TModel> = new ServerRepository(this);
 
 	public Create():TModel{
-		if (this.Type.Constructor !== undefined){
-			var result = new this.Type.Constructor(this.Context);
+		var constructor = this.Model.Schema.GetConstructor();
+		if (constructor !== undefined){
+			var result = new constructor()(this.Context);
 			return result;
 		}
 		throw new Error(`Repository.Create was unable to create Model`);
@@ -36,7 +47,7 @@ export class Repository<TModel extends Model> {
 		if (value === undefined)
 			value = this.Add({});
 		var result:TModel|undefined = undefined;	
-		if (! (value instanceof Model)){
+		if (! (value instanceof LMS.Model)){
 			result = this.Local.Select(value);
 			if (result === undefined){
 				result = this.Create();
@@ -44,18 +55,18 @@ export class Repository<TModel extends Model> {
 				return this.Add(result, fromServer);
 			}	
 		}
-		if (value instanceof Model){
-			if (value.GetType() !== this.Type)
-				throw new Error(`Repository.Add():Model(${value.GetType().Name}) is not valid in Repository<${this.Type.Name}>`);
+		if (value instanceof LMS.Model){
+			if (value.GetType() !== this.Model.Schema)
+				throw new Error(`Repository.Add():Model(${value.GetType().FullName}) is not valid in Repository<${this.Model.Type.FullName}>`);
 			var exists = this.Items.find(x => { return x === value});
 			if (exists === undefined){
 				this.Items.push(value);
 			}
 			
 			if (fromServer === true)
-				value.__controller.__status.Change.Model = ChangeStatus.Unchanged;
+				value.__controller.__status.Change.Model = LMS.ChangeStatus.Unchanged;
 			else
-				value.__controller.__status.Change.Model = ChangeStatus.Added;
+				value.__controller.__status.Change.Model = LMS.ChangeStatus.Added;
 			return value;
 		}	
 		throw Error(``);
@@ -75,7 +86,7 @@ export class Repository<TModel extends Model> {
 		return this.Local.Search(...values);
 	}
 }
-export class LocalRepository<TModel extends Model> {
+export class LocalRepository<TModel extends LMS.Model> {
     constructor(repository: Repository<TModel>) {
         this.Repository = repository;
     }
@@ -83,21 +94,21 @@ export class LocalRepository<TModel extends Model> {
 	public get Items():TModel[]{
 		return this.Repository.Items;
 	}
-	public get Type():Schema.Type{
-		return this.Repository.Type;
+	public get Schema():LMS.Schema.Model{
+		return this.Repository.Model.Schema;
 	}
 
 
     public Select(value:Partial<TModel>) : TModel|undefined {				
 		var filter:Partial<TModel> = {};
-		this.Repository.Type.PrimaryKey.Properties.forEach(property =>{
+		this.Schema.PrimaryKey.Properties.forEach(property =>{
 			property.SetValue(filter, property.GetValue(value));
 		})
 		var results = this.Search(filter);		
 		if (results.length === 1)
 			return results[0];
 		
-		this.Repository.Type.AdditionalKeys.forEach(key =>{
+		this.Schema.AdditionalKeys.forEach(key =>{
 			filter = {};
 			key.Properties.forEach(property=>{
 				property.SetValue(filter, property.GetValue(value));
@@ -114,7 +125,7 @@ export class LocalRepository<TModel extends Model> {
 			for (let item of this.Repository.Items){
 				var include = true;
 				for (var propertyName in value){
-					var property = this.Type.GetProperty(propertyName);
+					var property = this.Schema.GetProperty(propertyName);
 					if (property !== undefined){
 						if (property.GetValue(item) !== property.GetValue(value))
 							include = false;
@@ -130,32 +141,31 @@ export class LocalRepository<TModel extends Model> {
 		return results;
 	}
 }
-export class ServerRepository<TModel extends Model> {
+export class ServerRepository<TModel extends LMS.Model> {
     constructor(repository: Repository<TModel>) {
         this.Repository = repository;
     }
 	public Repository: Repository<TModel>;
+	public get Schema():LMS.Schema.Model{
+		return this.Repository.Model.Schema;
+	}
 	public async Select(value: Partial<TModel>) : Promise<TModel|undefined> {
-		if (this.Repository.Type === undefined)
-			return undefined;
 		var body = {
-			Type: this.Repository.Type.Name,
+			Type: this.Schema.Name,
 			Value: value
 		};
-		var request:Request = new Request("Model/Select", body);
-		var response:Response = await request.Post(this.Repository.Context.API);
+		var request:LMS.Request = new LMS.Request("Model/Select", body);
+		var response:LMS.Response = await request.Post(this.Repository.Context.API);
 		if (response.Result)
 			this.Repository.Context.Load(response.Result);
 		return this.Repository.Local.Select(value);
 	}
 	public async Search(...values:any[]):Promise<TModel[]>{
-		if (this.Repository.Type === undefined)
-			return [];
 		var body = {
-			Type:this.Repository.Type.Name,
+			Type:this.Schema.Name,
 			Values:values
 		}
-		var request:Request = new Request("Model/Search", body);
+		var request:LMS.Request = new LMS.Request("Model/Search", body);
 		var response = await request.Post(this.Repository.Context.API);
 		if (response !== undefined)
 			this.Repository.Context.Load(response.Result);

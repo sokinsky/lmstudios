@@ -24,17 +24,17 @@ export class Model implements OnInit {
     public get dataProperties():Schema.Property[]{
         if (this.model === undefined)
             return [];
-        return this.model.GetType().Properties.filter(x => { return (! x.IsModel && ! x.IsCollection)});
+        return this.model.GetSchema().Properties.filter(x => { return (! (x.PropertyType instanceof Schema.Model) &&  x.PropertyType.Name !== "Collection" )});
     }
     public get modelProperties():Schema.Property[]{
         if (this.model === undefined)
             return []
-        return this.model.GetType().Properties.filter(x => { return x.IsModel; })
+        return this.model.GetSchema().Properties.filter(x => { return x instanceof Schema.Model; })
     }
     public get collectionProperies():Schema.Property[]{
         if (this.model === undefined)
             return []
-        return this.model.GetType().Properties.filter(x => { return x.IsCollection; })
+        return this.model.GetSchema().Properties.filter(x => { return x.PropertyType.Name === "Collection"; })
     }
 
     public getPre(item:Schema.Property|Data|Collection<Data>|undefined):string|undefined{
@@ -54,14 +54,11 @@ export class Model implements OnInit {
 
 
     public Add(property:Schema.Property){
-
-
-        if (this.model !== undefined && property.Type !== undefined) {
+        if (this.model !== undefined && property.Model !== undefined) {
             let parentModel:Data = this.model;
 
-            var newModel = parentModel.__context.GetRepository(property.Type).Add({});
+            var newModel = parentModel.__context.GetRepository(property.Model).Add({});
             this.model = newModel;
-
 
             if (property.Relationship !== undefined){
                 let relationship:{[name:string]:Schema.Property} = property.Relationship;
@@ -70,7 +67,7 @@ export class Model implements OnInit {
                     if (foreignProperty.References !== undefined){
                         let references:Schema.Property[] = foreignProperty.References;
                         if (this.model !== undefined){
-                            let reference = references.find(x => x.Type === parentModel.GetType());
+                            let reference = references.find(x => x.Model === parentModel.GetType());
                             if (reference !== undefined){
                                 newModel.SetValue(reference, parentModel);
                             }
@@ -86,10 +83,7 @@ export class Model implements OnInit {
     
 
     public GetValue(property:Schema.Property){
-        console.log(this.model);
-        console.log(property);
-        console.log(property.GetValue(this.model));
-         return property.GetValue(this.model);
+        return property.GetValue(this.model);
     }
     public Log(item:any){
         console.log(item);

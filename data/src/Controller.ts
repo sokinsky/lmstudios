@@ -1,16 +1,10 @@
 import { Guid } from "./Utilities";
-import { Schema, Utilities } from "./";
-import { Context, Model, Request, ServerStatus, ChangeStatus} from "./";
-import { Repository } from "./Repository";
-import { Collection } from "./Collection";
-
-
-
+import { Schema, Utilities, Context, Model, ServerStatus, ChangeStatus, Repository, Collection } from "./";
 
 export class Controller<TModel extends Model> {
 	constructor(context:Context, actual: TModel, proxy:TModel) {
 		this.__context = context;
-		this.__schema = actual.GetType();
+		this.__schema = actual.GetSchema();
 		this.__repository = <Repository<TModel>>this.__context.GetRepository(actual);
 		this.__values = {
 			Actual:{ Model:actual, Data:{} },
@@ -25,7 +19,7 @@ export class Controller<TModel extends Model> {
 	}
 	public __id:string = Utilities.Guid.Create().toString();
 	public __context:Context;
-	public __schema:Schema.Type;
+	public __schema:Schema.Model;
 	public __repository:Repository<TModel>;
 	public __values:{ 
 		Actual:{ Model:TModel, Data:Partial<TModel>	}, 
@@ -39,7 +33,7 @@ export class Controller<TModel extends Model> {
 	}
 
 	public get PrimaryKey():any{
-		var keyProperty = this.__values.Actual.Model.GetType().PrimaryKey
+		var keyProperty = this.__values.Actual.Model.GetSchema().PrimaryKey
 		return keyProperty.Properties[0].GetValue(this.__values.Actual.Model);
 	}
 
@@ -50,8 +44,6 @@ export class Controller<TModel extends Model> {
 
 
 	public GetValue(property:Schema.Property|string):any{	
-		console.log(property);
-
 		if (typeof(property) === "string")
 			return this.getValue_byPropertyName(<string>property);
 		else if (property instanceof Schema.Property)
@@ -60,13 +52,9 @@ export class Controller<TModel extends Model> {
 			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
 	}
 	private getValue_byProperty(property:Schema.Property):any{
-		if (! (property instanceof Schema.Property))
-			throw new Error(`Controller.getValue_byProperty(property):property is not an @lmstudios/data/Schema.Property`);
-		if (property.Parent !== this.Model.GetType())
-			throw new Error(`Controller.getValue_byProperty(property):property's parent type(${property.Parent.Name}) is not the same as the controller's model type(${this.Model.GetType().Name})`);
-		if (property.IsModel)
-			this.selectModel_byProperty(property);		
-		else if (property.IsCollection)
+		if (property.PropertyType instanceof Schema.Model)
+			return this.getModel_byProperty(property);		
+		else if (property.PropertyType.Name === "Collection")
 			return property.GetValue(this.Model);
 		else
 			return property.GetValue(this.Model);
@@ -74,27 +62,59 @@ export class Controller<TModel extends Model> {
 	private getValue_byPropertyName(propertyName:string):any{
 		if (typeof(propertyName) !== "string")
 			throw new Error(`Controller.getValue_byPropertyName(propertyName):propertyName is not a string`);
-		var property:Schema.Property|undefined = this.__values.Actual.Model.GetType().GetProperty(propertyName);
+		var property:Schema.Property|undefined = this.__values.Actual.Model.GetSchema().GetProperty(propertyName);
 		if (property === undefined)
 			throw new Error(`Controller.getValue_byPropertyName(propertyName):type(${this.Model.GetType().Name})propertyName(${propertyName})`);
 		return this.getValue_byProperty(property);
 	}
-	private async selectModel_byProperty(property:Schema.Property):Promise<Model|undefined>{
-		if (property.Type === undefined)
-			throw new Error(`Controller.selectModel(property):property's Type is undefined`);
-		if (property.Relationship === undefined)
-			throw new Error(`Controller.selectModel(property):property's Relationship is undefined`);
-
+	private getModel_byProperty(property:Schema.Property):Model|undefined{
 		var selectFilter:any = {};
 		for (var propertyName in property.Relationship){
 			var referenceProperty = property.Relationship[propertyName];
 			referenceProperty.SetValue(selectFilter, property.GetValue(this.__values.Actual.Data));
 		}		
-		var repository = this.__context.GetRepository(property.Type);
+		var repository = this.__context.GetRepository(property.Model);
+		var result = repository.Local.Select(selectFilter);
+		return result;
+	}
+	private searchCollection_byProperty(property:Schema.Property):Model[]{
+		return [];
+	}
+
+	public async GetValueAsync(property:Schema.Property|string):Promise<any>{
+		if (typeof(property) === "string")
+			return this.getValueAsync_byPropertyName(<string>property);
+		else if (property instanceof Schema.Property)
+			return this.getValue_byProperty(<Schema.Property>property);
+		else
+			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
+	}
+	private async getValueAsync_byProperty(property:Schema.Property):Promise<any>{
+		if (property.PropertyType instanceof Schema.Model)
+			this.getModel_byProperty(property);		
+		else if (property.PropertyType.Name == "Collection")
+			return property.GetValue(this.Model);
+		else
+			return property.GetValue(this.Model);
+	}
+	private async getValueAsync_byPropertyName(propertyName:string):Promise<any>{
+		if (typeof(propertyName) !== "string")
+			throw new Error(`Controller.getValueAsync_byPropertyName():propertyName is not a string`);
+		var property:Schema.Property|undefined = this.__values.Actual.Model.GetSchema().GetProperty(propertyName);
+		if (property === undefined)
+			throw new Error(`Controller.getValueAsync_byPropertyName():type(${this.Model.GetType().Name})propertyName(${propertyName})`);
+		return this.getValue_byProperty(property);
+	}
+	private async selectModelAsync_byProperty(property:Schema.Property):Promise<Model|undefined>{
+		var selectFilter:any = {};
+		for (var propertyName in property.Relationship){
+			var referenceProperty = property.Relationship[propertyName];
+			referenceProperty.SetValue(selectFilter, property.GetValue(this.__values.Actual.Data));
+		}		
+		var repository = this.__context.GetRepository(property.Model);
 		var result = repository.Local.Select(selectFilter);
 		if (result === undefined){
 			if (this.__status.Server.Properties[property.Name] === undefined){
-				console.log(selectFilter);
 				this.__status.Server.Properties[property.Name] = ServerStatus.Serving;
 				result = await repository.Server.Select(selectFilter);
 				this.__status.Server.Properties[property.Name] = ServerStatus.Served;
@@ -102,6 +122,9 @@ export class Controller<TModel extends Model> {
 			}
 		}
 		return result;
+	}
+	private async searchCollectionAsyn_byProperty(property:Schema.Property):Promise<Model[]>{
+		return [];
 	}
 
 	public SetValue(property:Schema.Property|string, value:any, fromServer?:boolean){		
@@ -112,13 +135,12 @@ export class Controller<TModel extends Model> {
 		else
 			throw new Error(`Controller.GetValue(property):property is neither a string nor a Property`);
 	}
-	private setValue_byProperty(property:Schema.Property, value:any, fromServer?:boolean){
-		
-		if (property.Parent !== this.Model.GetType())
-			throw new Error(`Controller.setValue_byProperty(property, value, fromServer):property's parent type(${property.Parent.Name}) is not the same as the controller's model type(${this.Model.GetType().Name})`);
-		if (property.IsModel)
+	private setValue_byProperty(property:Schema.Property, value:any, fromServer?:boolean){		
+		if (property.Model !== this.Model.GetType())
+			throw new Error(`Controller.setValue_byProperty(property, value, fromServer):property's parent type(${property.Model.FullName}) is not the same as the controller's model type(${this.Model.GetType().Name})`);
+		if (property.PropertyType instanceof Schema.Model)
 			this.setModel_byProperty(property, value, fromServer);
-		else if (property.IsCollection)
+		else if (property.PropertyType.Name == "Collection")
 			this.setCollection_byProperty(property, value, fromServer);
 		else{
 			property.SetValue(this.__values.Actual.Model, value);
@@ -163,21 +185,14 @@ export class Controller<TModel extends Model> {
 		}
 	}
 	private setValue_byPropertyName(propertyName:string, value:any, fromServer?:boolean){
-		if (typeof(propertyName) !== "string")
-			throw new Error(`Controller.setValue_byPropertyName(propertyName, value, fromServer):propertyName is not a string`);
-		var property:Schema.Property|undefined = this.__values.Actual.Model.GetType().GetProperty(propertyName);
+		var property:Schema.Property|undefined = this.__values.Actual.Model.GetSchema().GetProperty(propertyName);
 		if (property === undefined)
 			throw new Error(`Controller.setValue_byPropertyName(propertyName):type(${this.Model.GetType().Name})propertyName(${propertyName})`);
 		return this.setValue_byProperty(property, value, fromServer);
 	}
 	private setModel_byProperty(property:Schema.Property, value:Model, fromServer?:boolean){
-		if (! property.IsModel)
-			throw new Error(`Controller.setModel_byProperty(property, value, fromServer):property.IsModel is false`);
-		if (property.Type === undefined)
-			throw new Error(`Contoller.setModel_byProperty(property, value, fromServer):property.Type is undefined.`);
-
 		var referenceProperty = undefined;
-		var referenceProperties = this.Model.GetType().Properties.filter(x => { return x.References !== undefined; });
+		var referenceProperties = this.Model.GetSchema().Properties.filter(x => { return x.References !== undefined; });
 		referenceProperties = referenceProperties.filter(x => {
 			return x.References !== undefined && x.References.find(y => {return y === property}) != undefined;
 		});
@@ -193,11 +208,6 @@ export class Controller<TModel extends Model> {
 		if (value === undefined){
 		}
 		else{
-			if (!(value instanceof Model))
-				throw new Error(`Controller.setModel_byProperty(property, value, fromServer):value is not a Model`);
-			if (value.GetType() !== property.Type)
-				throw new Error(`Controller.setModel_byProperty(property, value, fromServer):property.Type(${property.Type.Name}) !== value.Type(${value.GetType().Name}).`);
-
 			property.SetValue(this.__values.Actual.Model, value);
 			property.SetValue(this.__values.Actual.Data, value.__controller.PrimaryKey);
 			switch (this.__status.Server.Properties[property.Name]){
@@ -215,10 +225,6 @@ export class Controller<TModel extends Model> {
 		
 	}
 	private setCollection_byProperty(property:Schema.Property, value:Collection<Model>, fromServer?:boolean){
-		if (! property.IsCollection)
-			throw new Error(`Controller.setCollection_byProperty():property IsCollection is false.`);
-		if (! (value instanceof Collection))
-			throw new Error(`Collection.setCollection_byProperty():value is not a collection`);
 		property.SetValue(this.Model, value);
 	}	
 

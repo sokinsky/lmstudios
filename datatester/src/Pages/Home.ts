@@ -28,8 +28,6 @@ export class Home implements OnInit {
     public Email?:Models.Email;
 
 
-    public async Test(){
-    }
     public Log(item:any){
         console.log(item);
     }
@@ -38,5 +36,15 @@ export class Home implements OnInit {
 	public async NewPerson() {
     }
     public async NewUser(){
+    }
+
+    public async GetPerson(){
+        this.Person = await this.context.People.Select({ID:2});
+    }
+    public async GetPersonUser(){
+        if (this.Person !== undefined){
+            var user = await this.Person.Server.User;
+        }
+            
     }
 }

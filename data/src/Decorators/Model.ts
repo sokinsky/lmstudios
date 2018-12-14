@@ -1,14 +1,14 @@
-import { Controller } from "../";
+import * as LMS from "../";
 
-export function Model(name:string, controllerType?:(()=>new(...args:any[])=>any)){
+export function Model(fullName:string, controllerType?:(()=>new(...args:any[])=>any)){
     var controllerType:(()=>new(...args:any[])=>any)|undefined = controllerType;  
     return function(target:any){        
-        target.prototype.decoration = {
-            type: {
-                name:name
-            }
+        target.prototype.model = {
+            FullName: fullName,
+            Controller: controllerType
         }
-        if (controllerType !== undefined)
-            target.prototype.decoration.type.controller = controllerType;
+        var type = LMS.Type.GetType(fullName);
+        if (type === undefined)
+            LMS.Type.Create(fullName, target);    
      }    
 }

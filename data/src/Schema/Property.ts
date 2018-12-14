@@ -1,57 +1,48 @@
-import { Type } from "./";
+import { Type } from "../Type";
+import { Context, Model } from "./";
 
 export class Property {
-    constructor(parent:Type, name:string){
-        this.Parent = parent;  
+    constructor(model:Model, name:string){
+        this.Model = model; 
         this.Name = name;
+        this.PropertyType = new Type("any");
     }
-    public Initialize(data:{ Name:string, Type:string, Relationship?:{ [name:string]:string }, References?:string }){        
-        this.Type = this.Parent.Context.GetType(data.Type);
-        if (this.Type === undefined){
-            if (data.References !== undefined){
-                this.References = [];
-                for (var dataReference of data.References){
-                    var referenceProperty = this.Parent.GetProperty(dataReference);
-                    if (referenceProperty === undefined)
-                        throw new Error(``);
-                    this.References.push(referenceProperty);
-                }
+    public Initialize(type:string, relationship?:{ [name:string]:string }, references?:string) {  
+   
+        var propertyType = Type.GetType(type);
+        if (propertyType === undefined)
+            propertyType = Type.Create(type);
+        this.PropertyType = propertyType;
 
+        if (references !== undefined){
+            this.References = [];
+            for (var dataReference of references){
+                var referenceProperty = this.Model.GetProperty(dataReference);
+                if (referenceProperty === undefined)
+                    throw new Error(``);
+                this.References.push(referenceProperty);
             }
         }
-        else{
-            if (data.Relationship !== undefined){
-                this.Relationship = {};
-                for (var name in data.Relationship){
-                    var parentProperty = this.Parent.GetProperty(name);
-                    if (parentProperty === undefined)
-                        throw new Error(`Invalid Relactionship:Type(${this.Parent.Name}) does not have Property(${name})`);
-
-                    var childProperty = this.Type.GetProperty(data.Relationship[name]);
-                    if (childProperty === undefined)
-                        throw new Error(`Invalid Relationship:Type(${this.Type.Name}) does not have Property(${data.Relationship[name]})`)
-
-                    this.Relationship[name] = childProperty;
+        if (relationship !== undefined){
+            this.Relationship = {};
+            for (var name in relationship){
+                var parentProperty = this.Model.GetProperty(name);
+                if (parentProperty !== undefined){
+                    if (this.ModelType !== undefined){
+                        var childProperty = this.ModelType.GetProperty(relationship[name]);
+                        if (childProperty !== undefined)
+                            this.Relationship[name] = childProperty;                       
+                    }  
                 }
-
-                if (data.Type.match(/\[\]/)){
-                    this.IsCollection = true;
-                    this.Type = undefined;
-                }
-                else{
-                    this.IsModel = true;
-                }
-                    
-            }
+              
+            }                    
         }
-
-
+        
     }
-    public Parent:Type;
+    public Model:Model;
     public Name:string;
-    public Type?:Type;
-    public IsModel:boolean = false;
-    public IsCollection:boolean = false;
+    public PropertyType:Type;
+    public ModelType?:Model;
     public Relationship?:{[name:string]:Property};
     public References?:Property[];
     

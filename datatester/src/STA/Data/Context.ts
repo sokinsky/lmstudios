@@ -2,8 +2,6 @@ import { Injectable, Inject, InjectionToken} from "@angular/core";
 import { Schema, Context as Base, Repository, Decorators } from "@lmstudios/data";
 import { Email, Person, User, PersonEmail } from "./Models";
 import { appSettings } from "../../Configuration/appSettings"
-import { stringify } from "@angular/core/src/util";
-import { analyzeAndValidateNgModules } from "@angular/compiler";
 
 @Injectable()
 export class ContextService {
