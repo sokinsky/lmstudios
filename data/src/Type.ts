@@ -1,3 +1,6 @@
+console.log("LMS.Data.Type");
+
+
 export class Type {
     constructor(name:string, constructor?:(new (...args: any[]) => any)){
         this.FullName = name;

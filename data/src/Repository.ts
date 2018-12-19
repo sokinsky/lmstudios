@@ -1,4 +1,6 @@
 import * as LMS from "./";
+console.log("LMS.Data.Repository");
+
 
 export class Repository<TModel extends LMS.Model> {
 	constructor(context:LMS.Context, model: (new (...args: any[]) => TModel)) {

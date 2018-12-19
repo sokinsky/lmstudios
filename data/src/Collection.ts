@@ -1,6 +1,9 @@
 import * as LMS from "./";
 import { Repository } from "./Repository";
 
+console.log("LMS.Data.Collection");
+
+
 export class Collection<TModel extends LMS.Model> {
     constructor(parentModel:LMS.Model, type:(new (...args:any[])=>TModel)){
         this.Parent = {

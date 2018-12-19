@@ -10,19 +10,25 @@ export class Context {
             if (contextData.Models !== undefined){
                 for (var modelData of contextData.Models){
                     var model = new LMS.Schema.Model(this, modelData.FullName);
+                    var type = LMS.Type.GetTypes().find(x => { return x.FullName === modelData.FullName});                    
+                    if (type !== undefined && ! (type instanceof LMS.Schema.Model)){                    
+                        var index = LMS.Type.GetTypes().indexOf(type);
+                        LMS.Type.GetTypes()[index] = new LMS.Schema.Model(this, modelData.FullName, type.Constructor);
+                    }
                     if (modelData.Properties !== undefined){
                         for (var propertyData of modelData.Properties){
                             model.Properties.push(new LMS.Schema.Property(model, propertyData.Name));
                         }
                     }
                     this.Models.push(model);
-                }      
+                }     
             }
             for (let model of this.Models){
                 var modelData = contextData.Models.find((x:any) => { return x.FullName === model.FullName; } );
                 model.Initialize(modelData.Keys, modelData.Properties);
             }
         }
+       
     }
     public Name:string = "";
     public Models:LMS.Schema.Model[] = [];

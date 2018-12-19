@@ -1,4 +1,5 @@
 import { Context, ChangeEntry, ChangeStatus, Model } from "./";
+console.log("LMS.Data.ChangeTracker");
 
 export class ChangeTracker {
 	constructor(context: Context) {

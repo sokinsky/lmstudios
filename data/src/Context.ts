@@ -1,5 +1,6 @@
 ﻿import * as LMS from "./";
 
+console.log("LMS.Data.Context");
 export class Context {
 	constructor(apiUrl:string, schemaData:any) {	
 		this.API = new LMS.API(this, apiUrl);
@@ -36,7 +37,7 @@ export class Context {
 		if (response !== undefined)
 			this.Load(response.Result);
 	}
-	public GetRepository(type:string|LMS.Schema.Model|LMS.Model|(new (...args: any[]) => LMS.Model)):LMS.Repository<LMS.Model> {
+	public GetRepository(type:string|LMS.Type|LMS.Model|(new (...args: any[]) => LMS.Model)):LMS.Repository<LMS.Model> {
 		switch (typeof(type)){
 			case "string":
 				return this.getRepository_byName(<string>type);					
@@ -65,7 +66,9 @@ export class Context {
 
 	}
 	private getRepository_bySchema(schema:LMS.Schema.Model){
-		var results = this.Repositories.filter(repository => { return repository.Schema === schema; });
+		var results = this.Repositories.filter(repository => { 
+			return repository.Schema.FullName === schema.FullName; });
+
 		switch (results.length){
 			case 0: throw new Error(`Context.getRepository_bySchema():Unable to locate repository(${schema.FullName})`);
 			case 1: return results[0];

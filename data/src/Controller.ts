@@ -99,11 +99,8 @@ export class Controller<TModel extends LMS.Model> {
 		return this.getValue_byProperty(property);
 	}
 	private async getValueAsync_byProperty(property:LMS.Schema.Property):Promise<any>{
-		console.log(property.PropertyType);
-		if (property.PropertyType instanceof LMS.Schema.Model){
-			console.log(property.PropertyType);
-			this.getModelAsync_byProperty(property);
-		}
+		if (property.PropertyType instanceof LMS.Schema.Model)
+			return this.getModelAsync_byProperty(property);	
 					
 		else if (property.PropertyType.Name == "Collection")
 			return property.GetValue(this.Actual.Model);
@@ -115,9 +112,9 @@ export class Controller<TModel extends LMS.Model> {
 		var selectFilter:any = {};
 		for (var propertyName in property.Relationship){
 			var referenceProperty = property.Relationship[propertyName];
-			referenceProperty.SetValue(selectFilter, property.GetValue(this.Actual.Data));
+			referenceProperty.SetValue(selectFilter, referenceProperty.GetValue(this.Actual.Data));
 		}		
-		var repository = this.Context.GetRepository(property.Model);
+		var repository = this.Context.GetRepository(property.PropertyType);
 		var result = repository.Local.Select(selectFilter);
 		if (result === undefined){
 			if (this.Status.Server.Properties[property.Name] === undefined){
@@ -127,6 +124,7 @@ export class Controller<TModel extends LMS.Model> {
 				this.SetValue(property, result, true);
 			}
 		}
+		console.log(result);
 		return result;
 	}
 	private async searchCollectionAsyn_byProperty(property:LMS.Schema.Property):Promise<LMS.Model[]>{

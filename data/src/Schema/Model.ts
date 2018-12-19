@@ -1,22 +1,9 @@
 import * as LMS from "../";
-import { Context, Property, Key, Type } from "./";
 
 export class Model extends LMS.Type {
-    constructor(context:Context, name:string){
-        super(name);
-
+    constructor(context:LMS.Schema.Context, name:string, constructor?:(new (...args: any[]) => any)){
+        super(name, constructor);
         this.Context = context;
-        this.FullName = name;
-        this.Name = "";
-        this.Namespace = "";
-        var split = name.split('.');
-        for (var i=0; i<split.length; i++){
-            if (i === split.length-1)
-                this.Name = split[i];
-            else
-                this.Namespace += `${split[i]}.`
-        }
-        this.Namespace = this.Namespace.replace(/\.$/, "");
     }
     public Initialize(keys: { Name:string, Properties: string[] }[], properties:{ Name:string, PropertyType:string, Relationship?:{[name:string]:string}, References?:string }[] ){
         for (let property of this.Properties){
@@ -27,23 +14,20 @@ export class Model extends LMS.Type {
         for (let keyData of keys){
             let key = this.Keys.find((x:any) => {return x.Name == keyData.Name});
             if (key === undefined){
-                key = new Key(this, keyData);
+                key = new LMS.Schema.Key(this, keyData);
                 this.Keys.push(key);
             }                
         }
     }
-    public Context:Context;       
-    public Name:string;
-    public Namespace:string;
-    public FullName:string;
-    public Properties:Property[] = [];
-    public GetProperty(name:string):Property|undefined{
+    public Context:LMS.Schema.Context;       
+    public Properties:LMS.Schema.Property[] = [];
+    public GetProperty(name:string):LMS.Schema.Property|undefined{
         return this.Properties.find(x => {
             return x.Name == name;
         });        
     }
-    public Keys:Key[] = [];
-    public get PrimaryKey():Key{
+    public Keys:LMS.Schema.Key[] = [];
+    public get PrimaryKey():LMS.Schema.Key{
         if (this.Keys.length == 0)
             throw new Error(`Type(${this.Name}) does not have a PrimaryKey`);
         var key = this.Keys[0];
@@ -51,8 +35,8 @@ export class Model extends LMS.Type {
             throw new Error(`Type(${this.Name}) does not have a PrimaryKey`);
         return key;
     }
-    public get AdditionalKeys():Key[]{
-        var result:Key[] = [];
+    public get AdditionalKeys():LMS.Schema.Key[]{
+        var result:LMS.Schema.Key[] = [];
         this.Keys.forEach(key=>{
             if (key !== this.PrimaryKey)
                 result.push(key);

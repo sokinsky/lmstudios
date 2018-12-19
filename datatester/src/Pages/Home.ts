@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Context } from "../STA/Data/Context";
-import { Models } from "../STA/Data";
+import { STA } from '..';
 
 @Component({
     selector: 'home',
@@ -8,44 +7,25 @@ import { Models } from "../STA/Data";
     styleUrls: ['./Home.css'],
 })
 export class Home implements OnInit {
-	constructor(private context: Context) {
+	constructor(private context: STA.Data.Context) {
     }
     public async ngOnInit(){
-        var data = {
-            Username:"Steven",
-            Password:"Okinsky",
-            Person:{
-                FirstName:"Steven",
-                LastName:"Okinsky"
-            }
-        }
-        //this.Email = await this.context.Emails.Select({ID:1});
     }
 
-    public PersonEmail?:Models.PersonEmail;
-    public User?:Models.User;
-    public Person?:Models.Person;
-    public Email?:Models.Email;
-
-
-    public Log(item:any){
-        console.log(item);
-    }
-    public async SaveChanges(){
-    }
-	public async NewPerson() {
-    }
-    public async NewUser(){
-    }
+    public User?:STA.Data.Models.User;
+    public Person?:STA.Data.Models.Person; 
 
     public async GetPerson(){
         this.Person = await this.context.People.Select({ID:2});
-        console.log(this.Person);
     }
     public async GetPersonUser(){
         if (this.Person !== undefined){
-            console.log(await this.Person.Server.User);
-        }
-            
+            var user = await this.Person.Server.User;
+            if (user instanceof STA.Data.Models.Person)
+                this.User = user
+        }            
+    }
+    public Log(item:any){
+        console.log(item);
     }
 }

@@ -9,6 +9,7 @@
     "watch":true,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
   }
 }
