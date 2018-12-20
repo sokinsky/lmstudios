@@ -1,6 +1,3 @@
-console.log("LMS.Data.Type");
-
-
 export class Type {
     constructor(name:string, constructor?:(new (...args: any[]) => any)){
         this.FullName = name;
@@ -72,6 +69,36 @@ export class Type {
     private static getType_byObject(obj:object):Type{
         return this.getType_byConstructor((<any>obj).prototype.constrcutor);
     }
+
+    public static ByName(name:string, constructor?:(new (...args: any[]) => any)):Type{
+        // remove all white space
+        name = name.replace(/\s+/, "");
+        // check for generic
+        if (name.match(/</)){
+            var match = name.match(/^([^<]+)<([^>]*)>/);
+            if (! match)
+                throw new Error(`Invalid Type Name(${name})`);
+            var rootName = match[1];
+            var genericNames = match[2].split(',');
+            var genericTypes:Type[] = [];
+            for (var genericName of genericNames){
+                var genericType = Type.ByName(genericName);
+                genericTypes.push(genericType);
+            }
+            var rootType = Type.ByName(rootName, constructor);
+            rootType.GenericTypes = genericTypes;
+            return rootType;
+        }
+
+        var result = Type.GetTypes().find(x => x.FullName === name);
+        if (result !== undefined) 
+            return result;
+        result = new Type(name, constructor);
+        Type.GetTypes().push(result);
+        return result;
+
+    }
+
     public static Parse(name:string) : Type{        
         var result:Type|undefined;
         name = name.replace(/\s+/, "");          

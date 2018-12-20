@@ -1,6 +1,3 @@
-console.log("LMS.Data.Message");
-
-
 export enum MessageType {
     OK = "OK",
     Invalid = "Invalid",

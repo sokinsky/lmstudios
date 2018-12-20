@@ -1,6 +1,4 @@
 ﻿import * as LMS from "./";
-
-console.log("LMS.Data.Context");
 export class Context {
 	constructor(apiUrl:string, schemaData:any) {	
 		this.API = new LMS.API(this, apiUrl);
@@ -87,7 +85,7 @@ export class Context {
 	public async Load(models: {ID:string,Type:string,Value:any}[], fromServer?:boolean) {	
 		models.forEach((bridgeModel: any) => {
 			var dataModel = undefined;
-			var dataEntry = this.Tracker.Entries.find(x => x.Model.ToBridge().ID === bridgeModel.ID);
+			var dataEntry = this.Tracker.Entries.find(x => x.Model.__controller.ID === bridgeModel.ID);
 			if (dataEntry !== undefined)
 				dataModel = dataEntry.Model;
 			if (dataModel === undefined){

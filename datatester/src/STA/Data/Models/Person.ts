@@ -1,7 +1,7 @@
 import { Decorators } from "@lmstudios/data";
-import { Model, Controllers, Models } from "../";
+import { Model } from "../Model";
+import { Models } from "../";
 
-console.log("STA.Data.Models.Person");
 @Decorators.Model("STA.Data.Models.Person")
 export class Person extends Model {
     public FirstName?:string;

@@ -1,10 +1,10 @@
-import { Decorators, Collection } from "@lmstudios/data";
+import { Collection, Decorators } from "@lmstudios/data";
 import { Model } from "../Model";
-import { PersonEmail } from "./";
+import { Models } from "../";
 
 @Decorators.Model("STA.Data.Models.Email")
 export class Email extends Model{
     public Address?:string;
 
-    public PeopleEmails:Collection<PersonEmail> = new Collection(this, PersonEmail)
+    public PeopleEmails:Collection<Models.PersonEmail> = new Collection(this, Models.PersonEmail)
 }

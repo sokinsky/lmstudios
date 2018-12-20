@@ -1,6 +1,4 @@
 import { Context, ChangeEntry, ChangeStatus, Model } from "./";
-console.log("LMS.Data.ChangeTracker");
-
 export class ChangeTracker {
 	constructor(context: Context) {
 		this.Context = context;
@@ -35,7 +33,11 @@ export class ChangeTracker {
     public GetBridgeChanges():any[]{
         var results:any[] = [];
 		this.Changes.forEach((entry: ChangeEntry) => {	
-            results.push(entry.Model.ToBridge());	
+            results.push({
+                ID:entry.Model.__controller.ID,
+                Type:entry.Model.GetSchema().FullName,
+                Value:entry.Model.__controller.Actual.Data
+            });	
         });
         return results;
     } 

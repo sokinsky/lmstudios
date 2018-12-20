@@ -1,6 +1,6 @@
 import { Injectable, Inject, InjectionToken} from "@angular/core";
 import { Schema, Context as Base, Repository, Decorators } from "@lmstudios/data";
-import { Email, Person, User, PersonEmail } from "./Models";
+import { Models } from "./";
 import { appSettings } from "../../Configuration/appSettings"
 
 @Injectable()
@@ -32,8 +32,8 @@ export class Context extends Base {
     constructor(public service:ContextService){
         super(service.Url, service.Schema);
     }
-    public Emails = new Repository(this, Email);
-    public People = new Repository(this, Person);
-    public Users = new Repository(this, User);
-    public PeopleEmails = new Repository(this, PersonEmail);
+    public Emails = new Repository(this, Models.Email);
+    public People = new Repository(this, Models.Person);
+    public Users = new Repository(this, Models.User);
+    public PeopleEmails = new Repository(this, Models.PersonEmail);
 }

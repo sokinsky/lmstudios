@@ -1,7 +1,4 @@
 import { Context, Request, Response } from ".";
-console.log("LMS.Data.API");
-
-
 export class API {
 	constructor(context: Context, url: string) {
 		this.Context = context;
