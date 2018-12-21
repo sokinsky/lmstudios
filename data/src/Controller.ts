@@ -146,6 +146,7 @@ export class Controller<TModel extends LMS.Model> {
 		}
 		else{
 			var repository = this.Context.GetRepository(property.PropertyType);
+			
 		}
 		
 	}

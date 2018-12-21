@@ -3,7 +3,7 @@ import { Repository } from "./Repository";
 export class Collection<TModel extends LMS.Model> {
     constructor(parentModel:LMS.Model, type:(new (...args:any[])=>TModel)){
         this.Parent = {
-            Model: parentModel            
+            Model: parentModel                        
         };
         this.Child = {
             Schema:this.Context.Schema.GetModel(type),
