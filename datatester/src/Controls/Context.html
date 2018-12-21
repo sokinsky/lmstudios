@@ -1,23 +1,39 @@
-<table style="width:100%;">
-    <tr>
-        <td style="vertical-align: top; width: 20%;">
-            <div>
-                <span (click)="Log(this.data)">Context</span>
-                <div *ngFor="let repository of this.data.Repositories" (click)="selectedRepository=repository" style="padding:0 0 0 10px;">
-                    {{repository.Name}}
-                </div>
-            </div>
-            
-        </td>
-        <td style="vertical-align: top;">
-            <repository-control [repository]=selectedRepository></repository-control>
-        </td>
-    </tr>
-</table>
-<div>
-    <a (click)="this.data.SaveChanges()">Save</a>
-</div>
-<div *ngFor="let request of this.data.API.Requests" (click)="Log(request)">
-    {{request.Path}}
-</div>
+<fieldset *ngIf="Value">
+    <legend (click)="Log(Value)">{{Value.Name}}</legend>
+    <table style="width:100%;">
+            <tr>
+                <td style="vertical-align: top; width: 20%;">
+                    <fieldset>
+                        <legend>Repositories({{Value.Repositories.length}})</legend>
+                        <div *ngFor="let repository of Value.Repositories" (click)="selectRepository(repository)">
+                            {{repository.Name}}
+                        </div>
+                    </fieldset>
+                    
+                </td>
+                <td style="vertical-align: top;">
+                    <repository-control *ngFor="let repository of Value.Repositories"  [ctlContext]=this [Value]=repository (modelSelected)="selectModel($event)"></repository-control>
+                    <model-control [ctlContext]=this [Value]="SelectedModel" (modelSelected)="selectModel($event)"></model-control>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <fieldset>
+                        <legend>Requests</legend>
+                        <div *ngFor="let request of Value.API.Requests">
+                            <span (click)="Log(request)">{{request.Path}}</span>
+                            <pre>{{Json(request.Body)}}</pre>
+                        </div>
+                    </fieldset>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                        <fieldset>
+                            <legend>Actions</legend>
+                        </fieldset>
+                    </td>
+                </tr>
+        </table>
+</fieldset>
 

@@ -1,18 +1,24 @@
-<div *ngIf="repository" style="border:1px solid #000;">
-    <div *ngIf="! selectedModel">
-            <div>
-                <span>Search</span>
-                <textarea [(ngModel)]="searchString" style="width:100%;" (blur)=blurSearch() [rows]=searchRows></textarea>
+<fieldset *ngIf="Visible">
+    <legend>{{Value.Name}}</legend>
+    <div *ngIf="! SelectedModel">
+            <div style="border-bottom:1px solid #000;">
+                <textarea type="text" [(ngModel)]="search.String" [rows]="search.Rows" (blur)=blurSearch() style="width:100%;" placeholder="Search/Select"></textarea>
+                <div style="text-align:right;">
+                    <a (click)="Search()">Search</a> | <a (click)="Select()">Select</a>
+                </div>
             </div>
-            <div>
-                <div *ngFor="let model of repository" (click)="selectedModel = model">
+            <div style="margin:10px 0px">
+                <div *ngIf="SearchResults.length === 0" style="text-align:center">
+                    Search found 0 results
+                </div>
+                <div *ngFor="let model of SearchResults" (click)="modelSelected.emit(model)">
                     {{model.toString()}}
                 </div>
             </div>
-            <div>
+            <div style="border-top:1px solid #000;">
                 <a (click)="Create()">Create</a>
             </div>
     </div>
-    <model-control *ngIf=selectedModel [model]=selectedModel></model-control>
+    <model-control *ngIf=SelectedModel [Value]=SelectedModel></model-control>
 
-</div>
+</fieldset>

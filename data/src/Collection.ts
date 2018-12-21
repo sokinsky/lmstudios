@@ -32,6 +32,7 @@ export class Collection<TModel extends LMS.Model> {
     };
 
     private generateDefaultFilter() : Partial<TModel>{
+        console.log(this.Parent);
         if (this.Parent.Property === undefined)
             throw new Error(`Collection.generateDefaultFilter():Parent.Property was undefined`);
         if (this.Parent.Property.Relationship === undefined)

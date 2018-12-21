@@ -28,4 +28,7 @@ export class Home implements OnInit {
     public Log(item:any){
         console.log(item);
     }
+    public Json(item:any):string{
+        return JSON.stringify(item, null, "\t");
+    }
 }

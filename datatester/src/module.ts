@@ -18,7 +18,7 @@ export function schemaFactory(service:ContextService){
 	bootstrap: [Pages.Master],
 	declarations: [
 		Pages.Master, Pages.Home,
-		Controls.Context, Controls.Repository, Controls.Model
+		Controls.ContextControl, Controls.RepositoryControl, Controls.ModelControl, Controls.CollectionControl
 	],
     imports: [
 		BrowserModule,

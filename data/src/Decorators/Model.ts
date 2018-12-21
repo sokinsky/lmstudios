@@ -7,6 +7,6 @@ export function Model(fullName:string, controllerType?:(()=>new(...args:any[])=>
             FullName: fullName,
             Controller: controllerType
         }
-        Type.ByName(fullName, target);     
+        Type.ByName(fullName, target);
      }    
 }

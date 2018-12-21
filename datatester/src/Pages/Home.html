@@ -1,34 +1,4 @@
-<fieldset>
-    <legend>Person</legend>
-    <div *ngIf="Person">
-        <span (click)="Log(Person)">{{Person.FirstName}} {{Person.LastName}}</span>
-        <div *ngIf="Person.User">
-            <span (click)="Log(Person.User)">{{Person.User.Username}}</span>
-        </div>
-    </div>
-    <div *ngIf="!Person">
-        <a (click)="GetPerson()">Get Person</a>    
-    </div>
-</fieldset>
-
-<fieldset>
-    <legend>User</legend>
-    <div *ngIf="User">
-        <span (click)="Log(User)">{{User.Username}}</span>
-        <div *ngIf="User.Person">
-            <span (click)="Log(User.Person)">{{User.Person.FirstName}} {{User.Person.LastName}}</span>
-        </div>
-    </div>
-    <div *ngIf="!User">
-        <a (click)="GetUser()">Get User</a>    
-    </div>
-</fieldset>
-
-<br /><br /><br /><br />
-<fieldset>
-    <legend>Requests</legend>
-    <div *ngFor="let request of context.API.Requests">{{request.Path}}</div>
-</fieldset>
+<context-control [Value]="context"></context-control>
 
 
 

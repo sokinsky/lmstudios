@@ -76,6 +76,8 @@ export class Repository<TModel extends LMS.Model> {
 	public async Search(...values:any[]):Promise<TModel[]>{
 		if (values === undefined || values.length === 0)
 			return [];
+		if (values.length === 1 && Array.isArray(values[0]))
+			values = values[0];
 
 		await this.Server.Search(...values);
 		return this.Local.Search(...values);

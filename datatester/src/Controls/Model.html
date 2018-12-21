@@ -1,25 +1,26 @@
-<fieldset *ngIf="model">
-    <legend (click)="Log(model)">{{model.toString()}}</legend>
+<fieldset *ngIf="Value">
+    <legend (click)="Log(Value)">{{Value.toString()}}</legend>
     <fieldset *ngIf="dataProperties.length > 0">
         <legend>Data</legend>
         <div *ngFor="let property of dataProperties">
             <span>{{property.Name}}:</span><br />
-            <input type="text" [(ngModel)]=model[property.Name] />
+            <input type="text" [(ngModel)]=Value[property.Name] style="width:100%;"/>
         </div>
     </fieldset>
-    <fieldset *ngIf="modelProperties.length > 0">
-        <legend>Models</legend>
-        <div *ngFor="let property of modelProperties">
-            <span>{{property.Name}}:</span>
-            <span *ngIf="! this.GetValue(property)">
-                <a (click)="Add(property)">Add</a>
-            </span>
-            <br /> 
-            <div *ngIf="this.GetValue(property)">
-                Show
+
+    <div *ngFor="let property of modelProperties">
+        <fieldset *ngIf="modelProperties.length > 0">
+            <legend>{{property.Name}}</legend>
+            <div *ngIf="Value[property.Name]" (click)="selectModel(Value[property.Name])">
+                <pre>{{Json(Value[property.Name])}}</pre>
             </div>
-        </div>
-    </fieldset>
+            <div *ngIf="!Value[property.Name] && ! ActiveSelectors[property.Name]" style="text-align:center;">
+                <a (click)="AddModel(property)">Add</a>
+            </div>      
+            <collection-control *ngIf="ActiveSelectors[property.Name]" [ctlModel]=this [parentValue]=Value [parentProperty]=property (modelSelected)="selectModel($event)"></collection-control>
+        </fieldset>     
+    </div>
+    
     <fieldset *ngIf="collectionProperies.length > 0">
         <legend>Collections</legend>
         <div *ngFor="let property of collectionProperies">

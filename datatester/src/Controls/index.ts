@@ -1,3 +1,4 @@
-export { Context } from "./Context";
-export { Model } from "./Model";
-export { Repository } from "./Repository";
+export { ContextControl } from "./Context";
+export { ModelControl } from "./Model";
+export { RepositoryControl } from "./Repository";
+export { CollectionControl } from "./Collection";

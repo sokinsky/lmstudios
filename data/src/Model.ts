@@ -57,6 +57,10 @@ export class Model {
 	// 	};
 
 	// }
+
+	public get PrimaryKey():any{
+		return this.__controller.PrimaryKey;
+	}
 	public Load(value:any, server?:boolean){
 		this.__controller.Load(value, server);
 	}

@@ -1,34 +1,29 @@
 ﻿import * as LMS from "./";
+import { Repository } from "./Repository";
 export class Context {
 	constructor(apiUrl:string, schemaData:any) {	
 		this.API = new LMS.API(this, apiUrl);
 		this.Schema = new LMS.Schema.Context(schemaData);
 		var proxy:Context = new Proxy(this, {
 			set: (target, propertyName:string, propertyValue, reciever) => {
-				if (propertyValue instanceof LMS.Repository)
+				if (propertyValue instanceof LMS.Repository){
 					propertyValue.Name = propertyName;
+					if (this.Repositories.find(x => { return x === propertyValue}) === undefined){
+						this.Repositories.push(propertyValue);
+					}
+						
+				}					
 				return Reflect.set(target, propertyName, propertyValue, reciever);
 			}
 		});
-		//this.Initialize();
+		this.Initialize();
 		return proxy;
 	}
 	public API:LMS.API;
 	public Tracker:LMS.ChangeTracker = new LMS.ChangeTracker(this);
 	public Schema:LMS.Schema.Context;
 
-	private __repositories?:LMS.Repository<LMS.Model>[];
-	public get Repositories(){
-		if (this.__repositories === undefined){
-			this.__repositories = [];
-			for (var key in this){
-				if ((<any>this)[key] instanceof LMS.Repository){
-					this.__repositories.push((<any>this)[key]);
-				}
-			}
-		}
-		return this.__repositories;
-	}
+	public Repositories:Repository<LMS.Model>[] = [];
 	public async Initialize(){
 		var request = new LMS.Request("Context/Initialize", {});
 		var response = await this.API.Post(request);

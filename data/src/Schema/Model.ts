@@ -35,6 +35,9 @@ export class Model extends LMS.Type {
             throw new Error(`Type(${this.Name}) does not have a PrimaryKey`);
         return key;
     }
+    public get PrimaryKeyProperty():LMS.Schema.Property{
+        return this.PrimaryKey.Properties[0];
+    }
     public get AdditionalKeys():LMS.Schema.Key[]{
         var result:LMS.Schema.Key[] = [];
         this.Keys.forEach(key=>{
