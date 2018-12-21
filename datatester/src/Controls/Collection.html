@@ -1,6 +1,6 @@
 <div *ngIf="parentValue">
         <div style="border-bottom:1px solid #000;">
-            <textarea type="text" [(ngModel)]="search.String" [rows]="search.Rows" (blur)=blurSearch() style="width:100%;" placeholder="Search/Select"></textarea>
+            <textarea type="text" [(ngModel)]="search.String" [rows]="search.Rows" (blur)=blurSearch() style="width:100%;" placeholder="Select"></textarea>
             <div style="text-align:right;">
                 <a (click)="Search()">OK</a>
             </div>
