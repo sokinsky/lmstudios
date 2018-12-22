@@ -1,32 +1,40 @@
 <fieldset *ngIf="Value">
     <legend (click)="Log(Value)">{{Value.toString()}}</legend>
-    <fieldset *ngIf="dataProperties.length > 0">
-        <legend>Data</legend>
-        <div *ngFor="let property of dataProperties">
-            <span>{{property.Name}}:</span><br />
-            <input type="text" [(ngModel)]=Value[property.Name] style="width:100%;"/>
+    <div *ngIf="!Selecting">
+        <div class="data" *ngFor="let property of dataProperties">
+            <div class="header">{{property.Name}}</div>
+            <div class="body">
+                <input type="text" [(ngModel)]=Value[property.Name]/>
+            </div>     
         </div>
-    </fieldset>
-
-    <div *ngFor="let property of modelProperties">
-        <fieldset *ngIf="modelProperties.length > 0">
-            <legend>{{property.Name}}</legend>
-            <div *ngIf="Value[property.Name]" (click)="selectModel(Value[property.Name])">
-                <pre>{{Json(Value[property.Name])}}</pre>
+        <div class="model" *ngFor="let property of modelProperties">
+            <div class="header">
+                <div class="title">
+                    {{property.Name}}
+                    <div class="actions">
+                        <a *ngIf="Value[property.Name]" class="far fa-edit" (click)="Edit(model)"></a>
+                        <a *ngIf="!Value[property.Name]" class="far fa-plus-square" (click)="Add(model)"></a>
+                    </div>
+                </div>
             </div>
-            <div *ngIf="!Value[property.Name] && ! ActiveSelectors[property.Name]" style="text-align:center;">
-                <a (click)="AddModel(property)">Add</a>
-            </div>      
-            <collection-control *ngIf="ActiveSelectors[property.Name]" [ctlModel]=this [parentValue]=Value [parentProperty]=property (modelSelected)="selectModel($event)"></collection-control>
-        </fieldset>     
-    </div>
-    
-    <fieldset *ngIf="collectionProperies.length > 0">
-        <legend>Collections</legend>
-        <div *ngFor="let property of collectionProperies">
-            <span>{{property.Name}}:</span><br />
-            <pre></pre>
+            <div class="body">
+                <div *ngIf="Value[property.Name]">
+                    <pre>{{Json(Value[property.Name])}}</pre>
+                </div>
+                <div *ngIf="!Value[property.Name]" style="text-align:center;font-size:14pt;padding:3px 0;">
+                    <a class="far fa-plus-square" (click)="Add(model)"></a>
+                </div>
+            </div>  
+            <div class="footer">
+
+            </div>   
+        </div>        
+        <div *ngFor="let property of collectionProperties">
+            <fieldset>
+                <legend>{{property.Name}}</legend>
+            </fieldset>
         </div>
-    </fieldset>
+    </div>
+    <repository-control *ngIf="Selecting" [ctlContext]=ctlContext [Value]=Selecting.Repository (modelSelected)="selectModel($event)"></repository-control>
 </fieldset>
     

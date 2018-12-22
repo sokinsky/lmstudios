@@ -1,24 +1,46 @@
-<fieldset *ngIf="Visible">
-    <legend>{{Value.Name}}</legend>
-    <div *ngIf="! SelectedModel">
-            <div style="border-bottom:1px solid #000;">
-                <textarea type="text" [(ngModel)]="search.String" [rows]="search.Rows" (blur)=blurSearch() style="width:100%;" placeholder="Search/Select"></textarea>
-                <div style="text-align:right;">
-                    <a (click)="Search()">Search</a> | <a (click)="Select()">Select</a>
-                </div>
+<div *ngIf="Visible">
+    <div class="header">
+        <div class="title">
+            {{Value.Name}}
+            <div class="toolbar">
+                <a class="fas fa-search" (click)="selectTool('Search')"></a>
             </div>
-            <div style="margin:10px 0px">
-                <div *ngIf="SearchResults.length === 0" style="text-align:center">
+            <div class="searchbar" *ngIf="Search && Search.Active">
+                <textarea type="text" spellcheck=false [(ngModel)]="Search.Input" [rows]="Search.Rows" (blur)=searchBlur() (keyup)="searchChange()" placeholder="Search"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="body">
+        <div *ngIf="! SelectedModel">
+           <div style="margin:10px 0px">
+                <div *ngIf="!Display" style="text-align:center">
                     Search found 0 results
                 </div>
-                <div *ngFor="let model of SearchResults" (click)="modelSelected.emit(model)">
-                    {{model.toString()}}
+                <div *ngIf="Display">
+                    <table style="width:100%;" class="results">
+                        <thead>
+                            <tr>
+                                <td *ngFor="let property of this.Display.Header">{{property.Name}}</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let model of Display.Body">
+                                <td *ngFor="let property of this.Display.Header" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;" [attr.title]=model[property]>
+                                    {{model[property.Name]}}
+                                </td>
+                                <td class="actions" style="text-align:center;"><a class="far fa-edit" (click)="Edit(model)"></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div style="border-top:1px solid #000;">
                 <a (click)="Create()">Create</a>
             </div>
+        </div>
+        <model-control *ngIf=SelectedModel [Value]=SelectedModel></model-control>
     </div>
-    <model-control *ngIf=SelectedModel [Value]=SelectedModel></model-control>
 
-</fieldset>
+
+</div>

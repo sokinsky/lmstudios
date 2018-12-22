@@ -217,6 +217,8 @@ export class Controller<TModel extends LMS.Model> {
 	}
 
 	public toString():string{
+		if (this.PrimaryKey === undefined)
+			return `${this.Schema.Name}(...)`;
 		return `${this.Schema.Name}(${this.PrimaryKey})`
 	}
 }

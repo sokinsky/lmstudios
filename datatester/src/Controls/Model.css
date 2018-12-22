@@ -1,0 +1,70 @@
+div.data{
+    margin:0 0 10px 0;
+}
+div.data div.header{
+    border-radius: 5px 5px 0 0;
+    background-color:#ccc;
+    color:#444;
+    font-weight: bold;
+    padding: 3px 0 3px 5px;
+}
+div.data div.body {
+    border-radius: 0 0 5px 5px;
+    border-left:1px solid #ccc;
+    border-right:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    padding:0 5px 0 5px;    
+}
+div.data div.body input {
+    border: none;
+    width:100%;
+}
+
+div.model {
+    margin: 0 0 10px 0;
+}
+div.model div.header {
+    border-radius: 5px 5px 0 0;
+    background-color:#ccc;
+    color:#444;
+    font-weight: bold;
+    padding: 3px 0 3px 5px;
+}
+div.model div.header div.actions{
+    float:right;
+    padding: 0 5px 0 0;
+}
+div.model div.header div.actions a {
+    margin:0 5px 0 0;
+}
+div.model div.header div.actions a:hover{
+    color:#000;
+    font-weight:bold;
+    cursor:pointer;
+}
+div.model div.body {
+    border-left:1px solid #ccc;
+    border-right:1px solid #ccc;
+    padding:0 0 0 5px;    
+}
+div.model div.body a { 
+    color:#444;
+}
+div.model div.body a:hover { 
+    color:#000;
+    font-weight:bold;
+    cursor: pointer;
+}
+div.model div.footer {
+    border-radius: 0 0 5px 5px;
+    border-bottom:1px solid #ccc;  
+    background-color:#ccc;
+    color:#444;
+    font-weight: bold;
+    padding: 3px 0 3px 5px;
+}
+
+div.model pre {
+    padding:0;
+    margin:0;
+}

@@ -1,0 +1,51 @@
+div.header{
+    border-radius: 5px 5px 0 0;
+    background-color:#ccc;
+    color:#444;
+    font-weight: bold;
+    padding: 3px 0 3px 5px;
+}
+div.header div.toolbar {
+    float:right;
+    padding:0 5px 0 0;
+}
+div.header div.toolbar a {
+    padding:0 5px 0 0;
+}
+div.header div.toolbar a:hover{
+    font-weight: bold;
+    color:#000;
+}
+div.header div.searchbar textarea {
+    width:100%;
+    resize: none;
+    overflow: auto;
+    outline: none;
+    background-color:transparent;
+    padding:0px;
+    margin: 0px;
+    
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+div.body {
+    border-radius: 0 0 5px 5px;
+    border-left:1px solid #ccc;
+    border-right:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    padding:0 5px 0 5px;    
+}
+
+
+table.results thead tr {  background-color:#444;}
+table.results thead tr td {  padding:0 0 0 5px; font-weight:bold; color:#fff; }
+table.results thead td:last-child { border-radius: 0 5px 0 0 }
+table.results thead td:first-child { border-radius: 5px 0 0 0 }
+
+table.results tbody tr:nth-child(odd) { background-color: #fff;}
+table.results tbody tr:nth-child(even) { background-color: #ccc;}
+table.results tbody input.property { width:100%; border:none; padding:0 3px 0 0; background-color:transparent;}
+table.results tbody td.actions a { color: black; }
+table.results tbody td.actions a:hover { font-weight: bold; }

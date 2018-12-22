@@ -12,10 +12,21 @@
                     
                 </td>
                 <td style="vertical-align: top;">
-                    <repository-control *ngFor="let repository of Value.Repositories"  [ctlContext]=this [Value]=repository (modelSelected)="selectModel($event)"></repository-control>
-                    <model-control [ctlContext]=this [Value]="SelectedModel" (modelSelected)="selectModel($event)"></model-control>
+                    <repository-control  [ctlContext]=this [Value]=SelectedRepository (modelSelected)="selectModel($event)"></repository-control>
+                    <model-control [ctlContext]=this [Value]=SelectedModel (modelSelected)="selectModel($event)"></model-control>
                 </td>
             </tr>
+            <tr>
+                <td colspan="2">
+                        <fieldset>
+                            <legend>Actions</legend>
+                            <div style="text-align:center">
+                                <a *ngIf="this.Value.Tracker.Changes.length > 0" (click)="this.Value.SaveChanges()">SaveChanges</a>
+
+                            </div>
+                        </fieldset>
+                    </td>
+                </tr>
             <tr>
                 <td colspan="2">
                     <fieldset>
@@ -27,13 +38,7 @@
                     </fieldset>
                 </td>
             </tr>
-            <tr>
-                <td colspan="2">
-                        <fieldset>
-                            <legend>Actions</legend>
-                        </fieldset>
-                    </td>
-                </tr>
+
         </table>
 </fieldset>
 

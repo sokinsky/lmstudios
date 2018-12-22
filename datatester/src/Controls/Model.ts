@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
-import { Model, Collection, Schema } from "@lmstudios/data";
+import { Model, Repository, Schema } from "@lmstudios/data";
 import { ContextControl } from "./Context";
 
 @Component({
@@ -18,11 +18,15 @@ export class ModelControl implements OnInit {
     }  
     @Output() public modelSelected:EventEmitter<Model> = new EventEmitter();
     public selectModel(model:Model){
-        console.log(model);
-        this.modelSelected.emit(model);
-    }
+        if (this.Selecting !== undefined){
 
-    public ActiveSelectors:{[name:string]:boolean} = {};
+        }
+        else{
+            this.modelSelected.emit(model);
+        }
+        
+    }
+    public Selecting?:{Repository:Repository<Model>, Property:Schema.Property};
 
     public get dataProperties():Schema.Property[]{
         if (this.Value === undefined)
@@ -41,12 +45,15 @@ export class ModelControl implements OnInit {
     }  
 
     public AddModel(property:Schema.Property){
-        this.ActiveSelectors[property.Name] = true;
-    }
-    public NewModel(property:Schema.Property){
-        if (this.Value !== undefined){
-            this.Value.SetValue(property, {});
+        if (this.ctlContext !== undefined){
+            if (this.ctlContext.Value !== undefined){
+                this.Selecting = {
+                    Repository:this.ctlContext.Value.GetRepository(property.PropertyType),
+                    Property:property
+                };
+            }
         }
+        console.log(this.Selecting);
     }
 
     
