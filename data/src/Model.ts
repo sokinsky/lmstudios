@@ -73,6 +73,12 @@ export class Model {
 	public toString():string{
 		return this.__controller.toString();
 	}
+	public toJson():string{
+		return JSON.stringify(this.__controller.Actual.Data, null, "\t");
+	}
+	public Undo(property?:Schema.Property){
+		this.__controller.Undo(property);
+	}
 }
 
 

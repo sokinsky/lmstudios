@@ -4,7 +4,6 @@
             
             <span class="label" (click)="Log(this.Value)"> {{Value.toString()}} </span>
             <div class="actions">
-                <div *ngIf="ChangeStatus !== 'Unchanged'" class="button fas fa-exclamation-triangle"></div>
                 <div class="button fas fa-cog">
                 </div>
             </div>
@@ -19,10 +18,9 @@
         </div>
     </div>
     <div class="footer">
-        <div class="messages">
-            <div class="message fas fa-exclamation-triangle"> {{ServerStatus}}</div>
-            <div *ngIf="ChangeStatus !== 'Unchanged'" class="message fas fa-exclamation-triangle"> {{ChangeStatus}}</div>
-        </div>        
+        <div class="message">
+            <div *ngIf="ChangeStatus !== 'Unchanged'" class="button fas fa-undo" (click)="Undo()"> {{ChangeStatus}}</div>
+        </div>       
     </div>
 </div>
     

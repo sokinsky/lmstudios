@@ -1,56 +1,44 @@
 <div *ngIf="Visible">
-    <div class="header">
-        <div class="title">
-            <span class="label">
-                {{Value.Name}}
-            </span>            
-            <div class="toolbar">
-                <a class="fas fa-search" (click)="selectTool('Search')"></a>
-            </div>
-            <div class="searchbar" *ngIf="Search && Search.Active">
-                <div class="titlebar">
-                    <span class="fas fa-search"> Search</span>
-                </div>
-                <div class="inputbar">
-                    <textarea type="text" spellcheck=false [(ngModel)]="Search.Input" [rows]="Search.Rows" (blur)=searchBlur() (keyup)="searchChange()" placeholder="Search"></textarea>
-                </div>                
-                <div class="actionbar">
-                    <a><span class="fas fa-search"> Server</span></a>
-                </div>
-                
+    <div class="items">
+        <div class="head">
+            <div class="title">
+                <span>Results</span>
             </div>
         </div>
-    </div>
-    <div class="body">
+        <div class="body">
+            <table style="width:100%;" cellpadding=0 cellspacing=0>
+                <thead>
+                    <tr>
+                        <td *ngFor="let column of Table.Columns">
+                            <div>{{column.Name}}</div>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of Table.Rows">
+                        <td *ngFor="let column of this.Table.Columns" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;">
+                            {{row[column.Name]}}
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td [attr.colspan]=Table.Columns.length>
+                            <div class="options">
+                                <a class="fas fa-plus-circle" (click)="New()"></a>
+                            </div>                                    
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
         <div *ngIf="! SelectedModel">
            <div style="margin:10px 0px">
                 <div *ngIf="!Display" style="text-align:center">
                     Search found 0 results
                 </div>
                 <div *ngIf="Display">
-                    <table style="width:100%;" class="results" cellspacing="5">
-                        <thead>
-                            <tr>
-                                <td *ngFor="let property of this.Display.Header"><span>{{property.Name}}</span></td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let model of Display.Body">
-                                <td *ngFor="let property of this.Display.Header" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;" (click)="Select(model)">
-                                    {{model[property.Name]}}
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td [attr.colspan]=this.Display.Header.length>
-                                    <div class="actionbar">
-                                        <a class="far fa-plus-square" (click)="New()"><span> New</span> </a>
-                                    </div>                                    
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+
                 </div>
             </div>
         </div>

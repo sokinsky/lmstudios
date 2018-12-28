@@ -51,6 +51,6 @@ div.footer{
     color:#444;    
     padding: 3px 5px;
 }
-div.footer div.messages div.message{
-    padding:0 0 0 5px;
+div.footer div.message {
+    cursor: pointer;
 }

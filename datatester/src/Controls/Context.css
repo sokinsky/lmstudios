@@ -15,15 +15,28 @@ div.menu a.item.disabled {
 div.menu a.item:hover{
     text-decoration: underline;
 }
-div.responses div.response{
+div.response{
     border:1px solid #000;
-}
-div.responses div.response.error {
-    color:red;
-    border-color: red;
     border-radius: 5px;
 }
-div.responses div.response div.title i.close{
+div.response.error {
+    color:red;
+    border-color: red;    
+}
+div.response div.title span.label{
+    padding:0 0 0 5px;
+}
+div.response div.title div.close{
     float:right;
     cursor: pointer;
+    padding: 0 5px 0 0;
+}
+div.response.error div.title{
+    background-color: red;
+    color:#fff;
+}
+div.response.ok {
+    color:green;
+    border-color:green;
+
 }

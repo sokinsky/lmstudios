@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from "@angular/core";
 import { Context, Repository, Model, Response, ResponseStatus } from "@lmstudios/data";
 import { RepositoryControl } from "./Repository";
 import { Data } from "../STA";
+import { RaceOperator } from "rxjs/internal/observable/race";
 
 @Component({
     selector:"context-control",
@@ -13,38 +14,58 @@ export class ContextControl implements OnInit {
     }
     public async ngOnInit(){
     }
-    @Input() public Value?:Context;
-
-    public SelectedRepository?:Repository<Model>;
-    public SelectedModel?:Model;
-    public selectModel(model:Model){
-        this.SelectedModel = model;
-        this.SelectedRepository = undefined;
+    private __value?:Context;
+    public get Value():Context{
+        if (this.__value === undefined) throw new Error(``);
+        return this.__value;
     }
-    public selectRepository(repository:Repository<Model>){
-        this.SelectedRepository = repository;
-        this.SelectedModel = undefined;
+    @Input() public set Value(value:Context){
+        this.__value = value;
     }
 
-    public Responses:Response[] = [];
-    public async Save(){
-        if (this.Value !== undefined){
-            var response = await this.Value.SaveChanges();
-            if (response !== undefined)
-                this.Responses.push(response);
+    public Display:{
+        Type:string
+    } = { Type:"none" }
+
+    private __parentItem?:Model;
+    public get ParentItem():Model|undefined{
+        return this.__parentItem;
+    }
+    public set ParentItem(value:Model|undefined){
+        this.__parentItem = value;
+    }
+
+    private __selectedItem?:Repository<Model>|Model;
+    public get SelectedItem():Repository<Model>|Model|undefined{
+        return this.__selectedItem;
+    }
+    public set SelectedItem(value:Repository<Model>|Model|undefined){
+        this.__selectedItem = value;
+        if (this.__selectedItem !== undefined){
+            if (this.__selectedItem instanceof Repository)
+                this.Display.Type = "Repository";
+            else if (this.__selectedItem instanceof Model)
+                this.Display.Type = "Model";
+            else
+                this.Display.Type = "none";
         }
+        console.log(this.Display);
+    }
+    public SaveResponse?:Response;
+    public get SaveResponseStatus():string{
+        if (this.SaveResponse === undefined)
+            return "None";
+        return this.SaveResponse.Status.toString();
     }
 
-    public isError(response:Response):boolean{
-        console.log(response.Status === ResponseStatus.Error);
-        return response.Status === ResponseStatus.Error;
+
+    public async saveContext(){
+        if (this.Value !== undefined)
+            this.SaveResponse = await this.Value.SaveChanges();            
     }
 
 
     public Log(item:any){
         console.log(item);
-    }
-    public Json(item:any):string{
-        return JSON.stringify(item, null, "\t");
     }
 }

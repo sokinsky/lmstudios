@@ -57,6 +57,11 @@ export class ModelControl implements OnInit {
         return "Unserved";
     }
 
+    public Undo(){           
+        this.Value.Undo();
+        console.log(this.Value);
+    }
+
     public get dataProperties():Schema.Property[]{
         if (this.Value === undefined)
             return [];
