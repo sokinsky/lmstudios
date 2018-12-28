@@ -3,7 +3,18 @@ div.header{
     background-color:#ccc;
     color:#444;
     font-weight: bold;
-    padding: 3px 0 3px 5px;
+    padding: 3px 0 3px 0px;
+}
+div.header div.title{
+    padding: 5px;
+}
+div.header div.title span.label{
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
 }
 div.header div.toolbar {
     float:right;
@@ -11,12 +22,37 @@ div.header div.toolbar {
 }
 div.header div.toolbar a {
     padding:0 5px 0 0;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
 }
 div.header div.toolbar a:hover{
     font-weight: bold;
     color:#000;
 }
-div.header div.searchbar textarea {
+div.header div.searchbar {
+    margin:5px 0 0 0;
+}
+div.header div.searchbar div.titlebar {
+    border-radius: 5px 5px 0 0;
+    padding:3px 5px;
+    background-color: #ddd;
+    -webkit-box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+}
+div.header div.searchbar div.inputbar {
+    margin: 2px 0 0 0;
+    padding: 3px 5px;
+    background-color: #ddd;
+    -webkit-box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+}
+div.header div.searchbar div.inputbar textarea {
     width:100%;
     resize: none;
     overflow: auto;
@@ -30,6 +66,43 @@ div.header div.searchbar textarea {
     -moz-box-shadow: none;
     box-shadow: none;
 }
+div.header div.searchbar div.actionbar {
+    text-align:right;
+    border-radius: 0 0 5px 5px;
+    margin: 2px 0 0 0;
+    padding: 0px 10px;
+    background-color: #ddd;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.header div.searchbar div.actionbar a {
+    display: inline-block;
+    cursor: pointer;
+    padding:2px 5px 3px 3px;
+
+}
+div.header div.searchbar div.actionbar a span{
+    padding-left:5px;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+div.header div.searchbar div.actionbar a:hover {
+    background-color:#ccc;
+    -webkit-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    /* border-right: 1px solid #000; */
+}
+div.header div.searchbar div.actionbar a:hover span {
+    text-shadow: 0px 0px 0px rgba(255,255,255,0.5);
+    color:#444;
+ }
+
 div.body {
     border-radius: 0 0 5px 5px;
     border-left:1px solid #ccc;
@@ -39,13 +112,70 @@ div.body {
 }
 
 
-table.results thead tr {  background-color:#444;}
-table.results thead tr td {  padding:0 0 0 5px; font-weight:bold; color:#fff; }
+table.results thead tr {  background-color:#ccc;}
+table.results thead tr td {  
+    cursor: pointer;
+    padding:0 0 0 5px; 
+    font-weight:bold; 
+    color:#444; 
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+table.results thead tr td span {  
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+table.results thead tr td:hover {  
+    padding:0 0 0 5px; 
+    font-weight:bold; 
+    color:#444; 
+    -webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.75);
+}
 table.results thead td:last-child { border-radius: 0 5px 0 0 }
 table.results thead td:first-child { border-radius: 5px 0 0 0 }
 
+table.results tbody tr td {
+    cursor: pointer;
+    padding:0 0 0 5px; 
+}
+table.results tbody tr:hover td {
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
 table.results tbody tr:nth-child(odd) { background-color: #fff;}
 table.results tbody tr:nth-child(even) { background-color: #ccc;}
 table.results tbody input.property { width:100%; border:none; padding:0 3px 0 0; background-color:transparent;}
 table.results tbody td.actions a { color: black; }
 table.results tbody td.actions a:hover { font-weight: bold; }
+
+table.results tfoot td div.actionbar {
+    text-align:right;
+    border-radius: 0 0 5px 5px;
+    padding: 0px 10px;
+    background-color: #ccc;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+table.results tfoot td div.actionbar a {
+    cursor: pointer;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+table.results tfoot td div.actionbar a:hover {
+   -webkit-box-shadow: -2px 0px 0px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: -2px 0px 0px 0px rgba(0,0,0,0.75);
+    box-shadow: -2px 0px 0px 0px rgba(0,0,0,0.75);
+}

@@ -1,0 +1,29 @@
+div.menu{
+    margin: 0 0 10px 0;
+    background-color: #ccc;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.menu a.item{
+    padding: 0 0 0 5px;
+    cursor: pointer;
+}
+div.menu a.item.disabled {
+    color: #999;
+}
+div.menu a.item:hover{
+    text-decoration: underline;
+}
+div.responses div.response{
+    border:1px solid #000;
+}
+div.responses div.response.error {
+    color:red;
+    border-color: red;
+    border-radius: 5px;
+}
+div.responses div.response div.title i.close{
+    float:right;
+    cursor: pointer;
+}

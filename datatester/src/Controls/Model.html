@@ -1,40 +1,28 @@
-<fieldset *ngIf="Value">
-    <legend (click)="Log(Value)">{{Value.toString()}}</legend>
-    <div *ngIf="!Selecting">
-        <div class="data" *ngFor="let property of dataProperties">
-            <div class="header">{{property.Name}}</div>
-            <div class="body">
-                <input type="text" [(ngModel)]=Value[property.Name]/>
-            </div>     
-        </div>
-        <div class="model" *ngFor="let property of modelProperties">
-            <div class="header">
-                <div class="title">
-                    {{property.Name}}
-                    <div class="actions">
-                        <a *ngIf="Value[property.Name]" class="far fa-edit" (click)="Edit(model)"></a>
-                        <a *ngIf="!Value[property.Name]" class="far fa-plus-square" (click)="Add(model)"></a>
-                    </div>
+<div *ngIf="Visible">
+    <div class="header">
+        <div class="title">
+            
+            <span class="label" (click)="Log(this.Value)"> {{Value.toString()}} </span>
+            <div class="actions">
+                <div *ngIf="ChangeStatus !== 'Unchanged'" class="button fas fa-exclamation-triangle"></div>
+                <div class="button fas fa-cog">
                 </div>
             </div>
-            <div class="body">
-                <div *ngIf="Value[property.Name]">
-                    <pre>{{Json(Value[property.Name])}}</pre>
-                </div>
-                <div *ngIf="!Value[property.Name]" style="text-align:center;font-size:14pt;padding:3px 0;">
-                    <a class="far fa-plus-square" (click)="Add(model)"></a>
-                </div>
-            </div>  
-            <div class="footer">
-
-            </div>   
-        </div>        
-        <div *ngFor="let property of collectionProperties">
-            <fieldset>
-                <legend>{{property.Name}}</legend>
-            </fieldset>
         </div>
     </div>
-    <repository-control *ngIf="Selecting" [ctlContext]=ctlContext [Value]=Selecting.Repository (modelSelected)="selectModel($event)"></repository-control>
-</fieldset>
+    <div class="body">
+        <div *ngFor="let property of dataProperties" class="property">
+            <property-control [ctlModel]=this [Value]=property></property-control>
+        </div>
+        <div *ngFor="let property of modelProperties" class="property">
+            <property-control [ctlModel]=this [Value]=property></property-control>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="messages">
+            <div class="message fas fa-exclamation-triangle"> {{ServerStatus}}</div>
+            <div *ngIf="ChangeStatus !== 'Unchanged'" class="message fas fa-exclamation-triangle"> {{ChangeStatus}}</div>
+        </div>        
+    </div>
+</div>
     

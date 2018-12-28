@@ -118,6 +118,16 @@ export class RepositoryControl implements OnInit {
         }
     }
 
+    public Select(model:Model){
+        this.modelSelected.emit(model);
+    }
+    public New(){
+        if (this.Value !== undefined){
+            var model = this.Value.Add({});
+            this.modelSelected.emit(model);
+        }            
+    }
+
     public Edit(){
         console.log("Edit");
     }

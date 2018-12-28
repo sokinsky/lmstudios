@@ -1,0 +1,29 @@
+<div class="property">
+    <div class="header">
+        <div class="title" >
+            <div class="toggle" (click)="toggleState()">
+                <div class="button fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}" ></div>
+            </div>
+            <span class="label" (click)="toggleState()">{{Value.Name}}:{{ctlModel.Value[Value.Name]}}</span>
+            <div class="actions">                
+                <div *ngIf="isModel() && ctlModel.Value[Value.Name] === undefined" class="button fas fa-plus-square"></div>
+                <div *ngIf="isModel() && ctlModel.Value[Value.Name] !== undefined" class="button fas fa-edit" title="edit" (click)="editModel()"></div>
+                <div *ngIf="isModel() && ctlModel.Value[Value.Name] !== undefined" class="button fas fa-exchange-alt" title="change" (click)="changeModel()"></div>
+            </div>
+        </div>
+
+    </div>
+    <div class="body" *ngIf="State=='Open'">
+        <textarea spellcheck="false" *ngIf="Value.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="ctlModel.Value[Value.Name]" [rows]="2" placeholder="{{Value.Name}}"></textarea>
+        <input *ngIf="Value.PropertyType.Name=='Date'" type="date" [(ngModel)]="ctlModel.Value[Value.Name]" placeholder="{{Value.Name}}" />
+        <input *ngIf="Value.PropertyType.Name=='number'" type="number" [(ngModel)]="ctlModel.Value[Value.Name]" placeholder="{{Value.Name}}" />
+        <div *ngIf="isModel()">
+            <pre>{{Json.Value}}</pre>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="messages">
+            <div *ngIf="ChangeStatus !== 'Unchanged'" class="message fas fa-exclamation-triangle"> {{ChangeStatus}}</div>
+        </div>    
+    </div>
+</div>

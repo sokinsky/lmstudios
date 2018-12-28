@@ -11,11 +11,29 @@ export class ModelControl implements OnInit {
 	constructor() { }
     public async ngOnInit(){
     }
-    @Input() ctlContext?:ContextControl;   
-    @Input() Value?:Model;
+    private __ctlContext?:ContextControl;
+    public get ctlContext():ContextControl{
+        if (this.__ctlContext === undefined)
+            throw new Error(``);
+        return this.__ctlContext;
+    }
+    @Input() public set ctlContext(value:ContextControl){
+        this.__ctlContext = value;
+    }
+    private __value?:Model;
+    public get Value():Model{
+        if (this.__value === undefined)
+            throw new Error(``);
+        return this.__value;
+    }
+    @Input() public set Value(value:Model){
+        this.__value = value;
+    }
+
     public get Visible():boolean{
-        return this.Value !== undefined;
-    }  
+        return this.__value !== undefined;
+    }
+
     @Output() public modelSelected:EventEmitter<Model> = new EventEmitter();
     public selectModel(model:Model){
         if (this.Selecting !== undefined){
@@ -27,6 +45,17 @@ export class ModelControl implements OnInit {
         
     }
     public Selecting?:{Repository:Repository<Model>, Property:Schema.Property};
+
+    public get ChangeStatus():string {
+        if (this.Value.__controller.Status.Change.Model !== undefined)
+            return this.Value.__controller.Status.Change.Model.toString();
+        return "";
+    }
+    public get ServerStatus():string{
+        if (this.Value.__controller.Status.Server.Model !== undefined)
+            return this.Value.__controller.Status.Server.Model.toString();
+        return "Unserved";
+    }
 
     public get dataProperties():Schema.Property[]{
         if (this.Value === undefined)

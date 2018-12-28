@@ -1,5 +1,6 @@
 import * as LMS from "./";
 import { ServerStatus } from "./ServerStatus";
+import { ChangeStatus } from "./ChangeEntry";
 
 export class Controller<TModel extends LMS.Model> {
 	constructor(context:LMS.Context, actual: TModel, proxy:TModel) {
@@ -97,8 +98,10 @@ export class Controller<TModel extends LMS.Model> {
 	public SetValue(property:string|LMS.Schema.Property|undefined, value:any, fromServer?:boolean){				
 		if (property === undefined)
 			return;
+
 		if (typeof(property) === "string")
 			this.SetValue(this.Schema.GetProperty(property), value, fromServer);
+
 		if (property instanceof LMS.Schema.Property){
 			if (property.PropertyType instanceof LMS.Schema.Model)
 				this.setModel(property, value, fromServer);
@@ -109,8 +112,28 @@ export class Controller<TModel extends LMS.Model> {
 				}
 				property.SetValue(this.Actual.Model, value);
 				property.SetValue(this.Actual.Data, value);
-			}
-				
+				this.Status.Change.Properties[property.Name] = ChangeStatus.Unchanged;
+				var serverValue = property.GetValue(this.Values.Server.Data);
+				var actualValue = property.GetValue(this.Actual.Data);
+				if (serverValue === undefined){
+					if (actualValue !== undefined)
+						this.Status.Change.Properties[property.Name] = ChangeStatus.Added;
+				}
+				else{
+					if (actualValue === undefined)
+						this.Status.Change.Properties[property.Name] = ChangeStatus.Deleted;
+					else if (actualValue !== serverValue)
+						this.Status.Change.Properties[property.Name] = ChangeStatus.Modified;
+				}
+				if (this.Status.Change.Model !== ChangeStatus.Added && this.Status.Change.Model !== ChangeStatus.Deleted){
+					for (var key in this.Status.Change.Properties){
+						if (this.Status.Change.Properties[key] !== ChangeStatus.Unchanged){
+							this.Status.Change.Model = ChangeStatus.Modified;
+							return;
+						}							
+					}
+				}
+			}				
 		}
 	}
 

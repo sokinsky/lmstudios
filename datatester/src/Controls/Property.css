@@ -1,0 +1,117 @@
+div.property {
+    margin:10px 0 0 0;
+}
+div.header {
+    border-radius: 5px 5px 0 0;
+    background-color: #ccc;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.header div.title{
+    padding:3px 0;
+}
+div.header div.title div.toggle {
+    float:left;
+}
+div.header div.title div.toggle div.button {
+    border-radius:5px;
+    cursor: pointer;
+    padding:2px 4px 2px 2px;
+    margin-left:5px;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+div.header div.title span.label {
+    cursor: pointer;
+    font-weight: bold;
+    padding-left:5px;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+div.header div.title div.actions{
+    float:right;
+    z-index: 2000;
+}
+div.header div.title div.actions div.button{
+    border-radius:5px;
+    cursor: pointer;
+    padding:2px 4px 2px 2px;
+    margin-right:5px;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+div.header div.title div.actions div.button:hover{
+    -webkit-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+}
+
+div.body {
+    margin: 5px 0px 0 0px;
+    padding: 0 5px;
+    background-color: #ededed;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.body pre{
+    padding:0px;
+    margin:0px;
+}
+
+div.body textarea {
+    width:100%;
+    resize: none;
+    overflow: none;
+    white-space: nowrap;
+    outline: none;
+    background-color:transparent;
+    padding:0px;
+    margin: 0px;
+    
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+div.body input {
+    width:100%;
+    resize: none;
+    overflow: auto;
+    outline: none;
+    background-color:transparent;
+    padding:0px;
+    margin: 0px;
+    
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+div.footer {
+    font-size: 8pt;
+    color:#444;    
+    padding: 3px 5px;
+
+
+    margin: 5px 0 0 0;
+    border-radius: 0 0 5px 5px;
+    background-color: #ccc;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}

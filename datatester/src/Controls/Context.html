@@ -1,44 +1,59 @@
-<fieldset *ngIf="Value">
-    <legend (click)="Log(Value)">{{Value.Name}}</legend>
-    <table style="width:100%;">
-            <tr>
-                <td style="vertical-align: top; width: 20%;">
-                    <fieldset>
-                        <legend>Repositories({{Value.Repositories.length}})</legend>
-                        <div *ngFor="let repository of Value.Repositories" (click)="selectRepository(repository)">
-                            {{repository.Name}}
-                        </div>
-                    </fieldset>
-                    
-                </td>
-                <td style="vertical-align: top;">
-                    <repository-control  [ctlContext]=this [Value]=SelectedRepository (modelSelected)="selectModel($event)"></repository-control>
-                    <model-control [ctlContext]=this [Value]=SelectedModel (modelSelected)="selectModel($event)"></model-control>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                        <fieldset>
-                            <legend>Actions</legend>
-                            <div style="text-align:center">
-                                <a *ngIf="this.Value.Tracker.Changes.length > 0" (click)="this.Value.SaveChanges()">SaveChanges</a>
+<div class="menu">
+    <a class="item">File</a>
+    <a class="item" [ngClass]="{'disabled':Value.Tracker.Changes.length === 0}" (click)="Save()">Save</a>
+</div>
+<div class="responses">
+    <div class="response" [ngClass]="{'error':isError(response)}" *ngFor="let response of Responses">
+        <div class="title">
+            {{response.Message}}
+            <div class="close">
+                <i class="fas fa-times-circle"></i>
+            </div>
+        </div>
+        
+        <div class="message"></div>
+        <div class="description">{{response.Description}}</div>
+    </div>
+</div>
+<table style="width:100%;">
+    <tr>
+        <td style="vertical-align: top; width: 20%;">
+            <fieldset>
+                <legend>Repositories({{Value.Repositories.length}})</legend>
+                <div *ngFor="let repository of Value.Repositories" (click)="selectRepository(repository)">
+                    {{repository.Name}}
+                </div>
+            </fieldset>
+            
+        </td>
+        <td style="vertical-align: top;">
+            <repository-control  [ctlContext]=this [Value]=SelectedRepository (modelSelected)="selectModel($event)"></repository-control>
+            <model-control [ctlContext]=this [Value]=SelectedModel (modelSelected)="selectModel($event)"></model-control>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+                <fieldset>
+                    <legend>Actions</legend>
+                    <div style="text-align:center">
+                        <a *ngIf="this.Value.Tracker.Changes.length > 0" (click)="this.Value.SaveChanges()">SaveChanges</a>
 
-                            </div>
-                        </fieldset>
-                    </td>
-                </tr>
-            <tr>
-                <td colspan="2">
-                    <fieldset>
-                        <legend>Requests</legend>
-                        <div *ngFor="let request of Value.API.Requests">
-                            <span (click)="Log(request)">{{request.Path}}</span>
-                            <pre>{{Json(request.Body)}}</pre>
-                        </div>
-                    </fieldset>
-                </td>
-            </tr>
+                    </div>
+                </fieldset>
+            </td>
+        </tr>
+    <tr>
+        <td colspan="2">
+            <fieldset>
+                <legend>Requests</legend>
+                <div *ngFor="let request of Value.API.Requests">
+                    <span (click)="Log(request)">{{request.Path}}</span>
+                    <pre>{{Json(request.Body)}}</pre>
+                </div>
+            </fieldset>
+        </td>
+    </tr>
 
-        </table>
-</fieldset>
+</table>
+
 

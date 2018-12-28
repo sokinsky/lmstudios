@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { Context, Repository, Model } from "@lmstudios/data";
+import { Context, Repository, Model, Response, ResponseStatus } from "@lmstudios/data";
 import { RepositoryControl } from "./Repository";
+import { Data } from "../STA";
 
 @Component({
     selector:"context-control",
@@ -24,6 +25,21 @@ export class ContextControl implements OnInit {
         this.SelectedRepository = repository;
         this.SelectedModel = undefined;
     }
+
+    public Responses:Response[] = [];
+    public async Save(){
+        if (this.Value !== undefined){
+            var response = await this.Value.SaveChanges();
+            if (response !== undefined)
+                this.Responses.push(response);
+        }
+    }
+
+    public isError(response:Response):boolean{
+        console.log(response.Status === ResponseStatus.Error);
+        return response.Status === ResponseStatus.Error;
+    }
+
 
     public Log(item:any){
         console.log(item);

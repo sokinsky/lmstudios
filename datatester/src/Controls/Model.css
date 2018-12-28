@@ -1,70 +1,56 @@
-div.data{
-    margin:0 0 10px 0;
-}
-div.data div.header{
+div.header {
     border-radius: 5px 5px 0 0;
     background-color:#ccc;
     color:#444;
-    font-weight: bold;
-    padding: 3px 0 3px 5px;
+    
+    padding: 3px 0 3px 0px;
 }
-div.data div.body {
-    border-radius: 0 0 5px 5px;
-    border-left:1px solid #ccc;
-    border-right:1px solid #ccc;
-    border-bottom:1px solid #ccc;
-    padding:0 5px 0 5px;    
-}
-div.data div.body input {
-    border: none;
-    width:100%;
-}
-
-div.model {
-    margin: 0 0 10px 0;
-}
-div.model div.header {
-    border-radius: 5px 5px 0 0;
-    background-color:#ccc;
-    color:#444;
-    font-weight: bold;
-    padding: 3px 0 3px 5px;
-}
-div.model div.header div.actions{
-    float:right;
-    padding: 0 5px 0 0;
-}
-div.model div.header div.actions a {
-    margin:0 5px 0 0;
-}
-div.model div.header div.actions a:hover{
-    color:#000;
-    font-weight:bold;
-    cursor:pointer;
-}
-div.model div.body {
-    border-left:1px solid #ccc;
-    border-right:1px solid #ccc;
-    padding:0 0 0 5px;    
-}
-div.model div.body a { 
-    color:#444;
-}
-div.model div.body a:hover { 
-    color:#000;
-    font-weight:bold;
-    cursor: pointer;
-}
-div.model div.footer {
-    border-radius: 0 0 5px 5px;
-    border-bottom:1px solid #ccc;  
-    background-color:#ccc;
-    color:#444;
-    font-weight: bold;
-    padding: 3px 0 3px 5px;
-}
-
-div.model pre {
+div.header div.title{
     padding:0;
-    margin:0;
+}
+div.header div.title div.actions{
+    float:right;
+}
+div.header div.title span.label {
+    font-weight: bold;
+    padding-left:5px;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+div.header div.title div.actions div.button{
+    border-radius:5px;
+    cursor: pointer;
+    padding:2px 4px 2px 2px;
+    margin-right:5px;
+    background-color: #000;
+    color: transparent;
+    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+}
+div.header div.title div.actions div.button:hover{
+    -webkit-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+    box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+}
+
+div.body {
+    background-color: #eee;
+    padding: 0px 5px 10px 5px;
+    border: 1px solid #ccc;
+}
+div.footer{
+    font-size: 8pt;
+    border-radius: 0 0 5px 5px;
+    background-color:#ccc;
+    color:#444;    
+    padding: 3px 5px;
+}
+div.footer div.messages div.message{
+    padding:0 0 0 5px;
 }
