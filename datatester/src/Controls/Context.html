@@ -4,7 +4,7 @@
 <table style="width:100%;">
     <tr>
         <td style="vertical-align: top; width: 20%;">
-            <div *ngFor="let repository of context.Repositories" (click)="Init(repository)">
+            <div *ngFor="let repository of context.Repositories" (click)="Select(repository)">
                 {{repository.Name}}
             </div>  
             <div *ngFor="let request of context.API.Requests">

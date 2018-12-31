@@ -43,11 +43,16 @@ export class Collection<TModel extends LMS.Model> {
         
     }
 
+    public get Items():TModel[]{
+        if (this.Status === undefined)
+            this.Intialize();
+        return this.Child.Repository.Local.Search(this.generateDefaultFilter());
+    }
+
 	public *[Symbol.iterator]() {  
         if (this.Status===undefined)
             this.Intialize();
-        var items = this.Child.Repository.Local.Search(this.generateDefaultFilter());
-        for (const item of items) {
+        for (const item of this.Items) {
             yield item;
         }
     }  

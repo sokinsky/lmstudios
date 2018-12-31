@@ -1,0 +1,21 @@
+<div class="property">
+        <div class="header" [ngClass]="{'open':State==='Open'}">      
+            <div class="title" (click)="toggleState()">
+                <a class="toggle fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}"></a>
+                {{property.Name}}:<span class="value">{{parent.model[property.Name]}}</span>
+            </div>
+        </div>
+        <div class="body" *ngIf="State=='Open'">
+            <textarea spellcheck="false" *ngIf="property.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="parent.model[property.Name]" [rows]="2" placeholder="{{property.Name}}"></textarea>
+            <input *ngIf="property.PropertyType.Name=='Date'" type="date" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
+            <input *ngIf="property.PropertyType.Name=='number'" type="number" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
+        </div>
+        <div class="footer" *ngIf="State=='Open'">
+            <div class="message">
+            </div>    
+            <div class="actions">
+                <a class="action fas fa-undo" *ngIf="ChangeStatus !== 'Unchanged'" (click)="Undo()"></a>
+            </div>
+        </div>
+    </div>
+    

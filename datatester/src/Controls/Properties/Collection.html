@@ -1,0 +1,46 @@
+<div class="property">
+        <div class="header" [ngClass]="{'open':State==='Open'}">      
+            <div class="title" (click)="toggleState()">
+                <a class="toggle fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}"></a>
+                {{property.Name}}
+            </div>
+        </div>
+        <div class="body" *ngIf="State=='Open'">
+            <table style="width:100%;" cellpadding=0 cellspacing=0>
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td *ngFor="let column of Table.Columns">
+                            <div>{{column.Name}}</div>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of Table.Rows" >
+                        <td><i class="fas fa-ban"></i></td>
+                        <td *ngFor="let column of Table.Columns" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;" (click)="Select(row)">
+                             {{row[column.Name]}}
+                        </td>
+                    </tr>
+                    <tr (click)="Add()">
+                        <td>
+                            <div class="actions">
+                                <a class="action fas fa-plus"></a>
+                            </div>
+                        </td>
+                        <td [attr.colspan]=Table.Columns.length>
+                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer" *ngIf="State==='Open'">
+            <div class="messages">                
+            </div>
+            <div class="actions">
+                <a class="action fas fa-plus" (click)="Add()"></a>
+            </div>
+        </div>
+    </div>
+        

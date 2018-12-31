@@ -3,11 +3,14 @@ div.property {
 }
 div.header {
     color:#444;
-    border-radius: 5px 5px 0 0;
+    border-radius: 5px;
     background-color: #ccc;
     -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.header.open {
+    border-radius: 5px 5px 0 0;
 }
 div.header div.title{    
     cursor: pointer;
@@ -44,20 +47,46 @@ div.header::after{
 
 
 div.body {
-    
+    padding: 0 5px;
     background-color: #ededed;
-    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 2px 0px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 0px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 0px 5px 0px rgba(0,0,0,0.75);
+}
+div.body textarea {
+    width:100%;
+    resize: none;
+    overflow: none;
+    white-space: nowrap;
+    outline: none;
+    background-color:transparent;
+    padding:0px;
+    margin: 0px;
+    
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+div.body input {
+    width:100%;
+    resize: none;
+    overflow: auto;
+    outline: none;
+    background-color:transparent;
+    padding:0px;
+    margin: 0px;
+    
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
 
 div.footer {
     font-size:8pt;
-    background-color: #ededed;
     color:#444;    
     padding: 3px 5px;
-
-
     border-radius: 0 0 5px 5px;
     background-color: #ededed;
     -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
@@ -86,49 +115,4 @@ div.footer::after{
     content:"";
     clear:both; 
 }
-
-
-table thead {
-    margin:0 0 5px 0;
-}
-table thead tr {
-    background-color:#ccc;
-    text-align:center;
-}
-table thead tr td{
-    border-right:2px solid #bbb;
-}
-table thead tr td:last-child{
-    border-right:0px solid #444;
-}
-table thead tr td div {
-    padding:3px 0px;
-    cursor: pointer;
-    color:#444;
-    background-color:#ccc;
-    text-align:center;
-}
-table thead tr td:hover div {
-    background-color:#444;
-    color:#ccc;
-    text-align:center;
-}
-table tbody tr {
-    font-size:10pt;
-    cursor: pointer;
-    color:#444;
-}
-table tbody tr:nth-child(odd) {
-    background-color:#fff;
-}
-table tbody tr:nth-child(even) {
-    background-color:#eee;
-}
-table tbody tr:hover {
-    background-color:#444;
-    color:#ccc;
-}
-table tbody tr td {
-    text-align:center;
-    padding: 3px 0 3px 5px;
-}
+pre{margin:0;padding:2px 0;}

@@ -43,7 +43,6 @@ export class RepositoryControl implements OnInit {
             }
         }
     }
-
     public Table:{
         Columns:{Name:string, Type:string }[],
         Rows:Model[]
@@ -58,11 +57,6 @@ export class RepositoryControl implements OnInit {
         this.Select(this.repository.Create());
     }
     public Select(model:Model){
-        if (this.parent.PreviousItem instanceof Model){ 
-            this.parent.SelectedItems.pop();
-            return;
-        }
-
         this.parent.Select(model);
     }
 

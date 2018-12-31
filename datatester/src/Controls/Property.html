@@ -2,7 +2,10 @@
     <div class="header">      
         <div class="title" (click)="toggleState()">
             <a class="toggle fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}"></a>
-            {{property.Name}}: <span class="value">{{parent.model[property.Name]}}</span>
+            {{property.Name}}: 
+            <span *ngIf="Display.Type==='Data'" class="value">{{parent.model[property.Name]}}</span>
+            <span *ngIf="Display.Type==='Model'" class="value">{{parent.model[property.Name]}}</span>
+            <span *ngIf="Display.Type==='Collection'" class="value">{{parent.model[property.Name].length}}</span>
         </div>
         <div class="actions">
             <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] === undefined" class="action fas fa-plus" (click)="Add()"></a>
@@ -15,7 +18,10 @@
         <input *ngIf="property.PropertyType.Name=='Date'" type="date" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
         <input *ngIf="property.PropertyType.Name=='number'" type="number" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
         <div *ngIf="Display.Type === 'Model'">
-            Json
+            Model
+        </div>
+        <div *ngIf="Display.Type === 'Collection'">
+            Collection
         </div>
     </div>
     <div class="footer">

@@ -1,43 +1,41 @@
 <div *ngIf="Visible">
-    <div class="items">
-        <div class="head">
-            <div class="title">
-                <span>{{repository.Name}}</span>
-            </div>
+    <div class="header">
+        <div class="title">
+            <span>{{repository.Name}}</span>
         </div>
-        <div class="body">
-            <table style="width:100%;" cellpadding=0 cellspacing=0>
-                <thead>
-                    <tr>
-                        <td *ngFor="let column of Table.Columns">
-                            <div>{{column.Name}}</div>
-                        </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let row of Table.Rows" (click)="Select(row)">
-                        <td *ngFor="let column of Table.Columns" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;">
-                            {{row[column.Name]}}
-                        </td>
-                    </tr>
-                    <tr *ngIf="Table.Rows === undefined || Table.Rows.length === 0">
-                        <td [attr.colspan]=Table.Columns.length>
-                            No Results Found
-                        </td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td [attr.colspan]=Table.Columns.length>
-                            <div class="actions">
-                                <a class="action fas fa-plus" (click)="Create()"></a>
-                            </div>                                    
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
+        <div class="actions">
+            <a class="action fas fa-search"></a>
         </div>
     </div>
+    <div class="body">
+        <table style="width:100%;" cellpadding=0 cellspacing=0>
+            <thead>
+                <tr>
+                    <td *ngFor="let column of Table.Columns">
+                        <div>{{column.Name}}</div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of Table.Rows" (click)="Select(row)">
+                    <td *ngFor="let column of Table.Columns" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;">
+                        {{row[column.Name]}}
+                    </td>
+                </tr>
+                <tr *ngIf="Table.Rows === undefined || Table.Rows.length === 0">
+                    <td [attr.colspan]=Table.Columns.length>
+                        No Results Found
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">
+        <div class="messages">
 
-
+        </div>
+        <div class="actions">
+            <a class="action fas fa-plus" (click)="Create()"></a>
+        </div>
+    </div>
 </div>

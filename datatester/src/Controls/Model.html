@@ -10,14 +10,16 @@
     </div>
     <div class="body">
         <div *ngFor="let property of dataProperties" class="property">
-            <property-control [parent]=this [property]=property></property-control>
+            <data-property-control [parent]=this [property]=property></data-property-control>
         </div>
         <div *ngFor="let property of modelProperties" class="property">
-            <property-control [parent]=this [property]=property></property-control>
+            <model-property-control [parent]=this [property]=property></model-property-control>
+        </div>
+        <div *ngFor="let property of collectionProperties" class="property">
+            <collection-property-control [parent]=this [property]=property></collection-property-control>
         </div>
     </div>
     <div class="footer">
-        {{ChangeStatus}}
         <div *ngIf="ChangeStatus === 'Unchanged'" class="actions">
             <a class="action fas fa-check" (click)="OK()" title="OK"></a> 
         </div>

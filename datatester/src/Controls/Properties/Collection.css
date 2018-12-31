@@ -3,8 +3,14 @@ div.property {
 }
 div.header {
     color:#444;
-    border-radius: 5px 5px 0 0;
+    border-radius: 5px;
     background-color: #ccc;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.header.open {
+    border-radius: 5px 5px 0 0;
     -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
@@ -119,14 +125,13 @@ table tbody tr {
     color:#444;
 }
 table tbody tr:nth-child(odd) {
-    background-color:#fff;
+    background-color:#ededed;
 }
 table tbody tr:nth-child(even) {
     background-color:#eee;
 }
 table tbody tr:hover {
-    background-color:#444;
-    color:#ccc;
+    background-color:#ddd;
 }
 table tbody tr td {
     text-align:center;

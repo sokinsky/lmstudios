@@ -36,32 +36,10 @@ export class ModelControl implements OnInit {
     }
 
     public OK(){
-        var changeStatus = this.model.__controller.Status.Change.Model;
-        switch (changeStatus){
-            case ChangeStatus.Detached:
-                var repo = this.model.__context.GetRepository(this.model);
-                repo.Add(this.model);
-                this.parent.SelectedItems.pop();
-                break;
-            default:
-                console.log(changeStatus);
-                this.parent.SelectedItems.pop();
-                break;
-        }
+
     }
     public Cancel(){
-        var changeStatus = this.model.__controller.Status.Change.Model;
-        switch (changeStatus){
-            case ChangeStatus.Modified:
-                this.model.Undo();
-                break;
-            case ChangeStatus.Detached:
-                this.parent.SelectedItems.pop();
-                break;
-            default:
-                console.log(changeStatus);
-                break;
-        }
+
     }
 
     public get ChangeStatus():string {
@@ -73,8 +51,6 @@ export class ModelControl implements OnInit {
 
     public Undo(){           
         this.model.Undo();
-        console.log(this.model);
-
     }
 
     public get dataProperties():Schema.Property[]{
@@ -87,7 +63,7 @@ export class ModelControl implements OnInit {
             return []
         return this.model.GetSchema().Properties.filter(x => { return x.PropertyType instanceof Schema.Model; })
     }
-    public get collectionProperies():Schema.Property[]{
+    public get collectionProperties():Schema.Property[]{
         if (this.model === undefined)
             return []
         return this.model.GetSchema().Properties.filter(x => { return x.PropertyType.Name === "Collection"; })

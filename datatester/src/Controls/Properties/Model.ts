@@ -1,50 +1,43 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
 import { Repository, Model, Schema } from "@lmstudios/data";
-import { ModelControl } from "./Model";
-import { lchmodSync } from "fs";
+import { ModelControl } from "../Model";
 
 @Component({
-    selector:"property-control",
-    templateUrl:"Property.html",
-    styleUrls:["Property.css"]
+    selector:"model-property-control",
+    templateUrl:"Model.html",
+    styleUrls:["Model.css"]
 })
-export class PropertyControl implements OnInit {
+export class ModelPropertyControl implements OnInit {
 	constructor() { 
     }
     public async ngOnInit(){
     }
 
     private __parent?:ModelControl;
-    @Input() public get parent():ModelControl{
+    public get parent():ModelControl{
         if (this.__parent === undefined)
             throw new Error(``);
         return this.__parent;
     } 
-    public set parent(value:ModelControl){
+    @Input() public set parent(value:ModelControl){
         this.__parent = value;
     }
     
     private __property?:Schema.Property;
-    @Input() public get property():Schema.Property{
+    public get property():Schema.Property{
         if (this.__property === undefined)
             throw new Error(``);
         return this.__property;
     }
-    public set property(value:Schema.Property){
+    @Input() public set property(value:Schema.Property){
         this.__property = value;  
+        if (this.__property !== undefined){
+            if ( !(this.__property.PropertyType instanceof Schema.Model))
+                throw new Error("Invalid Property");
+        }
     }
 
-    public get Display():{Type:string}{
-        var result:{Type:string} = {Type:"none"};
-        if (this.property.PropertyType instanceof Schema.Model)
-            result.Type = "Model"
-        else if (this.property.PropertyType.Name === "Collection")
-            result.Type = "Collection"
-        else
-            result.Type = "Data";
-        return result;
-    }
-    public State:string = "Open";
+    public State:string = "Closed";
     public toggleState(){
         switch (this.State){
             case "Closed":

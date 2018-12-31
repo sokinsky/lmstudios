@@ -1,0 +1,32 @@
+<div class="property">
+    <div class="header" [ngClass]="{'open':State==='Open'}">      
+        <div class="title" (click)="toggleState()">
+            <a class="toggle fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}"></a>
+            {{property.Name}}: 
+            <span class="value">{{parent.model[property.Name]}}</span>
+        </div>
+        <div class="actions" *ngIf="State==='Closed' && parent.model[property.Name] === undefined">
+            <a *ngIf="parent.model[property.Name] === undefined" class="action fas fa-plus" (click)="Add()"></a>
+        </div>
+        <div class="actions" *ngIf="State==='Closed' && parent.model[property.Name] !== undefined">
+            <a *ngIf="parent.model[property.Name] !== undefined" class="action fas fa-edit" title="edit" (click)="editModel()"></a>
+            <a *ngIf="parent.model[property.Name] !== undefined" class="action fas fa-exchange-alt" title="change" (click)="selectModel()"></a>       
+        </div> 
+    </div>
+    <div class="body" *ngIf="State=='Open'">
+        <pre *ngIf="parent.model[property.Name] !== undefined">{{parent.model[property.Name].toJson()}}</pre>
+    </div>
+    <div class="footer" *ngIf="State==='Open'">
+        <div class="messages">
+
+        </div>
+        <div class="actions" *ngIf="parent.model[property.Name] === undefined">
+            <a *ngIf="parent.model[property.Name] === undefined" class="action fas fa-plus" (click)="Add()"></a>
+        </div>
+        <div class="actions" *ngIf="parent.model[property.Name] !== undefined">
+            <a *ngIf="parent.model[property.Name] !== undefined" class="action fas fa-edit" title="edit" (click)="editModel()"></a>
+            <a *ngIf="parent.model[property.Name] !== undefined" class="action fas fa-exchange-alt" title="change" (click)="selectModel()"></a>       
+        </div>   
+    </div>
+</div>
+    

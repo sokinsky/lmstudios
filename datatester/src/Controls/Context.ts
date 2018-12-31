@@ -29,34 +29,13 @@ export class ContextControl implements OnInit, AfterViewInit {
         this.__context = value;
     }
 
-    public SelectedItems:Array<Repository<Model>|Model> = [];
-    public get RootItem():Repository<Model>|Model|undefined{
-        if (this.SelectedItems.length> 0)
-            return this.SelectedItems[0];
-        return undefined;
-    }
-    public get SelectedItem():Repository<Model>|Model|undefined{
-        if (this.SelectedItems.length > 0)
-            return this.SelectedItems[this.SelectedItems.length-1];
-        return undefined;
-    }
-    public get PreviousItem():Repository<Model>|Model|undefined{
-        if (this.SelectedItems.length > 1)
-            return this.SelectedItems[this.SelectedItems.length-2]
-        return undefined;
-
-    }
-    public Init(value:Repository<Model>){
-        this.SelectedItems = [];
-        this.SelectedItems.push(value);
-    }
+    public SelectedItem:Repository<Model>|Model|undefined;
     public Select(value:Repository<Model>|Model){
-        this.SelectedItems.push(value);
+        this.SelectedItem = value;
         if (this.SelectedItem instanceof Model){
             if (this.ctlModel !== undefined)
                 this.ctlModel.model = this.SelectedItem;
         }
-        console.log(this.SelectedItems);
     }
 
 
