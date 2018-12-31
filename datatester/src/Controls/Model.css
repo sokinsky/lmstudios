@@ -45,12 +45,20 @@ div.body {
     border: 1px solid #ccc;
 }
 div.footer{
-    font-size: 8pt;
     border-radius: 0 0 5px 5px;
     background-color:#ccc;
-    color:#444;    
-    padding: 3px 5px;
+    color:#444;   
 }
-div.footer div.message {
-    cursor: pointer;
+div.footer div.actions {
+    padding:2px 5px 2px 0;
+    text-align:right;
+}
+div.footer div.actions a.action{
+    border-radius:5px;
+    margin: 0 5px 0 0;
+    padding: 5px;
+}
+div.footer div.actions a.action:hover{
+    color:#ccc;
+    background-color:#444;
 }

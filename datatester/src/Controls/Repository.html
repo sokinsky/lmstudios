@@ -2,7 +2,7 @@
     <div class="items">
         <div class="head">
             <div class="title">
-                <span>Results</span>
+                <span>{{repository.Name}}</span>
             </div>
         </div>
         <div class="body">
@@ -15,34 +15,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let row of Table.Rows">
-                        <td *ngFor="let column of this.Table.Columns" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;">
+                    <tr *ngFor="let row of Table.Rows" (click)="Select(row)">
+                        <td *ngFor="let column of Table.Columns" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:200px;">
                             {{row[column.Name]}}
+                        </td>
+                    </tr>
+                    <tr *ngIf="Table.Rows === undefined || Table.Rows.length === 0">
+                        <td [attr.colspan]=Table.Columns.length>
+                            No Results Found
                         </td>
                     </tr>
                 </tbody>
                 <tfoot>
                     <tr>
                         <td [attr.colspan]=Table.Columns.length>
-                            <div class="options">
-                                <a class="fas fa-plus-circle" (click)="New()"></a>
+                            <div class="actions">
+                                <a class="action fas fa-plus" (click)="Create()"></a>
                             </div>                                    
                         </td>
                     </tr>
                 </tfoot>
             </table>
         </div>
-        <div *ngIf="! SelectedModel">
-           <div style="margin:10px 0px">
-                <div *ngIf="!Display" style="text-align:center">
-                    Search found 0 results
-                </div>
-                <div *ngIf="Display">
-
-                </div>
-            </div>
-        </div>
-        <model-control *ngIf=SelectedModel [Value]=SelectedModel></model-control>
     </div>
 
 

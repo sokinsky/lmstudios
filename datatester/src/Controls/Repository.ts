@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 import { Repository, Model, Schema } from "@lmstudios/data";
 import { ContextControl } from "./Context";
-import { unescapeIdentifier, ThrowStmt } from "@angular/compiler";
-import { provideRouterInitializer } from "@angular/router/src/router_module";
 
 @Component({
     selector:"repository-control",
@@ -15,52 +13,40 @@ export class RepositoryControl implements OnInit {
     public async ngOnInit(){
     }
 
-    private __ctlContext?:ContextControl
-    public get ctlContext():ContextControl{
-        if (this.__ctlContext === undefined) throw new Error(``);
-        return this.__ctlContext;
+    private __parent?:ContextControl
+    public get parent():ContextControl{
+        if (this.__parent === undefined) throw new Error(``);
+        return this.__parent;
     }
-    @Input() public set ctlContext(value:ContextControl){
-        this.__ctlContext = value;
+    @Input() public set parent(value:ContextControl){
+        this.__parent = value;
     }
-    private __value?:Repository<Model>;
-    @Input() public get Value():Repository<Model>{
-        if (this.__value === undefined) throw new Error(``);
-        return this.__value;
+    private __repository?:Repository<Model>;
+    @Input() public get repository():Repository<Model>{
+        if (this.__repository === undefined) throw new Error(``);
+        return this.__repository;
     }
-    public set Value(value:Repository<Model>){
-        this.__value = value;
-        this.Items = this.__value.Items;                
+    public set repository(value:Repository<Model>){
+        this.__repository = value;
+        this.Items = this.__repository.Items;                
     }
-    @Output() public selected:EventEmitter<Model> = new EventEmitter();
-
     private __items:Model[] = [];
     public get Items():Model[]{
         return this.__items;
     }
     public set Items(values:Model[]){
         this.__items = values;
-        this.Table = { Columns:[], Rows:[] };
-        for (var property of this.Value.Schema.Properties){
+        this.Table = { Columns:[], Rows:values };
+        for (var property of this.repository.Schema.Properties){
             if ( !( property.PropertyType instanceof Schema.Model) && !(property.PropertyType.Name === "Collection")){
                 this.Table.Columns.push({Name:property.Name, Type:property.PropertyType.Name});
             }
         }
-        for (var model of values){
-            var row = {};
-            for (var column of this.Table.Columns){
-                var property = this.Value.Schema.GetProperty(column.Name);
-                if (property !== undefined)
-                    property.SetValue(row, property.GetValue(model));
-            }
-            this.Table.Rows.push(row);
-        }
-        console.log(this.Table);
     }
 
     public Table:{
         Columns:{Name:string, Type:string }[],
-        Rows:any[]
+        Rows:Model[]
     } = { Columns:[], Rows:[] }
     public Tools:{
         Search: { Active:boolean, Input:string }
@@ -68,8 +54,21 @@ export class RepositoryControl implements OnInit {
         Search: { Active:false, Input:"" }
     }
 
+    public Create(){
+        this.Select(this.repository.Create());
+    }
+    public Select(model:Model){
+        if (this.parent.PreviousItem instanceof Model){ 
+            this.parent.SelectedItems.pop();
+            return;
+        }
+
+        this.parent.Select(model);
+    }
+
+
     public get Visible():boolean{
-        return (this.__ctlContext !== undefined && this.__value !== undefined);
+        return (this.__parent !== undefined && this.__repository !== undefined && this.parent.SelectedItem === this.repository);
     }
 
     public Log(item:any){

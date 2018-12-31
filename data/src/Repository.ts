@@ -36,19 +36,19 @@ export class Repository<TModel extends LMS.Model> {
 		}
 		throw new Error(`Repository.Create was unable to create Model`);
 	}
-	public Add(value?:TModel|Partial<TModel>, fromServer?:boolean):TModel{	
-		
+	public Add(value?:TModel|Partial<TModel>, fromServer?:boolean):TModel{			
 		if (value === undefined)
 			value = this.Add({});
+		
 		var result:TModel|undefined = undefined;	
-		if (! (value instanceof LMS.Model)){
+		if (! (value instanceof LMS.Model)){			
 			result = this.Local.Select(value);
 			if (result === undefined){				
-				result = this.Create();
-				
+				result = this.Create();				
 				result.Load(value, fromServer);
 				return this.Add(result, fromServer);
 			}	
+			return result;
 		}
 		if (value instanceof LMS.Model){
 			if (value.GetSchema() !== this.Schema)
@@ -98,13 +98,15 @@ export class LocalRepository<TModel extends LMS.Model> {
 
     public Select(value:Partial<TModel>) : TModel|undefined {				
 		var filter:Partial<TModel> = {};
-		this.Schema.PrimaryKey.Properties.forEach(property =>{
-			property.SetValue(filter, property.GetValue(value));
-		})
-		var results = this.Search(filter);		
-		if (results.length === 1)
-			return results[0];
-		
+		if (this.Schema.PrimaryKey.Properties.length === 1){
+			var keyValue = this.Schema.PrimaryKey.Properties[0].GetValue(value);
+			if (keyValue !== undefined){
+				this.Schema.PrimaryKey.Properties[0].SetValue(filter, keyValue);
+				var results = this.Search(filter);		
+				if (results.length === 1)
+					return results[0];
+			}				
+		}	
 		this.Schema.AdditionalKeys.forEach(key =>{
 			filter = {};
 			key.Properties.forEach(property=>{

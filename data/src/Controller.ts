@@ -14,7 +14,7 @@ export class Controller<TModel extends LMS.Model> {
 		}
 		this.Status = {
 			Server: { Properties:{} },
-			Change: { Properties:{} }
+			Change: { Model: ChangeStatus.Detached, Properties:{} }
 		}
 	}
 	public ID:string;
@@ -105,6 +105,14 @@ export class Controller<TModel extends LMS.Model> {
 		if (property instanceof LMS.Schema.Property){
 			if (property.PropertyType instanceof LMS.Schema.Model)
 				this.setModel(property, value, fromServer);
+			else if (property.PropertyType.Name === "Collection" && property.PropertyType.GenericTypes !== undefined && property.PropertyType.GenericTypes.length === 1 && property.PropertyType.GenericTypes[0] instanceof  LMS.Schema.Model){
+				if (property.GetValue(this.Actual.Model) === undefined){
+					if (value instanceof LMS.Collection){
+						value.Parent.Property = property;
+						property.SetValue(this.Actual.Model, value);
+					}
+				}
+			}				
 			else{
 				if (fromServer){
 					property.SetValue(this.Values.Server.Data, value);
@@ -221,6 +229,8 @@ export class Controller<TModel extends LMS.Model> {
 		this.UpdateChangeStatus(fromServer);	
 	}
 	public UpdateChangeStatus(fromServer?:boolean){
+		if (this.Status.Change.Model === ChangeStatus.Detached)
+			return;
 		if (fromServer)
 			this.Status.Change.Model = ChangeStatus.Unchanged;
 

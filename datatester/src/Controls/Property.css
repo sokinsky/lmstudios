@@ -1,6 +1,7 @@
 div.property {
     margin:10px 0 0 0;
 }
+
 div.header {
     border-radius: 5px 5px 0 0;
     background-color: #ccc;
@@ -9,55 +10,38 @@ div.header {
     box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
 }
 div.header div.title{
-    padding:3px 0;
-}
-div.header div.title div.toggle {
+    color:#444;
+    padding:5px;
     float:left;
 }
-div.header div.title div.toggle div.button {
-    border-radius:5px;
-    cursor: pointer;
-    padding:2px 4px 2px 2px;
-    margin-left:5px;
-    background-color: #000;
-    color: transparent;
-    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
-    -webkit-background-clip: text;
-       -moz-background-clip: text;
-            background-clip: text;
-}
-div.header div.title span.label {
-    cursor: pointer;
+div.header div.title span.value {
     font-weight: bold;
-    padding-left:5px;
-    background-color: #000;
-    color: transparent;
-    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
-    -webkit-background-clip: text;
-       -moz-background-clip: text;
-            background-clip: text;
 }
-div.header div.title div.actions{
+div.header div.title div.toggle {
+    padding:0;
+}
+div.header div.actions{
     float:right;
-    z-index: 2000;
+    padding:0 5px 0 0;
 }
-div.header div.title div.actions div.button{
-    border-radius:5px;
-    cursor: pointer;
-    padding:2px 4px 2px 2px;
-    margin-right:5px;
-    background-color: #000;
-    color: transparent;
-    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
-    -webkit-background-clip: text;
-       -moz-background-clip: text;
-            background-clip: text;
+div.header div.actions a.action {
+    color:#444;
+    padding:5px;
+    border-radius: 5px;
+    
 }
-div.header div.title div.actions div.button:hover{
-    -webkit-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
-    -moz-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
-    box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+div.header div.actions a.action:hover{
+    color:#ccc;
+    background-color: #444;
 }
+div.header::after{
+    display:block;
+    content:"";
+    clear:both; 
+}
+
+
+
 
 div.body {
     margin: 5px 0px 0 0px;

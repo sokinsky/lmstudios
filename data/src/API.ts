@@ -1,4 +1,5 @@
 import { Context, Request, Response } from ".";
+
 export class API {
 	constructor(context: Context, url: string) {
 		this.Context = context;
@@ -23,6 +24,5 @@ export class API {
 		this.Requests.push(request);
 		return response;
 	}
-	
 
 }

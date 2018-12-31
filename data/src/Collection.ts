@@ -9,10 +9,6 @@ export class Collection<TModel extends LMS.Model> {
             Schema:this.Context.Schema.GetModel(type),
             Repository: <LMS.Repository<TModel>>parentModel.__context.GetRepository(type)
         }
-        this.Filters = {
-            Default: this.generateDefaultFilter(),
-            Additional: []
-        }
     }
     public Parent:{
         Model:LMS.Model,
@@ -26,13 +22,8 @@ export class Collection<TModel extends LMS.Model> {
     public get Context():LMS.Context{
         return this.Parent.Model.__context;
     }
-    public Filters:{
-        Default:Partial<TModel>,
-        Additional:Partial<TModel>[]
-    };
 
     private generateDefaultFilter() : Partial<TModel>{
-        console.log(this.Parent);
         if (this.Parent.Property === undefined)
             throw new Error(`Collection.generateDefaultFilter():Parent.Property was undefined`);
         if (this.Parent.Property.Relationship === undefined)
@@ -55,7 +46,7 @@ export class Collection<TModel extends LMS.Model> {
 	public *[Symbol.iterator]() {  
         if (this.Status===undefined)
             this.Intialize();
-        var items = this.Child.Repository.Local.Search(this.Filters.Default);
+        var items = this.Child.Repository.Local.Search(this.generateDefaultFilter());
         for (const item of items) {
             yield item;
         }
@@ -64,7 +55,7 @@ export class Collection<TModel extends LMS.Model> {
         if (this.Status === undefined)
              this.Intialize();
 
-        var items = this.Child.Repository.Local.Search(this.Filters.Default);
+        var items = this.Child.Repository.Local.Search(this.generateDefaultFilter());
         return items.length;
     }
     public Intialize(){
@@ -75,7 +66,7 @@ export class Collection<TModel extends LMS.Model> {
                 break;
             default:   
                 this.Status = LMS.ServerStatus.Serving;             
-                this.Child.Repository.Search(this.Filters.Default).then(items =>{
+                this.Child.Repository.Search(this.generateDefaultFilter()).then(items =>{
                     this.Status = LMS.ServerStatus.Served;
                 });
                 break;

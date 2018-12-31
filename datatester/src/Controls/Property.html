@@ -1,24 +1,21 @@
 <div class="property">
-    <div class="header">
-        <div class="title" >
-            <div class="toggle" (click)="toggleState()">
-                <div class="button fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}" ></div>
-            </div>
-            <span class="label" (click)="toggleState()">{{Value.Name}}:{{ctlModel.Value[Value.Name]}}</span>
-            <div class="actions">                
-                <div *ngIf="Display.Type === 'Model' && ctlModel.Value[Value.Name] === undefined" class="button fas fa-plus-circle" (click)="addModel()"></div>
-                <div *ngIf="Display.Type === 'Model' && ctlModel.Value[Value.Name] !== undefined" class="button fas fa-edit" title="edit" (click)="editModel()"></div>
-                <div *ngIf="Display.Type === 'Model' && ctlModel.Value[Value.Name] !== undefined" class="button fas fa-exchange-alt" title="change" (click)="selectModel()"></div>
-            </div>
+    <div class="header">      
+        <div class="title" (click)="toggleState()">
+            <a class="toggle fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}"></a>
+            {{property.Name}}: <span class="value">{{parent.model[property.Name]}}</span>
         </div>
-
+        <div class="actions">
+            <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] === undefined" class="action fas fa-plus" (click)="Add()"></a>
+            <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] !== undefined" class="action fas fa-edit" title="edit" (click)="editModel()"></a>
+            <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] !== undefined" class="action fas fa-exchange-alt" title="change" (click)="selectModel()"></a>       
+        </div> 
     </div>
     <div class="body" *ngIf="State=='Open'">
-        <textarea spellcheck="false" *ngIf="Value.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="ctlModel.Value[Value.Name]" [rows]="2" placeholder="{{Value.Name}}"></textarea>
-        <input *ngIf="Value.PropertyType.Name=='Date'" type="date" [(ngModel)]="ctlModel.Value[Value.Name]" placeholder="{{Value.Name}}" />
-        <input *ngIf="Value.PropertyType.Name=='number'" type="number" [(ngModel)]="ctlModel.Value[Value.Name]" placeholder="{{Value.Name}}" />
-        <div *ngIf="Model">
-            <pre>{{Model.toJson()}}</pre>
+        <textarea spellcheck="false" *ngIf="property.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="parent.model[property.Name]" [rows]="2" placeholder="{{property.Name}}"></textarea>
+        <input *ngIf="property.PropertyType.Name=='Date'" type="date" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
+        <input *ngIf="property.PropertyType.Name=='number'" type="number" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
+        <div *ngIf="Display.Type === 'Model'">
+            Json
         </div>
     </div>
     <div class="footer">

@@ -44,7 +44,7 @@ export class Model {
 	public __context:Context;
 	public __schema:Schema.Model;
 	public __controller:Controller<Model>
-	 public Server:{[p in keyof this]:Promise<this[p]>};
+	public Server:{[p in keyof this]:Promise<this[p]>};
 
 	public GetSchema(): Schema.Model{
 		return this.__schema;
@@ -78,6 +78,7 @@ export class Model {
 	}
 	public Undo(property?:Schema.Property){
 		this.__controller.Undo(property);
+
 	}
 }
 

@@ -1,6 +1,6 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, AfterViewInit, Input, ViewChild, ViewChildren, QueryList, forwardRef} from "@angular/core";
 import { Context, Repository, Model, Response, ResponseStatus } from "@lmstudios/data";
-import { RepositoryControl } from "./Repository";
+import { RepositoryControl, ModelControl } from "./";
 import { Data } from "../STA";
 import { RaceOperator } from "rxjs/internal/observable/race";
 
@@ -9,62 +9,74 @@ import { RaceOperator } from "rxjs/internal/observable/race";
     templateUrl:"Context.html",
     styleUrls:["Context.css"]
 })
-export class ContextControl implements OnInit {
+export class ContextControl implements OnInit, AfterViewInit {
 	constructor() {
     }
     public async ngOnInit(){
     }
-    private __value?:Context;
-    public get Value():Context{
-        if (this.__value === undefined) throw new Error(``);
-        return this.__value;
-    }
-    @Input() public set Value(value:Context){
-        this.__value = value;
+    public async ngAfterViewInit(){
     }
 
-    public Display:{
-        Type:string
-    } = { Type:"none" }
+    @ViewChild(forwardRef(()=>ModelControl)) ctlModel?:ModelControl;
+    @ViewChildren(forwardRef(()=>RepositoryControl)) ctlRepositories?:QueryList<RepositoryControl>;
 
-    private __parentItem?:Model;
-    public get ParentItem():Model|undefined{
-        return this.__parentItem;
+    private __context?:Context;
+    public get context():Context{
+        if (this.__context === undefined) throw new Error(``);
+        return this.__context;
     }
-    public set ParentItem(value:Model|undefined){
-        this.__parentItem = value;
+    @Input() public set context(value:Context){
+        this.__context = value;
     }
 
-    private __selectedItem?:Repository<Model>|Model;
+    public SelectedItems:Array<Repository<Model>|Model> = [];
+    public get RootItem():Repository<Model>|Model|undefined{
+        if (this.SelectedItems.length> 0)
+            return this.SelectedItems[0];
+        return undefined;
+    }
     public get SelectedItem():Repository<Model>|Model|undefined{
-        return this.__selectedItem;
+        if (this.SelectedItems.length > 0)
+            return this.SelectedItems[this.SelectedItems.length-1];
+        return undefined;
     }
-    public set SelectedItem(value:Repository<Model>|Model|undefined){
-        this.__selectedItem = value;
-        if (this.__selectedItem !== undefined){
-            if (this.__selectedItem instanceof Repository)
-                this.Display.Type = "Repository";
-            else if (this.__selectedItem instanceof Model)
-                this.Display.Type = "Model";
-            else
-                this.Display.Type = "none";
+    public get PreviousItem():Repository<Model>|Model|undefined{
+        if (this.SelectedItems.length > 1)
+            return this.SelectedItems[this.SelectedItems.length-2]
+        return undefined;
+
+    }
+    public Init(value:Repository<Model>){
+        this.SelectedItems = [];
+        this.SelectedItems.push(value);
+    }
+    public Select(value:Repository<Model>|Model){
+        this.SelectedItems.push(value);
+        if (this.SelectedItem instanceof Model){
+            if (this.ctlModel !== undefined)
+                this.ctlModel.model = this.SelectedItem;
         }
-        console.log(this.Display);
-    }
-    public SaveResponse?:Response;
-    public get SaveResponseStatus():string{
-        if (this.SaveResponse === undefined)
-            return "None";
-        return this.SaveResponse.Status.toString();
+        console.log(this.SelectedItems);
     }
 
 
-    public async saveContext(){
-        if (this.Value !== undefined)
-            this.SaveResponse = await this.Value.SaveChanges();            
+    public Add(){
+        if (this.SelectedItem instanceof Repository){
+            console.log("Add");
+        }
     }
 
 
+    public OK(){
+        if (this.SelectedItem instanceof Model){
+            console.log("OK");
+        }
+    }
+    public Cancel(){
+        if (this.SelectedItem instanceof Model){
+            console.log("Cancel");
+        }
+    }
     public Log(item:any){
         console.log(item);
     }

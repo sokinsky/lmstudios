@@ -13,34 +13,36 @@ export class PropertyControl implements OnInit {
     }
     public async ngOnInit(){
     }
-    public Display:{
-        Type:string
-    } = { Type:"unknown"}
 
-    private __ctlModel?:ModelControl;
-    @Input() public get ctlModel():ModelControl{
-        if (this.__ctlModel === undefined)
+    private __parent?:ModelControl;
+    @Input() public get parent():ModelControl{
+        if (this.__parent === undefined)
             throw new Error(``);
-        return this.__ctlModel;
+        return this.__parent;
     } 
-    public set ctlModel(value:ModelControl){
-        this.__ctlModel = value;
+    public set parent(value:ModelControl){
+        this.__parent = value;
     }
     
-    private __value?:Schema.Property;
-    @Input() public get Value():Schema.Property{
-        if (this.__value === undefined)
+    private __property?:Schema.Property;
+    @Input() public get property():Schema.Property{
+        if (this.__property === undefined)
             throw new Error(``);
-        return this.__value;
+        return this.__property;
     }
-    public set Value(value:Schema.Property){
-        this.__value = value;  
-        if (value.PropertyType instanceof Schema.Model)
-            this.Display.Type = "Model";
-        else if (value.PropertyType.Name === "Collection" && value.PropertyType.GenericTypes !== undefined && value.PropertyType.GenericTypes.length == 1 && value.PropertyType.GenericTypes[0] instanceof Schema.Model)
-            this.Display.Type = "Collection";
+    public set property(value:Schema.Property){
+        this.__property = value;  
+    }
+
+    public get Display():{Type:string}{
+        var result:{Type:string} = {Type:"none"};
+        if (this.property.PropertyType instanceof Schema.Model)
+            result.Type = "Model"
+        else if (this.property.PropertyType.Name === "Collection")
+            result.Type = "Collection"
         else
-            this.Display.Type = "Data";
+            result.Type = "Data";
+        return result;
     }
     public State:string = "Open";
     public toggleState(){
@@ -58,19 +60,19 @@ export class PropertyControl implements OnInit {
     }
 
     public get ChangeStatus():string{
-        if (this.ctlModel.Value.__controller.Status.Change.Properties[this.Value.Name] === undefined)
+        if (this.parent.model.__controller.Status.Change.Properties[this.property.Name] === undefined)
             return "Unchanged";
-        return this.ctlModel.Value.__controller.Status.Change.Properties[this.Value.Name].toString();
+        return this.parent.model.__controller.Status.Change.Properties[this.property.Name].toString();
     }
     public Undo(){
-        this.ctlModel.Value.Undo(this.Value);
+        this.parent.model.Undo(this.property);
     }    
 
-    public addModel(){
-        this.ctlModel.ctlContext.selectRepository()
+    public Add(){
+        var repo = this.parent.model.__context.GetRepository(this.property.PropertyType);
+        this.parent.parent.Select(repo);
     }
     public editModel(){
-        this.ctlModel.selectModel(this.Value.GetValue(this.ctlModel.Value));
     }
     public changeModel(){
 

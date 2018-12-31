@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
-import { Model, Repository, Schema } from "@lmstudios/data";
+import { Model, Repository, Schema, ChangeStatus } from "@lmstudios/data";
 import { ContextControl } from "./Context";
 
 @Component({
@@ -11,83 +11,89 @@ export class ModelControl implements OnInit {
 	constructor() { }
     public async ngOnInit(){
     }
-    private __ctlContext?:ContextControl;
-    public get ctlContext():ContextControl{
-        if (this.__ctlContext === undefined)
+    private __parent?:ContextControl;
+    public get parent():ContextControl{
+        if (this.__parent === undefined)
             throw new Error(``);
-        return this.__ctlContext;
+        return this.__parent;
     }
-    @Input() public set ctlContext(value:ContextControl){
-        this.__ctlContext = value;
+    @Input() public set parent(value:ContextControl){
+        this.__parent = value;
     }
-    private __value?:Model;
-    public get Value():Model{
-        if (this.__value === undefined)
+
+    private __model?:Model;
+    public get model():Model{
+        if (this.__model === undefined)
             throw new Error(``);
-        return this.__value;
+        return this.__model;
     }
-    @Input() public set Value(value:Model){
-        this.__value = value;
+    @Input() public set model(value:Model){
+        this.__model = value;
     }
 
     public get Visible():boolean{
-        return this.__value !== undefined;
+        return (this.__model !== undefined && this.parent.SelectedItem === this.model);
     }
 
-    @Output() public modelSelected:EventEmitter<Model> = new EventEmitter();
-    public selectModel(model:Model){
-        if (this.Selecting !== undefined){
-
+    public OK(){
+        var changeStatus = this.model.__controller.Status.Change.Model;
+        switch (changeStatus){
+            case ChangeStatus.Detached:
+                var repo = this.model.__context.GetRepository(this.model);
+                repo.Add(this.model);
+                this.parent.SelectedItems.pop();
+                break;
+            default:
+                console.log(changeStatus);
+                this.parent.SelectedItems.pop();
+                break;
         }
-        else{
-            this.modelSelected.emit(model);
-        }
-        
     }
-    public Selecting?:{Repository:Repository<Model>, Property:Schema.Property};
+    public Cancel(){
+        var changeStatus = this.model.__controller.Status.Change.Model;
+        switch (changeStatus){
+            case ChangeStatus.Modified:
+                this.model.Undo();
+                break;
+            case ChangeStatus.Detached:
+                this.parent.SelectedItems.pop();
+                break;
+            default:
+                console.log(changeStatus);
+                break;
+        }
+    }
 
     public get ChangeStatus():string {
-        if (this.Value.__controller.Status.Change.Model !== undefined)
-            return this.Value.__controller.Status.Change.Model.toString();
+        var result = this.model.__controller.Status.Change.Model;
+        if (result !== undefined)
+            return result.toString();
         return "";
-    }
-    public get ServerStatus():string{
-        if (this.Value.__controller.Status.Server.Model !== undefined)
-            return this.Value.__controller.Status.Server.Model.toString();
-        return "Unserved";
     }
 
     public Undo(){           
-        this.Value.Undo();
-        console.log(this.Value);
+        this.model.Undo();
+        console.log(this.model);
+
     }
 
     public get dataProperties():Schema.Property[]{
-        if (this.Value === undefined)
+        if (this.model === undefined)
             return [];
-        return this.Value.GetSchema().Properties.filter(x => { return (! (x.PropertyType instanceof Schema.Model) &&  x.PropertyType.Name !== "Collection" )});
+        return this.model.GetSchema().Properties.filter(x => { return (! (x.PropertyType instanceof Schema.Model) &&  x.PropertyType.Name !== "Collection" )});
     }
     public get modelProperties():Schema.Property[]{
-        if (this.Value === undefined)
+        if (this.model === undefined)
             return []
-        return this.Value.GetSchema().Properties.filter(x => { return x.PropertyType instanceof Schema.Model; })
+        return this.model.GetSchema().Properties.filter(x => { return x.PropertyType instanceof Schema.Model; })
     }
     public get collectionProperies():Schema.Property[]{
-        if (this.Value === undefined)
+        if (this.model === undefined)
             return []
-        return this.Value.GetSchema().Properties.filter(x => { return x.PropertyType.Name === "Collection"; })
+        return this.model.GetSchema().Properties.filter(x => { return x.PropertyType.Name === "Collection"; })
     }  
 
     public AddModel(property:Schema.Property){
-        if (this.ctlContext !== undefined){
-            if (this.ctlContext.Value !== undefined){
-                this.Selecting = {
-                    Repository:this.ctlContext.Value.GetRepository(property.PropertyType),
-                    Property:property
-                };
-            }
-        }
-        console.log(this.Selecting);
     }
 
     
