@@ -1,32 +1,5 @@
-<div class="property">
-    <div class="header">      
-        <div class="title" (click)="toggleState()">
-            <a class="toggle fas" [ngClass]="{'fa-angle-down':(State=='Open'), 'fa-angle-right':(State=='Closed')}"></a>
-            {{property.Name}}: 
-            <span *ngIf="Display.Type==='Data'" class="value">{{parent.model[property.Name]}}</span>
-            <span *ngIf="Display.Type==='Model'" class="value">{{parent.model[property.Name]}}</span>
-            <span *ngIf="Display.Type==='Collection'" class="value">{{parent.model[property.Name].length}}</span>
-        </div>
-        <div class="actions">
-            <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] === undefined" class="action fas fa-plus" (click)="Add()"></a>
-            <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] !== undefined" class="action fas fa-edit" title="edit" (click)="editModel()"></a>
-            <a *ngIf="Display.Type === 'Model' && parent.model[property.Name] !== undefined" class="action fas fa-exchange-alt" title="change" (click)="selectModel()"></a>       
-        </div> 
-    </div>
-    <div class="body" *ngIf="State=='Open'">
-        <textarea spellcheck="false" *ngIf="property.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="parent.model[property.Name]" [rows]="2" placeholder="{{property.Name}}"></textarea>
-        <input *ngIf="property.PropertyType.Name=='Date'" type="date" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
-        <input *ngIf="property.PropertyType.Name=='number'" type="number" [(ngModel)]="parent.model[property.Name]" placeholder="{{property.Name}}" />
-        <div *ngIf="Display.Type === 'Model'">
-            Model
-        </div>
-        <div *ngIf="Display.Type === 'Collection'">
-            Collection
-        </div>
-    </div>
-    <div class="footer">
-        <div class="message">
-            <div *ngIf="ChangeStatus !== 'Unchanged'" class="button fas fa-undo" (click)="Undo()"> {{ChangeStatus}}</div>
-        </div>    
-    </div>
-</div>
+<model-property-control *ngIf="Type==='Model'" [ModelControl]=ModelControl [Property]=Property></model-property-control>
+<collection-property-control *ngIf="Type==='Collection'" [ModelControl]=ModelControl [Property]=Property></collection-property-control>
+<data-property-control *ngIf="Type==='Data'" [ModelControl]=ModelControl [Property]=Property></data-property-control>
+
+    

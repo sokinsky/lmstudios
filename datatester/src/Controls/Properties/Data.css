@@ -12,6 +12,7 @@ div.header.open {
     border-radius: 5px 5px 0 0;
 }
 div.header div.title{
+    cursor: pointer;
     color:#444;
     padding:5px;
 }

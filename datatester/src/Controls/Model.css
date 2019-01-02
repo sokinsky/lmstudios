@@ -7,6 +7,7 @@ div.header {
 }
 div.header div.title{
     padding:0;
+    cursor: pointer;
 }
 div.header div.title div.actions{
     float:right;
@@ -14,29 +15,43 @@ div.header div.title div.actions{
 div.header div.title span.label {
     font-weight: bold;
     padding-left:5px;
-    background-color: #000;
-    color: transparent;
-    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
-    -webkit-background-clip: text;
-       -moz-background-clip: text;
-            background-clip: text;
+    color:#444;
 }
-div.header div.title div.actions div.button{
+div.header div.title div.actions a.action{
     border-radius:5px;
     cursor: pointer;
-    padding:2px 4px 2px 2px;
+    padding:5px;
     margin-right:5px;
-    background-color: #000;
-    color: transparent;
-    text-shadow: 0px 2px 3px rgba(255,255,255,0.5);
-    -webkit-background-clip: text;
-       -moz-background-clip: text;
-            background-clip: text;
 }
-div.header div.title div.actions div.button:hover{
-    -webkit-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
-    -moz-box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
-    box-shadow: -2px 0px 2px 0px rgba(0,0,0,0.75);
+div.header div.title div.actions div.action:hover{
+    background-color: #444;
+    color:#ccc;
+}
+div.header div.options {
+    margin:5px 0 0 0;
+    padding:5px 0 0 0;
+    border-top:1px solid #666;
+    text-align:right;
+}
+div.header div.options .option{
+    border-radius:5px;
+    margin: 0 5px 0 0;
+}
+div.header div.options select.option{
+    outline: none;
+    border:none;
+    background-color:transparent;
+    /* -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none; */
+}
+div.header div.options select.option::selection{
+    outline: none;
+    border:none;
+    background-color:transparent;
+    /* -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none; */
 }
 
 div.body {

@@ -1,26 +1,22 @@
 <div *ngIf="Visible">
     <div class="header">
-        <div class="title">            
-            <span class="label" (click)="Log(this.Value)"> {{model.toString()}} </span>
+        <div class="title">        
+            <span class="label">
+                <span>{{Label}}</span>
+            </span>
             <div class="actions">
-                <div class="button fas fa-cog">
+                <div class="action fas fa-cog">
                 </div>
             </div>
         </div>
     </div>
     <div class="body">
-        <div *ngFor="let property of dataProperties" class="property">
-            <data-property-control [parent]=this [property]=property></data-property-control>
-        </div>
-        <div *ngFor="let property of modelProperties" class="property">
-            <model-property-control [parent]=this [property]=property></model-property-control>
-        </div>
-        <div *ngFor="let property of collectionProperties" class="property">
-            <collection-property-control [parent]=this [property]=property></collection-property-control>
+        <div *ngFor="let property of Properties" class="property">
+            <property-control [ModelControl]=this [Property]=property></property-control>
         </div>
     </div>
     <div class="footer">
-        <div *ngIf="ChangeStatus === 'Unchanged'" class="actions">
+        <!-- <div *ngIf="ChangeStatus === 'Unchanged'" class="actions">
             <a class="action fas fa-check" (click)="OK()" title="OK"></a> 
         </div>
         <div *ngIf="ChangeStatus === 'Modified'" class="actions">
@@ -30,7 +26,7 @@
         <div *ngIf="ChangeStatus === 'Detached'" class="actions">
             <a class="action fas fa-undo" (click)="Cancel()" title="Cancel"></a>
             <a class="action fas fa-check" (click)="OK()" title="OK"></a>            
-        </div>  
+        </div>   -->
     </div>
 </div>
     

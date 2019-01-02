@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 import { Model, Repository, Schema, ChangeStatus } from "@lmstudios/data";
-import { ContextControl } from "./Context";
+import { ContextControl, ContextNode } from "./Context";
+import { modelGroupProvider } from "@angular/forms/src/directives/ng_model_group";
 
 @Component({
     selector:"model-control",
@@ -11,30 +12,51 @@ export class ModelControl implements OnInit {
 	constructor() { }
     public async ngOnInit(){
     }
-    private __parent?:ContextControl;
-    public get parent():ContextControl{
-        if (this.__parent === undefined)
+    private __contextControl?:ContextControl;
+    public get ContextControl():ContextControl{
+        if (this.__contextControl === undefined)
             throw new Error(``);
-        return this.__parent;
+        return this.__contextControl;
     }
-    @Input() public set parent(value:ContextControl){
-        this.__parent = value;
+    @Input() public set ContextControl(value:ContextControl){
+        this.__contextControl = value;
     }
-
-    private __model?:Model;
-    public get model():Model{
-        if (this.__model === undefined)
-            throw new Error(``);
-        return this.__model;
-    }
-    @Input() public set model(value:Model){
-        this.__model = value;
-    }
-
     public get Visible():boolean{
-        return (this.__model !== undefined && this.parent.SelectedItem === this.model);
+        if (this.ContextControl.Tree !== undefined){
+            if (this.ContextControl.Tree.Current !== undefined){
+                return (this.ContextControl.Tree.Current.Item instanceof Model);
+            }
+        }
+        return false;
     }
+    public get Model():Model{
+        if (this.ContextControl.Tree !== undefined){
+            if (this.ContextControl.Tree.Current !== undefined){
+                if (this.ContextControl.Tree.Current.Item instanceof Model)
+                    return <Model>this.ContextControl.Tree.Current.Item
+            }
+        }
+        throw new Error(``);
+    }
+    public get Label():string{
+        if (this.ContextControl.Tree !== undefined)
+            return this.generateLabel(this.ContextControl.Tree.Root);
+        throw new Error(``);   
+    }
+    public generateLabel(node:ContextNode, result?:string):string{
+        if (result == undefined)
+            result = "";
 
+        if (node.Item instanceof Model)
+            result += `${node.Item.toString()}.`
+        else if (node.Item instanceof Repository)
+            result += `${node.Item.Name}.`
+
+        if (node.Child === undefined)
+            return result.replace(/\.$/, "");
+        else
+            return this.generateLabel(node.Child, result);
+    }
     public OK(){
 
     }
@@ -43,33 +65,23 @@ export class ModelControl implements OnInit {
     }
 
     public get ChangeStatus():string {
-        var result = this.model.__controller.Status.Change.Model;
+        var result = this.Model.__controller.Status.Change.Model;
         if (result !== undefined)
             return result.toString();
         return "";
     }
 
     public Undo(){           
-        this.model.Undo();
+        this.Model.Undo();
     }
 
-    public get dataProperties():Schema.Property[]{
-        if (this.model === undefined)
+    public get Properties():Schema.Property[]{
+        if (this.Model === undefined)
             return [];
-        return this.model.GetSchema().Properties.filter(x => { return (! (x.PropertyType instanceof Schema.Model) &&  x.PropertyType.Name !== "Collection" )});
-    }
-    public get modelProperties():Schema.Property[]{
-        if (this.model === undefined)
-            return []
-        return this.model.GetSchema().Properties.filter(x => { return x.PropertyType instanceof Schema.Model; })
-    }
-    public get collectionProperties():Schema.Property[]{
-        if (this.model === undefined)
-            return []
-        return this.model.GetSchema().Properties.filter(x => { return x.PropertyType.Name === "Collection"; })
-    }  
-
-    public AddModel(property:Schema.Property){
+        var result = this.Model.GetSchema().Properties;
+        // result = result.filter(x => {return ! (x.PropertyType instanceof Schema.Model)});
+        // result = result.filter(x => {return x.PropertyType.Name !== "Collection"});
+        return result;
     }
 
     
