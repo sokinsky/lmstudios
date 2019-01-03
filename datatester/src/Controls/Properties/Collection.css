@@ -49,14 +49,12 @@ div.header::after{
 
 
 
-div.body {
-    
+div.body {    
     background-color: #ededed;
     -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
 }
-
 div.footer {
     font-size:8pt;
     background-color: #ededed;
@@ -74,7 +72,7 @@ div.footer {
 div.footer div.messages {
     float:left;
 }
-div.footer div.messages a.message{
+div.footer div.messages div.message{
     padding:5px;
     color:#444;
 }
@@ -97,7 +95,9 @@ div.footer::after{
     clear:both; 
 }
 
-
+table {
+    padding:10px 0;
+}
 table thead {
     margin:0 0 5px 0;
 }

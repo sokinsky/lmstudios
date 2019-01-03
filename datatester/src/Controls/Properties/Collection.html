@@ -1,6 +1,6 @@
 <div class="property">
         <div class="header" [ngClass]="{'open':ToggleState==='Open'}">      
-            <div class="title">
+            <div class="title" (click)="Toggle()">
                 <a class="toggle fas" [ngClass]="{'fa-angle-down':(ToggleState=='Open'), 'fa-angle-right':(ToggleState=='Closed')}"></a>
                 {{Property.Name}}
             </div>
@@ -24,7 +24,8 @@
             </table>
         </div>
         <div class="footer" *ngIf="ToggleState==='Open'">
-            <div class="messages">                
+            <div class="messages">  
+                <div class="message">{{Table.Models.length}} item(s) displayed</div>              
             </div>
             <div class="actions">
                 <a class="action fas fa-plus" (click)="Add()"></a>

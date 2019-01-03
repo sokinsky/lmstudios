@@ -8,7 +8,16 @@ import { ModelControl, PropertyControl } from "../";
     templateUrl:"Data.html",
     styleUrls:["Data.css"]
 })
-export class DataPropertyControl extends PropertyControl implements OnInit {
-    public async ngOnInit(){
+export class DataPropertyControl extends PropertyControl {
+    public propertyChanged(value:Schema.Property){
+        if (value.Required){
+            this.ToggleState = 'Open';
+            if (value === value.Model.PrimaryKeyProperty){
+                this.ToggleState = 'Locked'
+            }
+        }
+        else{
+            this.ToggleState = 'Closed';
+        }
     }
 }

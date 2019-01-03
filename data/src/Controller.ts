@@ -25,6 +25,14 @@ export class Controller<TModel extends LMS.Model> {
 		Pending: Partial<TModel>,
 		Proxy: TModel
 	}
+	public Error?:{
+		Message?:string,
+		Description?:string,
+		Properties?:{[name:string]:{
+			Message?:string,
+			Description?:string}
+		}
+	};
 	public get Actual(): { Model:TModel, Data:Partial<TModel> }{
 		return this.Values.Actual;
 	}
@@ -327,5 +335,21 @@ export class Controller<TModel extends LMS.Model> {
 		}
 		return undefined;
 	
+	}
+
+	public Validate(property?:LMS.Schema.Property){
+		var propertyErrors:{[name:string]:{Message?:string, Description?:string}}={};
+		if (property === undefined){
+			for (var p of this.Schema.Properties){
+				this.Validate(p);
+			}
+		}
+		else{			
+			if (property.Required && property.GetValue(this.Actual.Model) === undefined)
+				propertyErrors[property.Name] = {Message:"Required.", Description:`Please provide a value for ${property.Name}`};				
+		}
+
+		if (propertyErrors.length > 0)
+			this.Error
 	}
 }

@@ -100,12 +100,33 @@ export class ModelControl implements OnInit {
 
 
     public get Properties():Schema.Property[]{
-        if (this.Model === undefined)
-            return [];
-        var result = this.Model.GetSchema().Properties;
-        // result = result.filter(x => {return ! (x.PropertyType instanceof Schema.Model)});
-        // result = result.filter(x => {return x.PropertyType.Name !== "Collection"});
-        return result;
+        var properties:Schema.Property[] = [];
+        var keyProperties = this.Model.GetSchema().PrimaryKey.Properties;
+        for (var keyProperty of keyProperties){
+            if (! properties.find(x => {return x === keyProperty}))
+                properties.push(keyProperty);
+        }
+        var dataProperties = this.Model.GetSchema().Properties.filter(x => { return x.Relationship === undefined && x.References === undefined});
+        for (var dataProperty of dataProperties){
+            if (! properties.find(x => { return x === dataProperty}))
+                properties.push(dataProperty);
+        }
+        var referenceProperties = this.Model.GetSchema().Properties.filter(x => { return x.Relationship === undefined && x.References !== undefined});
+        for (var referenceProperty of referenceProperties){
+            if (! properties.find(x => { return x === referenceProperty}))
+                properties.push(referenceProperty);
+        }
+        var modelProperties = this.Model.GetSchema().Properties.filter(x => { return x.PropertyType instanceof Schema.Model});
+        for (var navProperty of modelProperties){
+            if (! properties.find(x => { return x === navProperty}))
+                properties.push(navProperty);
+        }
+        var collectionProperties = this.Model.GetSchema().Properties.filter(x => { return x.PropertyType.Name === "Collection" });
+        for (var collectionProperty of collectionProperties){
+            if (! properties.find(x => { return x === collectionProperty}))
+                properties.push(collectionProperty);
+        }
+        return properties
     }
 
     

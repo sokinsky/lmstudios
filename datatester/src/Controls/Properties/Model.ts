@@ -8,6 +8,10 @@ import { ContextControl, ModelControl, ModelTree, ModelNode, PropertyControl } f
     styleUrls:["Model.css"]
 })
 export class ModelPropertyControl extends PropertyControl {
+    constructor(){
+        super();
+        this.ToggleState = "Closed";
+    }
     public Add(){
         this.ActiveNode.Add(this.Property);
     }

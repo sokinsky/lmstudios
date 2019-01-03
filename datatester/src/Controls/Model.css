@@ -67,6 +67,9 @@ div.footer{
 div.footer div.messages{
     float:left;
 }
+div.footer div.messages div.message{
+    padding:5px 0 5px 5px;
+}
 div.footer div.actions {
     float:right;
     padding:2px 5px 2px 0;

@@ -9,7 +9,9 @@ import { markParentViewsForCheckProjectedViews } from "@angular/core/src/view/ut
     styleUrls:["Collection.css"]
 })
 export class CollectionPropertyControl extends PropertyControl {
-    public async ngOnInit(){
+    constructor(){
+        super();
+        this.ToggleState = 'Closed';
     }
     public get Table():{Properties:Schema.Property[], Models:Model[] }{
         var properties:Schema.Property[] = [];

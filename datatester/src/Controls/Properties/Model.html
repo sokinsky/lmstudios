@@ -1,16 +1,16 @@
 <div class="property">
     <div class="header" [ngClass]="{'open':ToggleState==='Open'}">      
-        <div class="title">
+        <div class="title" (click)="Toggle()">
             <a class="toggle fas" [ngClass]="{'fa-angle-down':(ToggleState=='Open'), 'fa-angle-right':(ToggleState=='Closed')}"></a>
             {{Property.Name}}: 
             <span class="value">{{ActiveModel[Property.Name]}}</span>
         </div>
-        <div class="actions" *ngIf="ToggleState==='Closed' && Mmodel[Property.Name] === undefined">
+        <div class="actions" *ngIf="ToggleState==='Closed' && ActiveModel[Property.Name] === undefined">
             <a *ngIf="ActiveModel[Property.Name] === undefined" class="action fas fa-plus"></a>
         </div>
-        <div class="actions" *ngIf="ToggleState==='Closed' && Model[Property.Name] !== undefined">
+        <div class="actions" *ngIf="ToggleState==='Closed' && ActiveModel[Property.Name] !== undefined">
             <a *ngIf="ActiveModel[Property.Name] !== undefined" class="action fas fa-edit" title="edit"></a>
-            <a *ngIf="ActiveModel[property.Name] !== undefined" class="action fas fa-exchange-alt" title="change"></a>       
+            <a *ngIf="ActiveModel[Property.Name] !== undefined" class="action fas fa-exchange-alt" title="change"></a>       
         </div> 
     </div>
     <div class="body" *ngIf="ToggleState==='Open'">

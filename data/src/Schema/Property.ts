@@ -17,6 +17,9 @@ export class Property {
         if (data.PropertyType === undefined)
             throw new Error(`Property.Initialize():PropertyType is required`);
         this.PropertyType = Type.GetType(data.PropertyType);
+        if (data.Required !== undefined){
+            this.Required = data.Required;
+        }
         if (data.Optional !== undefined){
             if (this.Optional === undefined)
                 this.Optional = [];
@@ -84,6 +87,7 @@ export class Property {
     public Model:Model;
     public Name:string;
     public PropertyType:Type;
+    public Required:boolean = false;
 
     public Principal?:Property;
     public Optional?:Property[];

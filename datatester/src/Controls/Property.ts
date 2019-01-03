@@ -26,7 +26,13 @@ export class PropertyControl {
         return this.__property;
     }
     @Input() public set Property(value:Schema.Property){
-        this.__property = value;  
+        if (this.__property !== value){
+            this.__property = value; 
+            this.propertyChanged(value);
+        }             
+    }
+    public propertyChanged(value:Schema.Property){
+
     }
     public get ActiveNode():ModelNode{
         if (this.ModelControl.ContextControl.SelectedModel !== undefined)
@@ -40,6 +46,16 @@ export class PropertyControl {
 
 
     public ToggleState:string = "Open";
+    public Toggle(){
+        switch (this.ToggleState){
+            case "Open":
+                this.ToggleState = "Closed";
+                break;
+            case "Closed":
+                this.ToggleState = "Open";
+                break;
+        }
+    }
     public get ChangeState():string {
         var propertyState = this.ModelControl.Model.__controller.Status.Change.Properties[this.Property.Name];
         if (propertyState === undefined)
