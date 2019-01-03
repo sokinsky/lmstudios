@@ -97,6 +97,11 @@ div.footer {
 div.footer div.messages {
     float:left;
 }
+div.footer div.messages span.message{
+    padding:50px;
+    margin:0 0 0 5px;
+    color:#444;
+}
 div.footer div.actions {
     float:right;
 }

@@ -64,7 +64,11 @@ div.footer{
     background-color:#ccc;
     color:#444;   
 }
+div.footer div.messages{
+    float:left;
+}
 div.footer div.actions {
+    float:right;
     padding:2px 5px 2px 0;
     text-align:right;
 }
@@ -76,4 +80,9 @@ div.footer div.actions a.action{
 div.footer div.actions a.action:hover{
     color:#ccc;
     background-color:#444;
+}
+div.footer::after{
+    display:block;
+    content:"";
+    clear:both; 
 }

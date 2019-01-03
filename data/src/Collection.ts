@@ -49,6 +49,15 @@ export class Collection<TModel extends LMS.Model> {
         return this.Child.Repository.Local.Search(this.generateDefaultFilter());
     }
 
+    public Add(){
+        var added = this.Child.Repository.Add();
+        var properties = this.Child.Schema.Properties.filter(x => {return x.PropertyType === this.Parent.Model.GetSchema()})
+        for (var property of properties){
+            property.SetValue(added, this.Parent.Model);
+        }
+        return added;
+    }
+
 	public *[Symbol.iterator]() {  
         if (this.Status===undefined)
             this.Intialize();
@@ -69,11 +78,22 @@ export class Collection<TModel extends LMS.Model> {
                 break;
             case LMS.ServerStatus.Serving:
                 break;
-            default:   
-                this.Status = LMS.ServerStatus.Serving;             
-                this.Child.Repository.Search(this.generateDefaultFilter()).then(items =>{
-                    this.Status = LMS.ServerStatus.Served;
-                });
+            default:                        
+                var filter = this.generateDefaultFilter();
+                var server = true;
+                for (var key in filter){
+                    var property = this.Child.Schema.GetProperty(key);
+                    if (property !== undefined){
+                        if (typeof(filter[key]) !== property.PropertyType.Name)
+                            server = false;
+                    }
+                }      
+                if (server){
+                    this.Status = LMS.ServerStatus.Serving;
+                    this.Child.Repository.Search(filter).then(items =>{
+                        this.Status = LMS.ServerStatus.Served;
+                    });
+                }  
                 break;
         }
     }

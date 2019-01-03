@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 import { Repository, Model, Schema } from "@lmstudios/data";
-import { ContextControl, ContextNode } from "./Context";
+import { ContextControl, ModelTree, ModelNode } from "./";
+import { ModelPropertyControl } from "./Properties";
 
 @Component({
     selector:"repository-control",
@@ -36,22 +37,43 @@ export class RepositoryControl implements OnInit {
         return result;
     }
 
-    public Create(){
-
+    public get ActiveNode():ModelNode|undefined{
+        if (this.ContextControl.SelectedModel !== undefined)
+            return this.ContextControl.SelectedModel.ActiveNode;
+        return undefined;
     }
-    public Select(model:Model){
-        if (this.ContextControl.Tree !== undefined)
-            this.ContextControl.Tree.Current.Child = new ContextNode(model);
+    public get ActiveModel():Model|undefined{
+        if (this.ActiveNode !== undefined)
+            return this.ActiveNode.Model;
+        return undefined;
     }
-
-
-    public get Visible():boolean{
-        if (this.ContextControl.Tree !== undefined){
-            if (this.ContextControl.Tree.Current !== undefined){
-                return (this.ContextControl.Tree.Current.Item === this.Repository);
+    public get Visible():boolean {
+        if (this.ActiveNode !== undefined){
+            if (this.ActiveNode.Property === undefined) return false;
+            else{
+                if (this.ActiveNode.Property.PropertyType.Name === "Collection" && this.ActiveNode.Property.PropertyType.GenericTypes !== undefined)
+                    return (this.ActiveNode.Property.PropertyType.GenericTypes[0] === this.Repository.Schema);
+                else if (this.ActiveNode.Property.PropertyType instanceof Schema.Model)
+                    return (this.ActiveNode.Property.PropertyType === this.Repository.Schema);
+                else
+                    return false;
             }
         }
-        return false;
+        return this.ContextControl.SelectedRepository === this.Repository;
+    }
+    public Select(model:Model){
+        if (this.ActiveNode !== undefined){
+            if (this.ActiveNode.Property !== undefined){
+                this.ActiveNode.Property.SetValue(this.ActiveNode.Model, model);
+                this.ActiveNode.Property = undefined;
+            }
+        }
+        else{
+            this.ContextControl.SelectedModel = new ModelTree(model);
+        }
+    }
+    public Create(){
+        this.ContextControl.SelectedModel = new ModelTree(this.Repository.Add());
     }
 
     public Log(item:any){

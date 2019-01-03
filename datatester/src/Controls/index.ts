@@ -1,5 +1,5 @@
 export { ContextControl } from "./Context";
-export { ModelControl } from "./Model";
+export { ModelControl, ModelTree, ModelNode } from "./Model";
 export { RepositoryControl } from "./Repository";
 export { PropertyControl } from "./Property";
 

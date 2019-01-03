@@ -2,16 +2,16 @@
         <div class="header" [ngClass]="{'open':ToggleState==='Open'}">      
             <div class="title">
                 <a class="toggle fas" [ngClass]="{'fa-angle-down':(ToggleState==='Open'), 'fa-angle-right':(ToggleState==='Closed'), 'fa-lock':(ToggleState==='Locked')}"></a>
-                {{Property.Name}}:<span class="value">{{Model[Property.Name]}}</span>
+                {{Property.Name}}:<span class="value">{{ActiveModel[Property.Name]}}</span>
             </div>
         </div>
         <div class="body" *ngIf="ToggleState=='Open'">
-            <textarea spellcheck="false" *ngIf="Property.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="Model[Property.Name]" [rows]="2" placeholder="{{Property.Name}}"></textarea>
-            <input *ngIf="Property.PropertyType.Name=='Date'" type="date" [(ngModel)]="Model[Property.Name]" placeholder="{{Property.Name}}" />
-            <input *ngIf="Property.PropertyType.Name=='number'" type="number" [(ngModel)]="Model[Property.Name]" placeholder="{{Property.Name}}" />
+            <textarea spellcheck="false" *ngIf="Property.PropertyType.Name=='string'" type="text" spellchck=false [(ngModel)]="ActiveModel[Property.Name]" [rows]="2" placeholder="{{Property.Name}}"></textarea>
+            <input *ngIf="Property.PropertyType.Name=='Date'" type="date" [(ngModel)]="ActiveModel[Property.Name]" placeholder="{{Property.Name}}" />
+            <input *ngIf="Property.PropertyType.Name=='number'" type="number" [(ngModel)]="ActiveModel[Property.Name]" placeholder="{{Property.Name}}" />
         </div>
         <div class="footer" *ngIf="ToggleState=='Open'">
-            <div class="message">
+            <div class="messages">
                 {{ChangeState}}
             </div>    
             <div class="actions">

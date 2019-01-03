@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
 import { Repository, Collection, Model, Schema } from "@lmstudios/data";
-import { ModelControl } from "./Model";
+import { ModelControl, ModelTree, ModelNode, ContextControl } from "./";
 import { ThrowStmt } from "@angular/compiler";
 
 @Component({
@@ -28,10 +28,16 @@ export class PropertyControl {
     @Input() public set Property(value:Schema.Property){
         this.__property = value;  
     }
-
-    public get Model():Model{
-        return this.ModelControl.Model;
+    public get ActiveNode():ModelNode{
+        if (this.ModelControl.ContextControl.SelectedModel !== undefined)
+            return this.ModelControl.ContextControl.SelectedModel.ActiveNode;
+        throw new Error(``);
     }
+    public get ActiveModel():Model{
+        return this.ActiveNode.Model;
+    }
+
+
 
     public ToggleState:string = "Open";
     public get ChangeState():string {

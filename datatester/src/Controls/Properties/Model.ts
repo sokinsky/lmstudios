@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
 import { Repository, Model, Schema } from "@lmstudios/data";
-import { ModelControl, PropertyControl } from "../";
+import { ContextControl, ModelControl, ModelTree, ModelNode, PropertyControl } from "../";
 
 @Component({
     selector:"model-property-control",
@@ -8,6 +8,10 @@ import { ModelControl, PropertyControl } from "../";
     styleUrls:["Model.css"]
 })
 export class ModelPropertyControl extends PropertyControl {
-    constructor(){super();console.log(this);}
-
+    public Add(){
+        this.ActiveNode.Add(this.Property);
+    }
+    public Select(){
+        this.ActiveNode.Property = this.Property;
+    }
 }

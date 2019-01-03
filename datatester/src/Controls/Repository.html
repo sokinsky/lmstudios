@@ -1,6 +1,7 @@
 <div *ngIf="Visible">
     <div class="header">
-        <div class="title">
+        <div class="title" *ngIf="ActiveNode === undefined">
+            {{Repository.Name}}
         </div>
         <div class="actions">
             <a class="action fas fa-search"></a>

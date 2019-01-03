@@ -1,8 +1,6 @@
 import { Component, OnInit, AfterViewInit, Input, ViewChild, ViewChildren, QueryList, forwardRef, SchemaMetadata} from "@angular/core";
-import { Context, Repository, Model, Response, ResponseStatus, Schema } from "@lmstudios/data";
-import { RepositoryControl, ModelControl } from "./";
-import { Data } from "../STA";
-import { RaceOperator } from "rxjs/internal/observable/race";
+import { Context, Collection, Repository, Model, Response, ResponseStatus, Schema } from "@lmstudios/data";
+import { RepositoryControl, ModelControl, ModelTree, ModelNode } from "./";
 
 @Component({
     selector:"context-control",
@@ -29,54 +27,13 @@ export class ContextControl implements OnInit, AfterViewInit {
         this.__context = value;
     }
 
-    public Tree?:ContextTree;
-    public Select(value:Repository<Model>|Model){
-        this.Tree = new ContextTree(value);
-    }
-    public Add(){
-    }
-
-
-    public OK(){
-    }
-    public Cancel(){
+    public SelectedRepository?:Repository<Model>;
+    public SelectedModel?:ModelTree;
+    public Select(repository:Repository<Model>|undefined){
+        this.SelectedRepository = repository;
+        this.SelectedModel = undefined;
     }
     public Log(item:any){
         console.log(item);
-    }
-}
-export class ContextTree {
-    constructor(item:Model|Repository<Model>, action?:string){
-        this.Root = new ContextNode(item, action);
-    }
-    public Root:ContextNode;
-    public get Current():ContextNode{
-        var result:ContextNode = this.Root;
-        while (result.Child !== undefined){
-            result = result.Child;
-        }
-        return result;
-    }
-}
-
-export class ContextNode {
-    constructor(item:Model|Repository<Model>, action?:string){
-        this.Item = item;
-        this.Action = action;
-    }
-    public Item:Model|Repository<Model>;
-    public Action?:string;
-    public Property?:Schema.Property;
-    
-    public Parent?:ContextNode;
-    
-    private __child?:ContextNode;
-    public get Child():ContextNode|undefined{
-        return this.__child;
-    }
-    public set Child(value:ContextNode|undefined){
-        if (value !== undefined)
-            value.Parent = this;
-        this.__child = value;
     }
 }

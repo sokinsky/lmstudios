@@ -38,7 +38,9 @@ export class Model {
 	 	if (createController !== undefined)
 	 		this.__controller = new (createController())(context, this, proxy);	
 	 	else
-	 		this.__controller = new Controller(context, this, proxy);	
+			 this.__controller = new Controller(context, this, proxy);
+		if (this.__controller.Schema.PrimaryKey.Properties.length === 1)
+			this.__controller.Schema.PrimaryKey.Properties[0].SetValue(this.__controller.Values.Actual.Data, this.__controller.ID);
 	 	return proxy;
 	}
 	public __context:Context;
@@ -57,6 +59,11 @@ export class Model {
 	// 	};
 
 	// }
+
+	public Remove(property?:Schema.Property){
+		var repository = this.__controller.Context.GetRepository(this.GetSchema());
+		repository.Remove(this);
+	}
 
 	public get PrimaryKey():any{
 		return this.__controller.PrimaryKey;
@@ -79,6 +86,10 @@ export class Model {
 	public Undo(property?:Schema.Property){
 		this.__controller.Undo(property);
 
+	}
+
+	public async Duplicate():Promise<Model|undefined>{
+		return this.__controller.Duplicate();
 	}
 }
 

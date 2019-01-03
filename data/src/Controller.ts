@@ -42,8 +42,8 @@ export class Controller<TModel extends LMS.Model> {
 		return this.Actual.Model.GetSchema();
 	}
 	public get PrimaryKey():any{
-		var keyProperty = this.Schema.PrimaryKey
-		return keyProperty.Properties[0].GetValue(this.Actual.Model);
+		var keyProperty = this.Schema.PrimaryKey.Properties[0];
+		return this.GetValue(keyProperty);
 	}
 
 	public GetValue(property:string|LMS.Schema.Property|undefined):any{	
@@ -53,8 +53,15 @@ export class Controller<TModel extends LMS.Model> {
 			return this.GetValue(this.Schema.GetProperty(property));
 		if (property instanceof LMS.Schema.Property){
 			if (property.PropertyType instanceof LMS.Schema.Model)
-				return this.getModel(property);		
-			return property.GetValue(this.Actual.Model);
+				return this.getModel(property);	
+			
+			var result = property.GetValue(this.Actual.Model);
+			if (result === undefined){
+				if (property === this.Schema.PrimaryKey.Properties[0]){
+					result = this.ID;
+				}
+			}
+			return result;
 		}
 	}
 	public async GetValueAsync(property:string|LMS.Schema.Property|undefined):Promise<any>{
@@ -98,7 +105,6 @@ export class Controller<TModel extends LMS.Model> {
 	public SetValue(property:string|LMS.Schema.Property|undefined, value:any, fromServer?:boolean){				
 		if (property === undefined)
 			return;
-
 		if (typeof(property) === "string")
 			this.SetValue(this.Schema.GetProperty(property), value, fromServer);
 
@@ -278,5 +284,48 @@ export class Controller<TModel extends LMS.Model> {
 		if (this.PrimaryKey === undefined)
 			return `${this.Schema.Name}(...)`;
 		return `${this.Schema.Name}(${this.PrimaryKey})`
+	}
+
+	public async Duplicate():Promise<LMS.Model|undefined>{
+		var repository = this.Context.GetRepository(this.Schema);
+		var filters:{Server:boolean, Value:any}[] = [];
+		for (var key of this.Schema.AdditionalKeys){
+			var item = {Server:true, Value:{}};
+			for (var property of key.Properties){				
+				var value = property.GetValue(this.Values.Actual.Data);				
+				property.SetValue(item.Value, value);
+				if (typeof(value) !== property.PropertyType.Name)
+				item.Server = false;
+			}
+			filters.push(item);
+		}
+
+		var duplicates;
+		for (var filter of filters){
+			duplicates = repository.Local.Search(filter.Value);
+			if (duplicates.length > 0)
+				duplicates = duplicates.filter(x => { return x !== this.Values.Proxy; });
+			switch (duplicates.length){
+				case 0: 
+					break;
+				default:
+					return duplicates[0];
+			}
+		}
+		for (var filter of filters){
+			if (filter.Server){
+				duplicates = await repository.Server.Search(filter.Value);
+				if (duplicates.length > 0)
+					duplicates = duplicates.filter(x => { return x !== this.Values.Proxy; });
+				switch (duplicates.length){
+					case 0:
+						break;
+					default:
+						return duplicates[0];
+				}
+			}
+		}
+		return undefined;
+	
 	}
 }

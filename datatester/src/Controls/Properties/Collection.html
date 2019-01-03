@@ -17,7 +17,7 @@
                 <tbody>
                     <tr *ngFor="let model of Table.Models" >
                         <td *ngFor="let property of Table.Properties">
-                             {{model[property.Name]}}
+                            {{model.__controller.Values.Actual.Data[property.Name]}}
                         </td>
                     </tr>
                 </tbody>

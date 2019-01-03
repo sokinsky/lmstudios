@@ -1,4 +1,5 @@
 import * as LMS from "./";
+import { ChangeStatus } from "./ChangeEntry";
 export class Repository<TModel extends LMS.Model> {
 	constructor(context:LMS.Context, model: (new (...args: any[]) => TModel)) {
 		var fullName = ((<any>model).prototype).model.FullName;
@@ -56,6 +57,9 @@ export class Repository<TModel extends LMS.Model> {
 			var exists = this.Items.find(x => { return x === value});
 			if (exists === undefined){
 				this.Items.push(value);
+				if (value.__controller.Status.Change.Model === ChangeStatus.Detached)
+					value.__controller.Status.Change.Model = ChangeStatus.Added;
+				
 			}
 			
 			if (fromServer === true)
@@ -65,6 +69,11 @@ export class Repository<TModel extends LMS.Model> {
 			return value;
 		}	
 		throw Error(``);
+	}
+	public Remove(value:TModel){		
+		var index = this.Items.indexOf(value);
+		if (index >= 0)
+			this.Items.splice(index, 1);
 	}
 
 	public async Select(value:Partial<TModel>):Promise<TModel|undefined> {
