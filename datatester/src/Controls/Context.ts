@@ -33,6 +33,10 @@ export class ContextControl implements OnInit, AfterViewInit {
         this.SelectedRepository = repository;
         this.SelectedModel = undefined;
     }
+
+    public Save(){
+        this.context.SaveChanges();
+    }
     public Log(item:any){
         console.log(item);
     }

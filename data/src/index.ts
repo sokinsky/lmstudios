@@ -4,6 +4,7 @@ export { ChangeTracker } from "./ChangeTracker";
 export { Collection } from "./Collection";
 export { Context } from "./Context";
 export { Controller } from "./Controller";
+export { Error } from "./Error";
 export { Message } from "./Message";
 export { Model } from "./Model";
 export { Repository } from "./Repository";

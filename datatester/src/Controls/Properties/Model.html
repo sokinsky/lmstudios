@@ -18,7 +18,7 @@
     </div>
     <div class="footer" *ngIf="ToggleState==='Open'">
         <div class="messages">
-            <span class="message">{{ChangeState}}</span>
+            <div class="message">{{ChangeState}}</div>
         </div>
         <div class="actions" *ngIf="ActiveModel[Property.Name] === undefined">
             <a class="action fas fa-exchange-alt" title="Select" (click)="Select()"></a>

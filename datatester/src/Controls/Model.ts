@@ -40,6 +40,10 @@ export class ModelControl implements OnInit {
         throw new Error(``);
     }
     public async OK(){
+        this.ActiveNode.Model.Validate();
+        if (this.ActiveNode.Model.__controller.Error !== undefined)
+            return;
+
         switch (this.ChangeState){
             case "Added":
                 var repository = this.ActiveNode.Model.__controller.Context.GetRepository(this.ActiveNode.Model.GetSchema());

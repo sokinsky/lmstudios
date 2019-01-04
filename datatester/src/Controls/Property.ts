@@ -43,6 +43,13 @@ export class PropertyControl {
         return this.ActiveNode.Model;
     }
 
+    public get Error():any{
+        if (this.ActiveModel.__controller.Error !== undefined){
+            if (this.ActiveModel.__controller.Error.InnerErrors !== undefined)
+                return (this.ActiveModel.__controller.Error.InnerErrors[this.Property.Name] !== undefined);
+        }
+    }
+
 
 
     public ToggleState:string = "Open";

@@ -1,13 +1,14 @@
-import { Decorators, Collection } from "@lmstudios/data";
-import { Model } from "../Model";
-import { Models } from "../";
+import * as LMS from "@lmstudios/data";
+import { Model as Base } from "../Model";
+import { User, PersonEmail } from "./";
 
-@Decorators.Model("STA.Data.Models.Person")
-export class Person extends Model {
+
+@LMS.Decorators.Model("STA.Data.Models.Person")
+export class Person extends Base {
     public FirstName?:string;
     public LastName?:string;
     public DOB?:Date;
-    public User?:Models.User|Partial<Models.User>;
+    public User?:User|Partial<User>;
 
-    public PeopleEmails:Collection<Models.PersonEmail> = new Collection(this, Models.PersonEmail);
+    public PeopleEmails:LMS.Collection<PersonEmail> = new LMS.Collection(this, PersonEmail);
 }

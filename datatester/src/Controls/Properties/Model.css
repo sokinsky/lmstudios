@@ -97,8 +97,8 @@ div.footer {
 div.footer div.messages {
     float:left;
 }
-div.footer div.messages span.message{
-    padding:50px;
+div.footer div.messages div.message{
+    padding:5px;
     margin:0 0 0 5px;
     color:#444;
 }

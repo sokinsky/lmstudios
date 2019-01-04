@@ -25,14 +25,8 @@ export class Controller<TModel extends LMS.Model> {
 		Pending: Partial<TModel>,
 		Proxy: TModel
 	}
-	public Error?:{
-		Message?:string,
-		Description?:string,
-		Properties?:{[name:string]:{
-			Message?:string,
-			Description?:string}
-		}
-	};
+	public Error?:LMS.Error;
+
 	public get Actual(): { Model:TModel, Data:Partial<TModel> }{
 		return this.Values.Actual;
 	}
@@ -338,18 +332,39 @@ export class Controller<TModel extends LMS.Model> {
 	}
 
 	public Validate(property?:LMS.Schema.Property){
-		var propertyErrors:{[name:string]:{Message?:string, Description?:string}}={};
 		if (property === undefined){
-			for (var p of this.Schema.Properties){
+			this.Error = new LMS.Error();
+			this.Error.InnerErrors = {};
+			var properties = this.Schema.Properties.filter(x => { return x.Relationship === undefined});
+			for (var p of properties){
 				this.Validate(p);
+			}
+
+			
+			if (this.Error !== undefined && this.Error.InnerErrors !== undefined && Object.keys(this.Error.InnerErrors).length === 0){
+				console.log(this.Error);
+				this.Error = undefined;				
+			}				
+			else{
+				this.Error.Message = "Invalid";
+				this.Error.Description = "See InnerErrors";
+				console.log(this.Error);
 			}
 		}
 		else{			
-			if (property.Required && property.GetValue(this.Actual.Model) === undefined)
-				propertyErrors[property.Name] = {Message:"Required.", Description:`Please provide a value for ${property.Name}`};				
+			if (property === this.Schema.PrimaryKeyProperty)
+				return;
+			var value = property.GetValue(this.Actual.Model);
+			if (property.Required){
+				if (value === undefined){
+					if (this.Error === undefined)
+						this.Error = new LMS.Error();
+					if (this.Error.InnerErrors == undefined)
+						this.Error.InnerErrors = {};
+					this.Error.InnerErrors[property.Name] = {Message:"Required.", Description:`Please provide a value for ${property.Name}`};
+				}					
+			}								
 		}
-
-		if (propertyErrors.length > 0)
-			this.Error
+			
 	}
 }

@@ -19,5 +19,6 @@ export class DataPropertyControl extends PropertyControl {
         else{
             this.ToggleState = 'Closed';
         }
+        
     }
 }

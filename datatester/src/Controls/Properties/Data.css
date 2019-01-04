@@ -1,7 +1,7 @@
 div.property {
     margin:10px 0 0 0;
 }
-div.header {
+div.property div.header {
     border-radius: 5px;
     background-color: #ccc;
     -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
@@ -22,10 +22,6 @@ div.header div.title div.toggle {
 div.header div.title span.value {
     font-weight: bold;
 }
-
-
-
-
 div.body {
     padding: 0 5px;
     background-color: #ededed;
@@ -33,16 +29,31 @@ div.body {
     -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
 }
+
+div.property.error div.header {
+    background-color:#c00;
+}
+div.property.error div.header div.title{
+    cursor: pointer;
+    color:#eff;
+    padding:5px;
+}
+
+
+
+
+
+
+
 div.body textarea {
     width:100%;
     resize: none;
     overflow: none;
     white-space: nowrap;
     outline: none;
-    background-color:transparent;
     padding:0px;
     margin: 0px;
-    
+    background-color:transparent;
     border:none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
@@ -77,9 +88,12 @@ div.footer {
 div.footer div.messages {
     float:left;
 }
-div.footer div.messages a.message{
+div.footer div.messages div.message{
     padding:5px;
     color:#444;
+}
+div.footer div.messages div.message.error{
+    color:#400;
 }
 div.footer div.actions{
     float:right;
