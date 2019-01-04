@@ -1,6 +1,5 @@
 import { Injectable, Inject, InjectionToken} from "@angular/core";
-import { Schema, Context as Base, Repository, Decorators } from "@lmstudios/data";
-import { Models } from "./";
+import * as LMS from "@lmstudios/data";
 import { appSettings } from "../../Configuration/appSettings"
 
 @Injectable()

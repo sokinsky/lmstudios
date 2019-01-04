@@ -10,7 +10,7 @@ import { ModelControl, PropertyControl } from "../";
 })
 export class DataPropertyControl extends PropertyControl {
     public propertyChanged(value:Schema.Property){
-        if (value.Required){
+        if (value.Required){ 
             this.ToggleState = 'Open';
             if (value === value.Model.PrimaryKeyProperty){
                 this.ToggleState = 'Locked'
