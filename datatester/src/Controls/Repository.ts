@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
-import { Repository, Model, Schema } from "@lmstudios/data";
+import * as LMS from "@lmstudios/data";
 import { ContextControl, ModelTree, ModelNode } from "./";
 import { ModelPropertyControl } from "./Properties";
 
@@ -22,17 +22,17 @@ export class RepositoryControl implements OnInit {
     @Input() public set ContextControl(value:ContextControl){
         this.__contextControl = value;
     }
-    private __repository?:Repository<Model>;
-    @Input() public get Repository():Repository<Model>{
+    private __repository?:LMS.Data.Repository<LMS.Data.Model>;
+    @Input() public get Repository():LMS.Data.Repository<LMS.Data.Model>{
         if (this.__repository === undefined) throw new Error(``);
         return this.__repository;
     }
-    public set Repository(value:Repository<Model>){
+    public set Repository(value:LMS.Data.Repository<LMS.Data.Model>){
         this.__repository = value;          
     }
-    public get Table():{Properties:Schema.Property[], Models:Model[] }{
+    public get Table():{Properties:LMS.Data.Schema.Property[], Models:LMS.Data.Model[] }{
         var result = { Properties:this.Repository.Schema.Properties, Models:this.Repository.Items }
-        result.Properties = result.Properties.filter(x => {return !(x.PropertyType instanceof Schema.Model) });
+        result.Properties = result.Properties.filter(x => {return !(x.PropertyType instanceof LMS.Data.Schema.Model) });
         result.Properties = result.Properties.filter(x => {return x.PropertyType.Name !== "Collection"});
         return result;
     }
@@ -42,7 +42,7 @@ export class RepositoryControl implements OnInit {
             return this.ContextControl.SelectedModel.ActiveNode;
         return undefined;
     }
-    public get ActiveModel():Model|undefined{
+    public get ActiveModel():LMS.Data.Model|undefined{
         if (this.ActiveNode !== undefined)
             return this.ActiveNode.Model;
         return undefined;
@@ -53,7 +53,7 @@ export class RepositoryControl implements OnInit {
             else{
                 if (this.ActiveNode.Property.PropertyType.Name === "Collection" && this.ActiveNode.Property.PropertyType.GenericTypes !== undefined)
                     return (this.ActiveNode.Property.PropertyType.GenericTypes[0] === this.Repository.Schema);
-                else if (this.ActiveNode.Property.PropertyType instanceof Schema.Model)
+                else if (this.ActiveNode.Property.PropertyType instanceof LMS.Data.Schema.Model)
                     return (this.ActiveNode.Property.PropertyType === this.Repository.Schema);
                 else
                     return false;
@@ -61,7 +61,7 @@ export class RepositoryControl implements OnInit {
         }
         return this.ContextControl.SelectedRepository === this.Repository;
     }
-    public Select(model:Model){
+    public Select(model:LMS.Data.Model){
         if (this.ActiveNode !== undefined){
             if (this.ActiveNode.Property !== undefined){
                 this.ActiveNode.Property.SetValue(this.ActiveNode.Model, model);

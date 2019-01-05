@@ -1,9 +1,9 @@
 import * as LMS from "@lmstudios/data";
 import { Model } from "../Model";
-import { Models } from "../";
+import { PersonEmail } from "./";
 
-@LMS.Decorators.Model("STA.Data.Models.Email")
+@LMS.Data.Decorators.Model("STA.Data.Models.Email")
 export class Email extends Model{
     public Address?:string;
-    public PeopleEmails?:LMS.Collection<Models.PersonEmail> = new LMS.Collection(this, Models.PersonEmail);
+    public PeopleEmails?:LMS.Data.Collection<PersonEmail> = new LMS.Data.Collection(this, PersonEmail);
 }

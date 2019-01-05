@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
-import { Repository, Model, Schema } from "@lmstudios/data";
+import * as LMS from "@lmstudios/data";
 import { ContextControl, ModelControl, ModelTree, ModelNode, PropertyControl } from "../";
 
 @Component({

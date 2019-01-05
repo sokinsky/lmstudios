@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
-import { Repository, Collection, Model, Schema } from "@lmstudios/data";
+import * as LMS from "@lmstudios/data";
 import { ModelControl, ModelTree, ModelNode, ContextControl } from "./";
-import { ThrowStmt } from "@angular/compiler";
 
 @Component({
     selector:"property-control",
@@ -19,19 +18,19 @@ export class PropertyControl {
         this.__modelControl = value;
     }
 
-    private __property?:Schema.Property;
-    public get Property():Schema.Property{
+    private __property?:LMS.Data.Schema.Property;
+    public get Property():LMS.Data.Schema.Property{
         if (this.__property === undefined)
             throw new Error(``);
         return this.__property;
     }
-    @Input() public set Property(value:Schema.Property){
+    @Input() public set Property(value:LMS.Data.Schema.Property){
         if (this.__property !== value){
             this.__property = value; 
             this.propertyChanged(value);
         }             
     }
-    public propertyChanged(value:Schema.Property){
+    public propertyChanged(value:LMS.Data.Schema.Property){
 
     }
     public get ActiveNode():ModelNode{
@@ -39,7 +38,7 @@ export class PropertyControl {
             return this.ModelControl.ContextControl.SelectedModel.ActiveNode;
         throw new Error(``);
     }
-    public get ActiveModel():Model{
+    public get ActiveModel():LMS.Data.Model{
         return this.ActiveNode.Model;
     }
 
@@ -73,7 +72,7 @@ export class PropertyControl {
         console.log(item);
     }
     public get Type():string{
-        if (this.Property.PropertyType instanceof Schema.Model)
+        if (this.Property.PropertyType instanceof LMS.Data.Schema.Model)
             return "Model";
         else if (this.Property.PropertyType.Name == "Collection")
             return "Collection";

@@ -1,5 +1,5 @@
 import { Injectable, Inject, InjectionToken} from "@angular/core";
-import { Schema, Context as Base, Repository, Decorators } from "@lmstudios/data";
+import * as LMS from "@lmstudios/data";
 import { Models } from "./";
 import { appSettings } from "../../Configuration/appSettings"
 
@@ -27,13 +27,13 @@ export class ContextService {
     }
 }
 @Injectable({ providedIn: "root" })
-@Decorators.Context("STA.Data.Context")
-export class Context extends Base {
+@LMS.Data.Decorators.Context("STA.Data.Context")
+export class Context extends LMS.Data.Context {
     constructor(public service:ContextService){
         super(service.Url, service.Schema);
     }
-    public Emails = new Repository(this, Models.Email);
-    public People = new Repository(this, Models.Person);
-    public Users = new Repository(this, Models.User);
-    public PeopleEmails = new Repository(this, Models.PersonEmail);
+    public Emails = new LMS.Data.Repository(this, Models.Email);
+    public People = new LMS.Data.Repository(this, Models.Person);
+    public Users = new LMS.Data.Repository(this, Models.User);
+    public PeopleEmails = new LMS.Data.Repository(this, Models.PersonEmail);
 }

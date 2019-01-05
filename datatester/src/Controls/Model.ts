@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
-import { Model, Collection, Repository, Schema, ChangeStatus, ResponseStatus } from "@lmstudios/data";
+import * as LMS from "@lmstudios/data";
 import { ContextControl } from "./";
 
 @Component({
@@ -31,7 +31,7 @@ export class ModelControl implements OnInit {
             return this.ContextControl.SelectedModel.ActiveNode; 
         throw new Error(``);
     }
-    public get Model():Model{
+    public get Model():LMS.Data.Model{
         return this.ActiveNode.Model;
     }
     public get Label():string{
@@ -103,8 +103,8 @@ export class ModelControl implements OnInit {
 
 
 
-    public get Properties():Schema.Property[]{
-        var properties:Schema.Property[] = [];
+    public get Properties():LMS.Data.Schema.Property[]{
+        var properties:LMS.Data.Schema.Property[] = [];
         var keyProperties = this.Model.GetSchema().PrimaryKey.Properties;
         for (var keyProperty of keyProperties){
             if (! properties.find(x => {return x === keyProperty}))
@@ -120,7 +120,7 @@ export class ModelControl implements OnInit {
             if (! properties.find(x => { return x === referenceProperty}))
                 properties.push(referenceProperty);
         }
-        var modelProperties = this.Model.GetSchema().Properties.filter(x => { return x.PropertyType instanceof Schema.Model});
+        var modelProperties = this.Model.GetSchema().Properties.filter(x => { return x.PropertyType instanceof LMS.Data.Schema.Model});
         for (var navProperty of modelProperties){
             if (! properties.find(x => { return x === navProperty}))
                 properties.push(navProperty);
@@ -138,14 +138,14 @@ export class ModelControl implements OnInit {
         console.log(item);
     }
     public Json(item:any):string{
-        if (item instanceof Model)
+        if (item instanceof LMS.Data.Model)
             return JSON.stringify(item.__controller.Values.Actual.Data, null, "\t");
         return JSON.stringify(item, null, "\t");
     }
 
 }
 export class ModelTree{
-    constructor(model:Model){
+    constructor(model:LMS.Data.Model){
         this.RootNode = new ModelNode(this, model);
     }
     public RootNode:ModelNode;
@@ -178,7 +178,7 @@ export class ModelTree{
 
 }
 export class ModelNode{
-    constructor(tree:ModelTree|ModelNode, model:Model, property?:Schema.Property){
+    constructor(tree:ModelTree|ModelNode, model:LMS.Data.Model, property?:LMS.Data.Schema.Property){
         if (tree instanceof ModelTree)
             this.Tree = tree;
         else {
@@ -190,8 +190,8 @@ export class ModelNode{
     }
     public Tree:ModelTree;
 
-    public Model:Model;
-    public Property?:Schema.Property;    
+    public Model:LMS.Data.Model;
+    public Property?:LMS.Data.Schema.Property;    
     public ParentNode?:ModelNode;
     private __childNode?:ModelNode    
     public get ChildNode():ModelNode|undefined{
@@ -209,20 +209,20 @@ export class ModelNode{
         return this.Tree.Label;
     }
 
-    public Select(property:Schema.Property){
+    public Select(property:LMS.Data.Schema.Property){
 
     }
-    public Add(property:Schema.Property){
-        var added:Model;
+    public Add(property:LMS.Data.Schema.Property){
+        var added:LMS.Data.Model;
         if (property.PropertyType.Name === "Collection"){
             var collection = property.GetValue(this.Model);
-            if (collection instanceof Collection){
+            if (collection instanceof LMS.Data.Collection){
                 added = collection.Add();
                 this.Property = property;
                 this.ChildNode = new ModelNode(this, added);
             }                       
         }
-        else if (property.PropertyType instanceof Schema.Model){
+        else if (property.PropertyType instanceof LMS.Data.Schema.Model){
             var context = this.Model.__controller.Context;
             var repository = context.GetRepository(property.PropertyType);
             added = repository.Add();
@@ -231,7 +231,7 @@ export class ModelNode{
             this.ChildNode = new ModelNode(this, added);
         }
     }
-    public Remove(property:Schema.Property){
+    public Remove(property:LMS.Data.Schema.Property){
 
     }
     public OK(){

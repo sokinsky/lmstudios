@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, Input, ViewChild, ViewChildren, QueryList, forwardRef, SchemaMetadata} from "@angular/core";
-import { Context, Collection, Repository, Model, Response, ResponseStatus, Schema } from "@lmstudios/data";
+import * as LMS from "@lmstudios/data";
 import { RepositoryControl, ModelControl, ModelTree, ModelNode } from "./";
 
 @Component({
@@ -18,18 +18,18 @@ export class ContextControl implements OnInit, AfterViewInit {
     @ViewChild(forwardRef(()=>ModelControl)) ctlModel?:ModelControl;
     @ViewChildren(forwardRef(()=>RepositoryControl)) ctlRepositories?:QueryList<RepositoryControl>;
 
-    private __context?:Context;
-    public get context():Context{
+    private __context?:LMS.Data.Context;
+    public get context():LMS.Data.Context{
         if (this.__context === undefined) throw new Error(``);
         return this.__context;
     }
-    @Input() public set context(value:Context){
+    @Input() public set context(value:LMS.Data.Context){
         this.__context = value;
     }
 
-    public SelectedRepository?:Repository<Model>;
+    public SelectedRepository?:LMS.Data.Repository<LMS.Data.Model>;
     public SelectedModel?:ModelTree;
-    public Select(repository:Repository<Model>|undefined){
+    public Select(repository:LMS.Data.Repository<LMS.Data.Model>|undefined){
         this.SelectedRepository = repository;
         this.SelectedModel = undefined;
     }
