@@ -1,0 +1,32 @@
+<div *ngIf="Visible">
+    <div class="header">
+        <div class="title" (click)="Log(ActiveNode)">        
+            <span class="label">
+                <span>{{Label}}</span>
+            </span>
+            <div class="actions">
+                <div class="action fas fa-cog">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="body">
+        <div *ngFor="let property of Properties" class="property">
+            <property-control [ModelControl]=this [Property]=property></property-control>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="messages">
+            <div class="message error" *ngIf="ActiveNode.Model.__controller.Error" (click)="Log(ActiveNode.Model.__controller.Error)"><i class="fas fa-exclamation-triangle"></i> {{ActiveNode.Model.__controller.Error.Message}}:{{ActiveNode.Model.__controller.Error.Description}}</div>
+            <div class="message">{{ChangeState}}</div>
+        </div>
+        <div *ngIf="ChangeState === 'Unchanged'" class="actions">
+            <a class="action fas fa-check" (click)="OK()" title="OK"></a> 
+        </div>
+        <div *ngIf="ChangeState !== 'Unchanged'" class="actions">
+            <a class="action fas fa-undo" (click)="Cancel()" title="Cancel"></a>
+            <a class="action fas fa-check" (click)="OK()" title="OK"></a> 
+        </div>
+    </div>
+</div>
+    

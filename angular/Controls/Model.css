@@ -1,0 +1,95 @@
+div.header {
+    border-radius: 5px 5px 0 0;
+    background-color:#ccc;
+    color:#444;
+    
+    padding: 3px 0 3px 0px;
+}
+div.header div.title{
+    padding:0;
+    cursor: pointer;
+}
+div.header div.title div.actions{
+    float:right;
+}
+div.header div.title span.label {
+    font-weight: bold;
+    padding-left:5px;
+    color:#444;
+}
+div.header div.title div.actions a.action{
+    border-radius:5px;
+    cursor: pointer;
+    padding:5px;
+    margin-right:5px;
+}
+div.header div.title div.actions div.action:hover{
+    background-color: #444;
+    color:#ccc;
+}
+div.header div.options {
+    margin:5px 0 0 0;
+    padding:5px 0 0 0;
+    border-top:1px solid #666;
+    text-align:right;
+}
+div.header div.options .option{
+    border-radius:5px;
+    margin: 0 5px 0 0;
+}
+div.header div.options select.option{
+    outline: none;
+    border:none;
+    background-color:transparent;
+    /* -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none; */
+}
+div.header div.options select.option::selection{
+    outline: none;
+    border:none;
+    background-color:transparent;
+    /* -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none; */
+}
+
+div.body {
+    background-color: #eee;
+    padding: 0px 5px 10px 5px;
+    border: 1px solid #ccc;
+}
+div.footer{
+    border-radius: 0 0 5px 5px;
+    background-color:#ccc;
+    color:#444;   
+}
+div.footer div.messages{
+    float:left;
+}
+div.footer div.messages div.message{
+    float:left;
+    padding:5px 0 5px 5px;
+}
+div.footer div.messages div.message.error{
+    color:#400;
+}
+div.footer div.actions {
+    float:right;
+    padding:2px 5px 2px 0;
+    text-align:right;
+}
+div.footer div.actions a.action{
+    border-radius:5px;
+    margin: 0 5px 0 0;
+    padding: 5px;
+}
+div.footer div.actions a.action:hover{
+    color:#ccc;
+    background-color:#444;
+}
+div.footer::after{
+    display:block;
+    content:"";
+    clear:both; 
+}

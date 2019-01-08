@@ -1,0 +1,114 @@
+div.property {
+    margin:10px 0 0 0;
+}
+div.property div.header {
+    border-radius: 5px;
+    background-color: #ccc;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+div.header.open {
+    border-radius: 5px 5px 0 0;
+}
+div.header div.title{
+    cursor: pointer;
+    color:#444;
+    padding:5px;
+}
+div.header div.title div.toggle {
+    padding:0;
+}
+div.header div.title span.value {
+    font-weight: bold;
+}
+div.body {
+    padding: 0 5px;
+    background-color: #ededed;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+
+div.property.error div.header {
+    background-color:#c00;
+}
+div.property.error div.header div.title{
+    cursor: pointer;
+    color:#eff;
+    padding:5px;
+}
+
+
+
+
+
+
+
+div.body textarea {
+    width:100%;
+    resize: none;
+    overflow: none;
+    white-space: nowrap;
+    outline: none;
+    padding:0px;
+    margin: 0px;
+    background-color:transparent;
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+div.body input {
+    width:100%;
+    resize: none;
+    overflow: auto;
+    outline: none;
+    background-color:transparent;
+    padding:0px;
+    margin: 0px;
+    
+    border:none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+div.footer {
+    font-size: 8pt;
+    color:#444;    
+    padding: 3px 5px;
+    border-radius: 0 0 5px 5px;
+    background-color: #ededed;
+    -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+
+div.footer div.messages {
+    float:left;
+}
+div.footer div.messages div.message{
+    padding:5px;
+    color:#444;
+}
+div.footer div.messages div.message.error{
+    color:#400;
+}
+div.footer div.actions{
+    float:right;
+}
+div.footer div.actions a.action{
+    padding:5px;
+    border-radius:5px;
+    color:#444;
+}
+div.footer div.actions a.action:hover{
+    background-color:#444;
+    color: #ccc;
+}
+div.footer::after{
+    display:block;
+    content:"";
+    clear:both; 
+}

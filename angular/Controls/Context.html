@@ -1,0 +1,22 @@
+<div class="menu">
+    <a class="item" [ngClass]="{'disabled':context.Tracker.Changes.length === 0}" (click)="Save()">Save</a>
+</div>
+<table style="width:100%;">
+    <tr>
+        <td style="vertical-align: top; width: 20%;">
+            <div *ngFor="let repository of context.Repositories" (click)="Select(repository)" class="repository" [ngClass]="{'selected':RootItem !== undefined && repository===RootItem.Item}">
+                {{repository.Name}}
+            </div>  
+            <div *ngFor="let request of context.API.Requests">
+                <span (click)="Log(request)">{{request.Path}}</span>
+            </div>         
+        </td>
+        <td style="vertical-align: top;">
+            <repository-control *ngFor="let repository of context.Repositories" [ContextControl]=this [Repository]=repository></repository-control>                
+            <model-control [ContextControl]=this></model-control>
+        </td>
+    </tr>
+
+</table>
+
+
