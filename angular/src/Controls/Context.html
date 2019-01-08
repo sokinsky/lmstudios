@@ -12,8 +12,8 @@
             </div>         
         </td>
         <td style="vertical-align: top;">
-            <repository-control *ngFor="let repository of context.Repositories" [ContextControl]=this [Repository]=repository></repository-control>                
-            <model-control [ContextControl]=this></model-control>
+            <lmscontrol-repository *ngFor="let repository of context.Repositories" [ContextControl]=this [Repository]=repository></lmscontrol-repository>                
+            <lmscontrol-model [ContextControl]=this></lmscontrol-model>
         </td>
     </tr>
 

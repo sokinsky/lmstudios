@@ -11,8 +11,14 @@
     "type": "git",
     "url": "https://github.com/sokinsky/lmstudios"
   },
+  "peerDependencies": {
+    "@lmstudios/data": "file:D:\\github\\lmstudios\\data",
+    "@angular/core": "^6.0.7",
+    "zone.js": "^0.8.26",
+    "rxjs": "^6.2.2"
+  },
   "dependencies": {
-    "@lmstudios/data": "file:../data",
+    "@lmstudios/data": "file:D:\\github\\lmstudios\\data",
     "@angular/core": "^6.0.7",
     "zone.js": "^0.8.26",
     "rxjs": "^6.2.2"

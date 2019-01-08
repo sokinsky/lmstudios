@@ -1,13 +1,12 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
-import * as LMS from "@lmstudios/data";
+import * as LMSData from "@lmstudios/data";
 import { ModelControl, ModelTree, ModelNode, ContextControl } from "./";
 
 @Component({
-    selector:"property-control",
+    selector:"lmscontrol-property",
     templateUrl:"Property.html"
 })
 export class PropertyControl {
-
     private __modelControl?:ModelControl;
     public get ModelControl():ModelControl{
         if (this.__modelControl === undefined)
@@ -18,19 +17,19 @@ export class PropertyControl {
         this.__modelControl = value;
     }
 
-    private __property?:LMS.Data.Schema.Property;
-    public get Property():LMS.Data.Schema.Property{
+    private __property?:LMSData.Schema.Property;
+    public get Property():LMSData.Schema.Property{
         if (this.__property === undefined)
             throw new Error(``);
         return this.__property;
     }
-    @Input() public set Property(value:LMS.Data.Schema.Property){
+    @Input() public set Property(value:LMSData.Schema.Property){
         if (this.__property !== value){
             this.__property = value; 
             this.propertyChanged(value);
         }             
     }
-    public propertyChanged(value:LMS.Data.Schema.Property){
+    public propertyChanged(value:LMSData.Schema.Property){
 
     }
     public get ActiveNode():ModelNode{
@@ -38,7 +37,7 @@ export class PropertyControl {
             return this.ModelControl.ContextControl.SelectedModel.ActiveNode;
         throw new Error(``);
     }
-    public get ActiveModel():LMS.Data.Model{
+    public get ActiveModel():LMSData.Model{
         return this.ActiveNode.Model;
     }
 
@@ -72,7 +71,7 @@ export class PropertyControl {
         console.log(item);
     }
     public get Type():string{
-        if (this.Property.PropertyType instanceof LMS.Data.Schema.Model)
+        if (this.Property.PropertyType instanceof LMSData.Schema.Model)
             return "Model";
         else if (this.Property.PropertyType.Name == "Collection")
             return "Collection";

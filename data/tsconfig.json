@@ -1,15 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "lib": [ "es2017", "dom" ],
-    "declaration": true,
-    "outDir": "dist",
-    "strict": true,
-    "watch":true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true,
+    "watch":true, "strict": true, "experimentalDecorators": true,
+
+    "target": "es2016", "module": "commonjs", "lib": [ "es2017", "dom" ],
+    "declaration": true, "outDir": "dist", "inlineSourceMap": true, "inlineSources": true,
+    "forceConsistentCasingInFileNames": true    
   }
 }

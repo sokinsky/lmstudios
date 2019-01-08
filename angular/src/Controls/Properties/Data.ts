@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
-import * as LMS from "@lmstudios/data";
+import * as LMSData from "@lmstudios/data";
 import { ModelControl, PropertyControl } from "../";
 
 
@@ -9,7 +9,7 @@ import { ModelControl, PropertyControl } from "../";
     styleUrls:["Data.css"]
 })
 export class DataPropertyControl extends PropertyControl {
-    public propertyChanged(value:LMS.Data.Schema.Property){
+    public propertyChanged(value:LMSData.Schema.Property){
         if (value.Required){
             this.ToggleState = 'Open';
             if (value === value.Model.PrimaryKeyProperty){

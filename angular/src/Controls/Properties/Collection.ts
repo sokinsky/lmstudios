@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, SchemaMetadata } from "@angular/core";
-import * as LMS from "@lmstudios/data";
+import * as LMSData from "@lmstudios/data";
 import { ModelControl, ModelTree, ModelNode, PropertyControl } from "../";
 import { markParentViewsForCheckProjectedViews } from "@angular/core/src/view/util";
 
@@ -13,8 +13,8 @@ export class CollectionPropertyControl extends PropertyControl {
         super();
         this.ToggleState = 'Closed';
     }
-    public get Table():{Properties:LMS.Data.Schema.Property[], Models:LMS.Data.Model[] }{
-        var properties:LMS.Data.Schema.Property[] = [];
+    public get Table():{Properties:LMSData.Schema.Property[], Models:LMSData.Model[] }{
+        var properties:LMSData.Schema.Property[] = [];
         var keyProperties = this.Collection.Child.Schema.PrimaryKey.Properties;
         for (var keyProperty of keyProperties){
             if (! properties.find(x => {return x === keyProperty}))
@@ -38,10 +38,10 @@ export class CollectionPropertyControl extends PropertyControl {
         var result = { Properties:properties, Models:this.Collection.Items }
         return result;
     }
-    public get Collection():LMS.Data.Collection<LMS.Data.Model>{
-        return <LMS.Data.Collection<LMS.Data.Model>>this.Property.GetValue(this.ModelControl.Model);
+    public get Collection():LMSData.Collection<LMSData.Model>{
+        return <LMSData.Collection<LMSData.Model>>this.Property.GetValue(this.ModelControl.Model);
     }
-    public Select(model:LMS.Data.Model){
+    public Select(model:LMSData.Model){
     }
 
     public Undo(){
