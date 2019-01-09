@@ -3,6 +3,7 @@ import * as LMS from "../";
 //LMS.Schema.Context
 export class Context {
     constructor(contextData?:any){
+        console.log(contextData);
           if (contextData !== undefined){
             if (contextData.FullName !== undefined) 
                 this.Name = contextData.FullName;
@@ -16,8 +17,10 @@ export class Context {
                         LMS.Type.GetTypes()[index] = new LMS.Schema.Model(this, modelData.FullName, type.Constructor);
                     }
                     var model = LMS.Type.GetTypes().find(x => { return x.FullName === modelData.FullName});
-                    if (! (model instanceof LMS.Schema.Model))
-                        throw new Error(``);
+                    if (! (model instanceof LMS.Schema.Model)){
+                        console.log(LMS.Type.GetTypes());
+                        throw new Error(`${modelData.FullName} could not be found!`);
+                    }
                     if (modelData.Properties !== undefined){
                         for (var propertyData of modelData.Properties){
                             model.Properties.push(new LMS.Schema.Property(model, propertyData.Name));
