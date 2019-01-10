@@ -1,10 +1,18 @@
 {
   "compilerOptions": {
-    "watch":true, "strict": true, "experimentalDecorators": true,
-
-    "target": "es2016", "module": "commonjs", "lib": [ "es2017", "dom" ],
-    "declaration": true, "outDir": "dist", "inlineSourceMap": true, "inlineSources": true,
-    "forceConsistentCasingInFileNames": true    
+    "watch": true,
+    "lib": [ "esnext", "dom", "dom.iterable" ],
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "target": "es2016",
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noEmit": true,
+    "inlineSourceMap": true,
+    "inlineSources": true
   },
   "exclude": [
     "node_modules",
