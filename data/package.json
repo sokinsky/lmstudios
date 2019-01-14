@@ -1,0 +1,22 @@
+{
+  "name": "@lmstudios/data",
+  "version": "0.0.4",
+  "description": "data access",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Steven J Okinsky",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sokinsky/lmstudios"
+  },
+  "peerDependencies": {},
+  "dependencies": {
+    "@lmstudios/utilities": "file:..\\utilities",
+    "@lmstudios/types": "file:..\\types",
+    "@lmstudios/schema": "file:..\\schema"
+  },
+  "devDependencies": {
+    "typescript": "^3.2.1"
+  }
+}

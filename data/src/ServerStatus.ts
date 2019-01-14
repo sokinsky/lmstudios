@@ -1,0 +1,1 @@
+export enum ServerStatus { Served="Served", Serving="Serving" }

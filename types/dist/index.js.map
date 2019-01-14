@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AAAA,cAAc,YAAY,CAAC;AAC3B,cAAc,qBAAqB,CAAC;AACpC,cAAc,QAAQ,CAAC;AACvB,cAAc,iBAAiB,CAAC","sourcesContent":["export * from \"./Property\";\nexport * from \"./PropertyDecorator\";\nexport * from \"./Type\";\nexport * from \"./TypeDecorator\";\n\n"]}
