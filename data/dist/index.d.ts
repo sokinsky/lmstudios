@@ -3,6 +3,7 @@ export { ChangeTracker } from "./ChangeTracker";
 export { Collection } from "./Collection";
 export { Context } from "./Context";
 export { Controller } from "./Controller";
+export { DbSet } from "./DbSet";
 export { Model } from "./Model";
 export { ModelDecorator } from "./ModelDecorator";
 export { Provider } from "./Provider";
